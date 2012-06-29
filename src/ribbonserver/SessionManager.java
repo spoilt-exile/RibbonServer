@@ -64,7 +64,7 @@ public class SessionManager {
             } finally {
                 RibbonServer.logAppend(LOG_ID, 3, "додана нова мережева сессія (" + SessionSocket.getInetAddress().getHostAddress() + ")");
                 ProtocolHandler = new RibbonProtocol(this);
-                RibbonServer.sessionObj.addSession(this);
+                //RibbonServer.sessionObj.addSession(this);
                 this.isAlive = true;
             }
         }
@@ -76,7 +76,7 @@ public class SessionManager {
                 while (this.isAlive == true) {
                     inputLine = inStream.readLine();
                     String answer = this.ProtocolHandler.process(inputLine);
-                    if (answer.equals("BYE:")) {
+                    if (answer.equals("COMMIT_CLOSE:")) {
                         isAlive = false;
                     }
                     this.outStream.println(answer);

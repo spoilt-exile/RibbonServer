@@ -81,7 +81,7 @@ public class RibbonServer {
     
     public static String BASE_PATH;
     
-    public static String RIBBON_VER = "a1";
+    public static String RIBBON_VER = "a2";
     
     //public static String INDEX_PATH;
     
@@ -123,8 +123,14 @@ public class RibbonServer {
             java.net.ServerSocket RibbonServSocket = new java.net.ServerSocket(PORT);
             logAppend(LOG_ID, 3, "система готова для прийому повідомлень");
             while (true) {
-                SessionManager.SessionThread accepted = sessionObj.new SessionThread(RibbonServSocket.accept());
-                sessionObj.addSession(accepted);
+                java.net.Socket inSocket = RibbonServSocket.accept();
+                if (!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.ALLOW_REMOTE == false) {
+                    inSocket.close();
+                } else {
+                    SessionManager.SessionThread accepted = sessionObj.new SessionThread(inSocket);
+                    sessionObj.addSession(accepted);
+                }
+                //SessionManager.SessionThread accepted = sessionObj.new SessionThread(RibbonServSocket.accept());
                 //sessionObj.addSession(new SessionManager.SessionThread(RibbonServSocket.accept()));
             }
         } catch (java.io.IOException ex) {

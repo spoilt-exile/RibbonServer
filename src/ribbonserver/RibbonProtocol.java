@@ -37,7 +37,7 @@ public class RibbonProtocol {
     /**
      * Protocol revision digit;
      */
-    private Integer INT_VERSION = 1;
+    private Integer INT_VERSION = 2;
     
     /**
      * String protocol revision version;
@@ -90,11 +90,11 @@ public class RibbonProtocol {
         /** CONNECTION CONTROL COMMANDS [LEVEL_0 SUPPORT] **/
         
         /**
-         * RIBBON_GREETINGS: commandlet
+         * RIBBON_CONNECTION_INIT: commandlet
          * Client and others application send this command to register
          * this connection.
          */
-        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_GREETINGS", CONNECTION_TYPES.NULL) {
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_CONNECTION_INIT", CONNECTION_TYPES.NULL) {
             @Override
             public String exec(String args) {
                 String[] parsedArgs = args.split(",");
@@ -116,27 +116,10 @@ public class RibbonProtocol {
         });
         
         /**
-         * RIBBON_EXIT: commandlet
-         * Exit command to close connection.
-         */
-        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_EXIT", CONNECTION_TYPES.ANY) {
-            @Override
-            public String exec(String args) {
-                if (CURR_TYPE == CONNECTION_TYPES.CONTROL && RibbonServer.sessionObj.hasOtherControl(CURR_SESSION) == false) {
-                    RibbonServer.logAppend(RibbonServer.LOG_ID, 2, "контроль над системою завершено!");
-                    RibbonServer.CONTROL_IS_PRESENT = false;
-                }
-                return "BYE:";
-            }
-        });
-        
-        /** GENERAL PROTOCOL STACK [LEVEL_1 SUPPORT] **/
-        
-        /**
-         * RIBBON_LOGIN: commandlet
+         * RIBBON_CONNECTION_LOGIN: commandlet
          * Client and other applications send this command to login user.
          */
-        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_LOGIN", CONNECTION_TYPES.CLIENT) {
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_CONNECTION_LOGIN", CONNECTION_TYPES.ANY) {
           @Override
           public String exec(String args) {
               Users.userEntry tryUser = csvHandler.parseUserLine(args);
@@ -150,6 +133,23 @@ public class RibbonProtocol {
               }
           }
         });
+        
+        /**
+         * RIBBON_CONNECTION_CLOSE: commandlet
+         * Exit command to close connection.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_CONNECTION_CLOSE", CONNECTION_TYPES.ANY) {
+            @Override
+            public String exec(String args) {
+                if (CURR_TYPE == CONNECTION_TYPES.CONTROL && RibbonServer.sessionObj.hasOtherControl(CURR_SESSION) == false) {
+                    RibbonServer.logAppend(RibbonServer.LOG_ID, 2, "контроль над системою завершено!");
+                    RibbonServer.CONTROL_IS_PRESENT = false;
+                }
+                return "COMMIT_CLOSE:";
+            }
+        });
+        
+        /** GENERAL PROTOCOL STACK [LEVEL_1 SUPPORT] **/
         
         /**
          * RIBBON_GET_DIRS: commandlet
