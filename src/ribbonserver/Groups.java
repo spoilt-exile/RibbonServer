@@ -44,6 +44,14 @@ public class Groups {
             GROUP_NAME = givenArray[0];
             COMM = givenArray[1];
         }
+        
+        /**
+         * Translate group object into csv index line
+         * @return csv formated string
+         */
+        public String toCsv() {
+            return "{" + this.GROUP_NAME + "},{" + this.COMM + "}";
+        }
     }
     
     /**

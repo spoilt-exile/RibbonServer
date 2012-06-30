@@ -93,7 +93,7 @@ public abstract class csvHandler {
         try {
             java.io.BufferedReader userIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.USERS_INDEX_PATH));
             while (userIndexReader.ready()) {
-                returnedUsers.add(parseUserLine(userIndexReader.readLine()));
+                returnedUsers.add(new Users.userEntry(complexParseLine(userIndexReader.readLine(), 4, 1)));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу користувачів не знайдено. Створюю новий.");
@@ -101,9 +101,11 @@ public abstract class csvHandler {
             try {
                 usersIndexFile.createNewFile();
                 java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile);
-                usersIndexWriter.write("test,test\n");
+                usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1\n");
+                usersIndexWriter.write("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1\n");
                 usersIndexWriter.close();
-                returnedUsers.add(new Users.userEntry(new String[] {"test", "test"}));
+                returnedUsers.add(new Users.userEntry(complexParseLine("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1", 4, 1)));
+                returnedUsers.add(new Users.userEntry(complexParseLine("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1", 4, 1)));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу користувачів!");
                 System.exit(5);
@@ -211,6 +213,7 @@ public abstract class csvHandler {
      * @param userLine line of config
      * @return userEntry object
      * @see Users.userEntry
+     * @deprecated 
      */
     public static Users.userEntry parseUserLine(String userLine) {
         String[] userArray = new String[2];
@@ -480,6 +483,7 @@ public abstract class csvHandler {
      * @param inputLine line to parse
      * @param baseArrLength length of base fields in csv line
      * @return string array with parsed words or null if parsing error occured
+     * @since RibbonServer a2
      */
     public static String[] commonParseLine(String inputLine, Integer baseArrLength) {
         String[] baseArray = new String[baseArrLength];
@@ -554,6 +558,7 @@ public abstract class csvHandler {
      * @param baseArrLength length of base fields in csv line
      * @param groupsCount count of additional arrays with groups parsed words
      * @return arraylist with string arrays of parsed words or null if parsing error occured
+     * @since RibbonServer a2
      */
     public static java.util.ArrayList<String[]> complexParseLine(String inputLine, Integer baseArrLength, Integer groupsCount) {
         java.util.ArrayList<String[]> returnedArr = new java.util.ArrayList();
@@ -577,7 +582,7 @@ public abstract class csvHandler {
                     continue;
                 case 1:
                     if (ignoreComma == false) {
-                        if (baseArray.length < baseArrLength) {
+                        if (acceptedIndex < baseArrLength) {
                             baseArray[++acceptedIndex] = inputLine.substring(beginSlice, index);
                             beginSlice = index + 1;
                         } else {
@@ -592,7 +597,7 @@ public abstract class csvHandler {
                 case 3:
                     if (ignoreComma == true) {
                         ignoreComma = false;
-                        if (baseArray.length < baseArrLength) {
+                        if (acceptedIndex < baseArrLength) {
                             baseArray[++acceptedIndex] = inputLine.substring(beginSlice, index);
                             beginSlice = index + 1;
                         } else {
@@ -623,7 +628,7 @@ public abstract class csvHandler {
                     break;
             }
             if ((!hasMoreSeparators(inputLine.substring(index + 1))) && (index < inputLine.length() - 1)) {
-                if (baseArray.length < baseArrLength) {
+                if (acceptedIndex < baseArrLength) {
                     baseArray[++acceptedIndex] = inputLine.substring(index + 1);
                 } else {
                     return null;

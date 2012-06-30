@@ -29,6 +29,11 @@ public class Users {
      */
     public static class userEntry {
         
+        /**
+         * a1 endian constructor
+         * @param givenArray array with login and password
+         * @deprecated 
+         */
         userEntry(String[] givenArray) {
             USER_NAME = givenArray[0];
             PASSWORD = givenArray[1];
@@ -46,6 +51,11 @@ public class Users {
             H_PASSWORD = baseArray[2];
             IS_ENABLED = baseArray[3].equals("1") ? true : false;
             GROUPS = groupsArray;
+            for (Integer groupIndex = 0; groupIndex < GROUPS.length; groupIndex++) {
+                if (!RibbonServer.groupObj.isGroupExisted(GROUPS[groupIndex])) {
+                    GROUPS[groupIndex] = null;
+                }
+            }
         }
         
         /**
@@ -55,6 +65,7 @@ public class Users {
         
         /**
          * User's password
+         * @deprecated 
          */
         public String PASSWORD;
         

@@ -132,7 +132,7 @@ public class Procedures {
         String formatLine = "======================================================================================";
         PROC_POST_MESSAGE(new Messenger.Message(
             "Системне повідомлення",
-            "Ribbon",
+            "root",
             new String[] {"СИСТЕМА.Оголошення", "СИСТЕМА.ТЕСТ"},
             new String[] {"оголошення", "ІТУ"},
             formatLine + "\nСистема \"Стрічка\" " + RibbonServer.RIBBON_VER + "\n" + formatLine + "\n"
