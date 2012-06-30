@@ -35,6 +35,20 @@ public class Users {
         }
         
         /**
+         * a2 endian constructor
+         * @param givenStruct result of csvHandler.complexParseLine
+         */
+        userEntry(java.util.ArrayList<String[]> givenStruct) {
+            String[] baseArray = givenStruct.get(0);
+            String[] groupsArray = givenStruct.get(1);
+            USER_NAME = baseArray[0];
+            COMM = baseArray[1];
+            H_PASSWORD = baseArray[2];
+            IS_ENABLED = baseArray[3].equals("1") ? true : false;
+            GROUPS = groupsArray;
+        }
+        
+        /**
          * User name
          */
         public String USER_NAME;
@@ -43,6 +57,28 @@ public class Users {
          * User's password
          */
         public String PASSWORD;
+        
+        /** a2 endian **/
+        
+        /**
+         * MD5 hashsumm of password
+         */
+        public String H_PASSWORD;
+        
+        /**
+         * Comment string
+         */
+        public String COMM;
+        
+        /**
+         * Array with groups
+         */
+        public String[] GROUPS;
+        
+        /**
+         * State of users account
+         */
+        public Boolean IS_ENABLED;
         
         /**
          * Translate user object into csv index line

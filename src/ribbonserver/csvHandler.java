@@ -116,6 +116,44 @@ public abstract class csvHandler {
     }
     
     /**
+     * Read groups in groups index file
+     * @return arrayList of groups entries
+     */
+    public static java.util.ArrayList<Groups.groupEntry> readGroups() {
+        java.util.ArrayList<Groups.groupEntry> returnedGroups = new java.util.ArrayList<Groups.groupEntry>();
+        try {
+            java.io.BufferedReader groupIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH));
+            Integer currentLine = 0;
+            while (groupIndexReader.ready()) {
+                String[] parsedArgs = commonParseLine(groupIndexReader.readLine(), 2);
+                if (parsedArgs != null) {
+                    returnedGroups.add(new Groups.groupEntry(parsedArgs));
+                } else {
+                    RibbonServer.logAppend(LOG_ID, 1, "помилка при опрацюванні індексу груп (" + currentLine + ")");
+                }
+                currentLine++;
+            }
+        } catch (java.io.FileNotFoundException ex) {
+            RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу груп не знайдено. Створюю новий.");
+            java.io.File usersIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH);
+            try {
+                usersIndexFile.createNewFile();
+                java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile);
+                usersIndexWriter.write("{test},{Test group}\n");
+                usersIndexWriter.close();
+                returnedGroups.add(new Groups.groupEntry(new String[] {"test", "Test group"}));
+            } catch (java.io.IOException exq) {
+                RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу груп!");
+                System.exit(5);
+            }
+        } catch (java.io.IOException ex) {
+            RibbonServer.logAppend(LOG_ID, 0, "помилка читання файлу індекса груп!");
+            System.exit(4);
+        }
+        return returnedGroups;
+    }
+    
+    /**
      * Notify main parser method about special chars<br><br>
      * <<b>Statuses:</b><br>
      * <b>0</b> : ordinary char<br>
@@ -434,5 +472,167 @@ public abstract class csvHandler {
             }
         }
         return new Messenger.Message(baseArray, dirArray, tagArray);
+    }
+    
+    /**
+     * Commin parse line method (without groups support).<br>
+     * Using to unify parse methodic.
+     * @param inputLine line to parse
+     * @param baseArrLength length of base fields in csv line
+     * @return string array with parsed words or null if parsing error occured
+     */
+    public static String[] commonParseLine(String inputLine, Integer baseArrLength) {
+        String[] baseArray = new String[baseArrLength];
+        Integer beginSlice = 0;
+        Integer acceptedIndex = -1;
+        Boolean ignoreComma = false;
+        for (Integer index = 0; index < inputLine.length(); index++) {
+            char currChar = inputLine.charAt(index);
+            char nextChar = '1';
+            char prevChar = '1';
+            if (index > 0) {
+                prevChar = inputLine.charAt(index - 1);
+            }
+            if (index < inputLine.length() - 1) {
+                nextChar = inputLine.charAt(index + 1);
+            }
+            switch (parseMarker(prevChar, currChar, nextChar)) {
+                case 0:
+                    continue;
+                case 1:
+                    if (ignoreComma == false) {
+                        if (acceptedIndex < baseArrLength - 1) {
+                            baseArray[++acceptedIndex] = inputLine.substring(beginSlice, index);
+                            beginSlice = index + 1;
+                        } else {
+                            return null;
+                        }
+                    }
+                    break;
+                case 2:
+                    beginSlice = index + 1;
+                    ignoreComma = true;
+                    break;
+                case 3:
+                    if (ignoreComma == true) {
+                        ignoreComma = false;
+                        if (acceptedIndex < baseArrLength - 1) {
+                            baseArray[++acceptedIndex] = inputLine.substring(beginSlice, index);
+                            beginSlice = index + 1;
+                        } else {
+                            return null;
+                        }
+                    }
+                    break;
+                case 4:
+                    return null;
+                case 5:
+                    return null;
+                case 6:
+                    ignoreComma = true;
+                    break;
+                case 7:
+                    beginSlice = index + 1;
+                    break;
+            }
+            if ((!hasMoreSeparators(inputLine.substring(index + 1))) && (index < inputLine.length() - 1)) {
+                if (acceptedIndex < baseArrLength - 1) {
+                    baseArray[++acceptedIndex] = inputLine.substring(index + 1);
+                } else {
+                    return null;
+                }
+                break;
+            }
+        }
+        return baseArray;
+    }
+    
+    /**
+     * Complex parse line method (with groups support).<br>
+     * Using to unify parse methodic.
+     * @param inputLine line to parse
+     * @param baseArrLength length of base fields in csv line
+     * @param groupsCount count of additional arrays with groups parsed words
+     * @return arraylist with string arrays of parsed words or null if parsing error occured
+     */
+    public static java.util.ArrayList<String[]> complexParseLine(String inputLine, Integer baseArrLength, Integer groupsCount) {
+        java.util.ArrayList<String[]> returnedArr = new java.util.ArrayList();
+        String[] baseArray = new String[baseArrLength];
+        java.util.ArrayList<String[]> tempGroupArray = new java.util.ArrayList();
+        Integer beginSlice = 0;
+        Integer acceptedIndex = -1;
+        Boolean ignoreComma = false;
+        for (Integer index = 0; index < inputLine.length(); index++) {
+            char currChar = inputLine.charAt(index);
+            char nextChar = '1';
+            char prevChar = '1';
+            if (index > 0) {
+                prevChar = inputLine.charAt(index - 1);
+            }
+            if (index < inputLine.length() - 1) {
+                nextChar = inputLine.charAt(index + 1);
+            }
+            switch (parseMarker(prevChar, currChar, nextChar)) {
+                case 0:
+                    continue;
+                case 1:
+                    if (ignoreComma == false) {
+                        if (baseArray.length < baseArrLength) {
+                            baseArray[++acceptedIndex] = inputLine.substring(beginSlice, index);
+                            beginSlice = index + 1;
+                        } else {
+                            return null;
+                        }
+                    }
+                    break;
+                case 2:
+                    beginSlice = index + 1;
+                    ignoreComma = true;
+                    break;
+                case 3:
+                    if (ignoreComma == true) {
+                        ignoreComma = false;
+                        if (baseArray.length < baseArrLength) {
+                            baseArray[++acceptedIndex] = inputLine.substring(beginSlice, index);
+                            beginSlice = index + 1;
+                        } else {
+                            return null;
+                        }
+                    }
+                    break;
+                case 4:
+                    beginSlice = index + 1;
+                    ignoreComma = true;
+                    break;
+                case 5:
+                    if (ignoreComma == true) {
+                        ignoreComma = false;
+                        if (tempGroupArray.size() < groupsCount) {
+                            tempGroupArray.add(inputLine.substring(beginSlice, index).split(","));
+                        } else {
+                            return null;
+                        }
+                        beginSlice = index + 1;
+                    }
+                    break;
+                case 6:
+                    ignoreComma = true;
+                    break;
+                case 7:
+                    beginSlice = index + 1;
+                    break;
+            }
+            if ((!hasMoreSeparators(inputLine.substring(index + 1))) && (index < inputLine.length() - 1)) {
+                if (baseArray.length < baseArrLength) {
+                    baseArray[++acceptedIndex] = inputLine.substring(index + 1);
+                } else {
+                    return null;
+                }
+                break;
+            }
+        }
+        returnedArr.add(baseArray);
+        returnedArr.addAll(tempGroupArray);
+        return returnedArr;
     }
 }

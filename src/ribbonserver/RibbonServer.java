@@ -18,6 +18,11 @@ public class RibbonServer {
     public static Directories dirObj;
     
     /**
+     * Groups handle object
+     */
+    public static Groups groupObj;
+    
+    /**
      * Users handle object
      */
     public static Users userObj;
@@ -97,6 +102,8 @@ public class RibbonServer {
     
     public static String USERS_INDEX_PATH = "users.index";
     
+    public static String GROUPS_INDEX_PATH = "groups.index";
+    
     public static String BASE_INDEX_PATH = "base.index";
 
     /**
@@ -109,6 +116,8 @@ public class RibbonServer {
         logAppend(LOG_ID, 2, "Версія системи: " + RIBBON_VER);
         CURR_STATE = RibbonServer.SYS_STATES.INIT;
         setSystemVariables();
+        logAppend(LOG_ID, 3, "початок налаштування груп доступу");
+        groupObj = new Groups();
         logAppend(LOG_ID, 3, "початок налаштування користувачів");
         userObj = new Users();
         logAppend(LOG_ID, 3, "початок налаштування напрявків");
