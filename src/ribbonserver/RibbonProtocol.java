@@ -122,11 +122,11 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_CONNECTION_LOGIN", CONNECTION_TYPES.ANY) {
           @Override
           public String exec(String args) {
-              Users.userEntry tryUser = csvHandler.parseUserLine(args);
-              String returned = RibbonServer.userObj.loginUser(tryUser);
+              String[] parsedArgs = csvHandler.commonParseLine(args, 2);
+              String returned = RibbonServer.userObj.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
               if (returned == null) {
-                  RibbonServer.logAppend(LOG_ID, 3, "користувач " + tryUser.USER_NAME + "зайшов у систему.");
-                  CURR_SESSION.USER_NAME = tryUser.USER_NAME;
+                  RibbonServer.logAppend(LOG_ID, 3, "користувач " + parsedArgs[0] + "зайшов у систему.");
+                  CURR_SESSION.USER_NAME = parsedArgs[0];
                   return "OK:";
               } else {
                   return "RIBBON_ERROR:" + returned;

@@ -42,6 +42,7 @@ public class Users {
         /**
          * a2 endian constructor
          * @param givenStruct result of csvHandler.complexParseLine
+         * @since RibbonServer a2
          */
         userEntry(java.util.ArrayList<String[]> givenStruct) {
             String[] baseArray = givenStruct.get(0);
@@ -65,7 +66,7 @@ public class Users {
         
         /**
          * User's password
-         * @deprecated 
+         * @deprecated plain password is unsafe.
          */
         public String PASSWORD;
         
@@ -73,21 +74,25 @@ public class Users {
         
         /**
          * MD5 hashsumm of password
+         * @since RibbonServer a2
          */
         public String H_PASSWORD;
         
         /**
          * Comment string
+         * @since RibbonServer a2
          */
         public String COMM;
         
         /**
          * Array with groups
+         * @since RibbonServer a2
          */
         public String[] GROUPS;
         
         /**
          * State of users account
+         * @since RibbonServer a2
          */
         public Boolean IS_ENABLED;
         
@@ -125,6 +130,7 @@ public class Users {
      * Login user or return error 
      * @param tryUser user entry of user which will be examened
      * @return null or error message
+     * @deprecated a1 specific
      */
     public String loginUser(Users.userEntry tryUser) {
         Users.userEntry findedUser = null;
@@ -139,6 +145,38 @@ public class Users {
         if (findedUser != null) {
             if (findedUser.PASSWORD.equals(tryUser.PASSWORD)) {
                 if (findedUser.PASSWORD.charAt(0) == '*') {
+                    return "Користувача заблоковано!";
+                } else {
+                    return null;
+                }
+            } else {
+                return "Невірний пароль!";
+            }
+        } else {
+            return "Користувача не знайдено!";
+        }
+    }
+    
+    /**
+     * Login user or return error 
+     * @param givenName name of user which is trying to login
+     * @param givenHash md5 hash of user's password
+     * @return null or error message
+     * @since RibbonServer a2
+     */
+    public String PROC_LOGIN_USER(String givenName, String givenHash) {
+        Users.userEntry findedUser = null;
+        java.util.ListIterator<Users.userEntry> usersIter = this.userStore.listIterator();
+        while (usersIter.hasNext()) {
+            Users.userEntry currUser = usersIter.next();
+            if (currUser.USER_NAME.equals(givenName)) {
+                findedUser = currUser;
+                break;
+            }
+        }
+        if (findedUser != null) {
+            if (findedUser.H_PASSWORD.equals(givenHash)) {
+                if (!findedUser.IS_ENABLED) {
                     return "Користувача заблоковано!";
                 } else {
                     return null;
