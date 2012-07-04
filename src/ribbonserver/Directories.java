@@ -42,6 +42,11 @@ public class Directories {
      */
     public static class dirSchema {
         
+        /**
+         * Default constructor from csv form
+         * @param givenArray array of parsed arguments
+         * @deprecated old specifications
+         */
         dirSchema(String[] givenArray) {
             SH_DIR_PATH = givenArray[0];
             SH_COMM = givenArray[1];
@@ -52,6 +57,12 @@ public class Directories {
             }
         }
         
+        /**
+         * Parametrick costructor
+         * @param givenPath full path of directory
+         * @param givenComm comment for directory
+         * @param givenFlag anonymous flag for this directory
+         */
         dirSchema(String givenPath, String givenComm, String givenFlag) {
             SH_DIR_PATH = givenPath;
             SH_COMM = givenComm;
@@ -60,11 +71,48 @@ public class Directories {
             } else {
                 SH_ANON_MODE = false;
             }
+            SH_LANGS = new String[] {"ALL"};
+            SH_EXPORTS = null;
+            SH_ACCESS = new String[] {"ALL:100"};
         }
         
+        /** a1 endian **/
+        
+        /**
+         * Full directory path
+         */
         public String SH_DIR_PATH;
+        
+        /**
+         * Commentary for directory
+         */
         public String SH_COMM;
+        
+        /**
+         * Anonymous mode flag
+         * @deprecated a2 has no support of completely anonymous users
+         */
         public Boolean SH_ANON_MODE;
+        
+        /** a2 endian **/
+        
+        /**
+         * Directory's supported languages
+         * @since RibbonServer a2
+         */
+        public String[] SH_LANGS;
+        
+        /**
+         * Access list for directory
+         * @since RibbonServer a2
+         */
+        public String[] SH_ACCESS;
+        
+        /**
+         * Directory's exports list
+         * @since RibbonServer a2
+         */
+        public String[] SH_EXPORTS;
     }
     
     /**
@@ -124,6 +172,8 @@ public class Directories {
             }
         }
         
+        /** a1 endian **/
+        
         /**
          * Short directrory name
          */
@@ -137,12 +187,12 @@ public class Directories {
         /**
          * Arraylist of inner directiries
          */
-        public java.util.ArrayList<dirEntry> FOLDED_DIR = new java.util.ArrayList<dirEntry>();
+        public java.util.ArrayList<dirEntry> FOLDED_DIR = new java.util.ArrayList<>();
         
         /**
          * Arraylist of messages indexes
          */
-        public java.util.ArrayList<String> DIR_INDEXCES = new java.util.ArrayList<String>();
+        public java.util.ArrayList<String> DIR_INDEXCES = new java.util.ArrayList<>();
         
         /**
          * Directory commentary
@@ -150,7 +200,8 @@ public class Directories {
         public String COMM;
         
         /**
-         * Anonymous acces to directory
+         * Anonymous access to directory
+         * @deprecated a1 has no full anonymous mode
          */
         public Boolean ANON_MODE;
         
@@ -159,10 +210,56 @@ public class Directories {
          */
         public String DIR_PATH;
         
+        /** a2 endian **/
+        
+        /**
+         * Array of exports shemas names
+         * @since RibbonServer a2
+         */
+        public java.util.ArrayList<String> DIR_EXPORTS;
+        
+        /**
+         * Array of directory's acceptable languages
+         * @since RibbonServer a2
+         */
+        public java.util.ArrayList<String> DIR_LANGS;
+        
+        /**
+         * Access array of this directory
+         */
+        public java.util.ArrayList<dirEntry.dirPermissionEntry> DIR_ACCESS;
+        
         /**
          * Last searched directory
          */
         private dirEntry lastEntry;
+        
+        /**
+         * Permission object class
+         */
+        public class dirPermissionEntry {
+            
+            /**
+             * Access key (user or group)
+             */
+            public String KEY;
+            
+            /**
+             * Set if owner of key may read this directory
+             */
+            public Boolean MAY_READ;
+            
+            /**
+             * Set if owner of key may release messages within this directory
+             */
+            public Boolean MAY_RELEASE;
+            
+            /**
+             * Set if owner of key may administrate this directory
+             */
+            public Boolean MAY_ADMIN;
+            
+        }
         
         /**
          * Insert chain of directories in current directory
