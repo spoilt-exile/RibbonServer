@@ -34,7 +34,8 @@ public abstract class csvHandler {
                 java.io.FileWriter dirIndexWriter = new java.io.FileWriter(dirIndexFile);
                 dirIndexWriter.write("СИСТЕМА.ТЕСТ,{Тестовий напрямок випуску},1\nСИСТЕМА.Оголошення,{Системні оголошення},0");
                 dirIndexWriter.close();
-                Dirs.add(new Directories.dirSchema("СИСТЕМА.ТЕСТ", "Тестовий напрямок випуск", "1"));
+                Dirs.add(new Directories.dirSchema("СИСТЕМА.ТЕСТ", "Тестовий напрямок випуску", "1"));
+                Dirs.add(new Directories.dirSchema("СИСТЕМА.Оголошення", "Системні оголошення", "0"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу напрямків!");
                 System.exit(4);
