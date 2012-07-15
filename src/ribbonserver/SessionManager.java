@@ -17,7 +17,7 @@ public class SessionManager {
     /**
      * Arraylist with active network sessions
      */
-    private java.util.ArrayList<SessionManager.SessionThread> sessionsStore = new java.util.ArrayList<SessionManager.SessionThread>();
+    private java.util.ArrayList<SessionManager.SessionThread> sessionsStore = new java.util.ArrayList<>();
     
     /**
      * Single client session class
@@ -27,7 +27,12 @@ public class SessionManager {
         /**
          * User name of this session
          */
-        public String USER_NAME;
+        public String USER_NAME = "Вхід не виконано";
+        
+        /**
+         * Short session description
+         */
+        public String SESSION_TIP;
         
         /**
          * Is session alive
@@ -64,7 +69,6 @@ public class SessionManager {
             } finally {
                 RibbonServer.logAppend(LOG_ID, 3, "додана нова мережева сессія (" + SessionSocket.getInetAddress().getHostAddress() + ")");
                 ProtocolHandler = new RibbonProtocol(this);
-                //RibbonServer.sessionObj.addSession(this);
                 this.isAlive = true;
             }
         }
@@ -72,6 +76,7 @@ public class SessionManager {
         @Override
         public void run() {
             String inputLine, outputLine;
+            this.setSessionName();
             try {
                 while (this.isAlive == true) {
                     inputLine = inStream.readLine();
@@ -99,16 +104,24 @@ public class SessionManager {
                 RibbonServer.sessionObj.closeSession(this);
             }
         }
+        
+        /**
+         * Set name of session thread
+         */
+        public void setSessionName() {
+            this.SESSION_TIP = "[" + this.USER_NAME + "] на " + this.SessionSocket.getInetAddress().getHostName();
+        }
     }
-    
+
     /**
-     * Add session to sessions array and start it;
-     * @param givenSession session to open;
+     * Create new session and add it into session list;
+     * @param givenSocket socket to open session;
      */
-    public void addSession(SessionManager.SessionThread givenSession) {
-        if (givenSession.isAlive) {
-            this.sessionsStore.add(givenSession);
-            givenSession.start();
+    public void createNewSession(java.net.Socket givenSocket) {
+        SessionManager.SessionThread createdThread = new SessionManager.SessionThread(givenSocket);
+        if (createdThread.isAlive) {
+            this.sessionsStore.add(createdThread);
+            createdThread.start();
         }
     }
     

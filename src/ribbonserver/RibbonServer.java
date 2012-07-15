@@ -136,11 +136,8 @@ public class RibbonServer {
                 if (!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.ALLOW_REMOTE == false) {
                     inSocket.close();
                 } else {
-                    SessionManager.SessionThread accepted = sessionObj.new SessionThread(inSocket);
-                    sessionObj.addSession(accepted);
+                    RibbonServer.sessionObj.createNewSession(inSocket);
                 }
-                //SessionManager.SessionThread accepted = sessionObj.new SessionThread(RibbonServSocket.accept());
-                //sessionObj.addSession(new SessionManager.SessionThread(RibbonServSocket.accept()));
             }
         } catch (java.io.IOException ex) {
             logAppend(LOG_ID, 0, "неможливо створити сервер!");
