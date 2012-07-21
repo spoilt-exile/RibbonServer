@@ -98,6 +98,8 @@ public class RibbonServer {
     
     public static ANON_MODES CURR_ANON_MODE;
     
+    public static String CURR_ALL_MASK = "100";
+    
     public static String DIR_INDEX_PATH = "dir.index";
     
     public static String USERS_INDEX_PATH = "users.index";

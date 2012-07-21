@@ -20,22 +20,25 @@ public abstract class csvHandler {
      * @see Directories.dirSchema
      */
     public static java.util.ArrayList<Directories.dirSchema> readDirectories() {
-        java.util.ArrayList<Directories.dirSchema> Dirs = new java.util.ArrayList<Directories.dirSchema>();
+        java.util.ArrayList<Directories.dirSchema> Dirs = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader dirIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.DIR_INDEX_PATH));
             while (dirIndexReader.ready()) {
-                Dirs.add(new Directories.dirSchema(parseDirLine(dirIndexReader.readLine())));
+                Dirs.add(new Directories.dirSchema(csvHandler.complexParseLine(dirIndexReader.readLine(), 2, 3)));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу напрявків не знайдено. Створюю новий.");
             java.io.File dirIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + RibbonServer.DIR_INDEX_PATH);
             try {
                 dirIndexFile.createNewFile();
-                java.io.FileWriter dirIndexWriter = new java.io.FileWriter(dirIndexFile);
-                dirIndexWriter.write("СИСТЕМА.ТЕСТ,{Тестовий напрямок випуску},1\nСИСТЕМА.Оголошення,{Системні оголошення},0");
-                dirIndexWriter.close();
-                Dirs.add(new Directories.dirSchema("СИСТЕМА.ТЕСТ", "Тестовий напрямок випуску", "1"));
-                Dirs.add(new Directories.dirSchema("СИСТЕМА.Оголошення", "Системні оголошення", "0"));
+                try (java.io.FileWriter dirIndexWriter = new java.io.FileWriter(dirIndexFile)) {
+                    dirIndexWriter.write("СИСТЕМА,{Головний напрямок новин про розробку системи},[ALL],[ALL:110],[]\n");
+                    dirIndexWriter.write("СИСТЕМА.Розробка,{Новини про розробку},[UA,RU],[ALL:100],[]\n");
+                    dirIndexWriter.write("СИСТЕМА.Тест,{Тестовий напрямок},[UA,RU],[ALL:110],[]\n");
+                }
+                Dirs.add(new Directories.dirSchema("СИСТЕМА", "Головний напрямок новин про розробку системи"));
+                Dirs.add(new Directories.dirSchema("СИСТЕМА.Розробка", "Новини про розробку"));
+                Dirs.add(new Directories.dirSchema("СИСТЕМА.Тест", "Тестовий напрямок"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу напрямків!");
                 System.exit(4);
@@ -51,6 +54,7 @@ public abstract class csvHandler {
      * Parse single directory cvs line
      * @param dirLine line of text config
      * @return array of string for creating directory schema
+     * @deprecated old code
      */
     private static String[] parseDirLine(String dirLine) {
         String[] returned = new String[3];
@@ -90,7 +94,7 @@ public abstract class csvHandler {
      * @return arrayList of users entries
      */
     public static java.util.ArrayList<Users.userEntry> readUsers() {
-        java.util.ArrayList<Users.userEntry> returnedUsers = new java.util.ArrayList<Users.userEntry>();
+        java.util.ArrayList<Users.userEntry> returnedUsers = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader userIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.USERS_INDEX_PATH));
             while (userIndexReader.ready()) {
@@ -101,10 +105,10 @@ public abstract class csvHandler {
             java.io.File usersIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + RibbonServer.USERS_INDEX_PATH);
             try {
                 usersIndexFile.createNewFile();
-                java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile);
-                usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1\n");
-                usersIndexWriter.write("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1\n");
-                usersIndexWriter.close();
+                try (java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile)) {
+                    usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1\n");
+                    usersIndexWriter.write("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1\n");
+                }
                 returnedUsers.add(new Users.userEntry(complexParseLine("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1", 4, 1)));
                 returnedUsers.add(new Users.userEntry(complexParseLine("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1", 4, 1)));
             } catch (java.io.IOException exq) {
@@ -123,7 +127,7 @@ public abstract class csvHandler {
      * @return arrayList of groups entries
      */
     public static java.util.ArrayList<Groups.groupEntry> readGroups() {
-        java.util.ArrayList<Groups.groupEntry> returnedGroups = new java.util.ArrayList<Groups.groupEntry>();
+        java.util.ArrayList<Groups.groupEntry> returnedGroups = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader groupIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH));
             Integer currentLine = 0;
@@ -141,9 +145,9 @@ public abstract class csvHandler {
             java.io.File usersIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH);
             try {
                 usersIndexFile.createNewFile();
-                java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile);
-                usersIndexWriter.write("{test},{Test group}\n");
-                usersIndexWriter.close();
+                try (java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile)) {
+                    usersIndexWriter.write("{test},{Test group}\n");
+                }
                 returnedGroups.add(new Groups.groupEntry(new String[] {"test", "Test group"}));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу груп!");
@@ -268,7 +272,7 @@ public abstract class csvHandler {
      * @return arraylist with index entries
      */
     public static java.util.ArrayList<Messenger.messageEntry> readBaseIndex() {
-        java.util.ArrayList<Messenger.messageEntry> returnedIndex = new java.util.ArrayList<Messenger.messageEntry>();
+        java.util.ArrayList<Messenger.messageEntry> returnedIndex = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader baseIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH));
             while (baseIndexReader.ready()) {
@@ -373,9 +377,9 @@ public abstract class csvHandler {
      */
     public static void appendToBaseIndex(String csvReport) {
         try {
-            java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH, true);
-            messageWriter.write(csvReport + "\n");
-            messageWriter.close();
+            try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH, true)) {
+                messageWriter.write(csvReport + "\n");
+            }
         } catch (java.io.IOException ex) {
             RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
         }
@@ -392,9 +396,9 @@ public abstract class csvHandler {
             newIndexFileContent += storeIter.next().toCsv() + "\n";
         }
         try {
-            java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH);
-            messageWriter.write(newIndexFileContent);
-            messageWriter.close();
+            try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH)) {
+                messageWriter.write(newIndexFileContent);
+            }
         } catch (java.io.IOException ex) {
             RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
         }
@@ -640,5 +644,48 @@ public abstract class csvHandler {
         returnedArr.add(baseArray);
         returnedArr.addAll(tempGroupArray);
         return returnedArr;
+    }
+    
+    /**
+     * Parse double struct string<br>
+     * for example: "TAG:ARG"
+     * @param rawString string from socket
+     * @return array with command and its arguments
+     */
+    public static String[] parseDoubleStruct(String rawString) {
+        String[] returnedArray = new String[2];
+        Integer splitIndex = -1;
+        for (Integer cursorIndex = 0; cursorIndex < rawString.length(); cursorIndex++) {
+            if (rawString.charAt(cursorIndex) == ':') {
+                splitIndex = cursorIndex;
+                break;
+            }
+        }
+        if (splitIndex == -1) {
+            return null;
+        } else {
+            returnedArray[0] = rawString.substring(0, splitIndex);
+            returnedArray[1] = rawString.substring(splitIndex + 1);
+            return returnedArray;
+        }
+    }
+    
+    /**
+     * Render given array to group format<br>
+     * Format: <b>'[arr1,arr2,arr3,->arrN]'</b>
+     * @param givenGroup group to render
+     * @return rendered string 
+     */
+    public static String renderGroup(String[] givenGroup) {
+        String returned = "[";
+        for (Integer rIndex = 0; rIndex < givenGroup.length; rIndex++) {
+            returned += givenGroup[rIndex];
+            if (rIndex == givenGroup.length - 1) {
+                returned += "]";
+            } else {
+                returned += ",";
+            }
+        }
+        return returned;
     }
 }

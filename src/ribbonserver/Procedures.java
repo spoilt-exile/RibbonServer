@@ -133,7 +133,7 @@ public class Procedures {
         PROC_POST_MESSAGE(new Messenger.Message(
             "Системне повідомлення",
             "root",
-            new String[] {"СИСТЕМА.Оголошення", "СИСТЕМА.ТЕСТ"},
+            new String[] {"СИСТЕМА.Тест"},
             new String[] {"оголошення", "ІТУ"},
             formatLine + "\nСистема \"Стрічка\" " + RibbonServer.RIBBON_VER + "\n" + formatLine + "\n"
                     + "Це повідомлення автоматично генерується системою \"Стрічка\"\n"

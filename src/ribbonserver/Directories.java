@@ -58,22 +58,30 @@ public class Directories {
         }
         
         /**
+         * Default constructor from csv form
+         * @param givenStruct given structure after parsing
+         * @since RibbonServer a2
+         */
+        dirSchema(java.util.ArrayList<String[]> givenStruct) {
+            SH_DIR_PATH = givenStruct.get(0)[0];
+            SH_COMM = givenStruct.get(0)[1];
+            SH_LANGS = givenStruct.get(1);
+            SH_ACCESS = givenStruct.get(2);
+            SH_EXPORTS = givenStruct.get(3);
+        }
+        
+        /**
          * Parametrick costructor
          * @param givenPath full path of directory
          * @param givenComm comment for directory
          * @param givenFlag anonymous flag for this directory
          */
-        dirSchema(String givenPath, String givenComm, String givenFlag) {
+        dirSchema(String givenPath, String givenComm) {
             SH_DIR_PATH = givenPath;
             SH_COMM = givenComm;
-            if (givenFlag.equals("1")) {
-                SH_ANON_MODE = true;
-            } else {
-                SH_ANON_MODE = false;
-            }
             SH_LANGS = new String[] {"ALL"};
             SH_EXPORTS = null;
-            SH_ACCESS = new String[] {"ALL:100"};
+            SH_ACCESS = new String[] {"ALL:" + RibbonServer.CURR_ALL_MASK};
         }
         
         /** a1 endian **/
@@ -127,18 +135,29 @@ public class Directories {
         dirEntry() {
             DIR_NAME = "";
             FULL_DIR_NAME = "";
-            RibbonServer.logAppend(LOG_ID, 2, "додано кореневий напрямок");
+            DIR_ACCESS.add(new dirEntry.dirPermissionEntry("ALL:" + RibbonServer.CURR_ALL_MASK));
+            //RibbonServer.logAppend(LOG_ID, 2, "додано кореневий напрямок");
         }
         
         /**
-         * Chain constuctor
+         * Schema-based end constructor
+         * @param givenSchema schema to build directory
+         */
+        dirEntry(Directories.dirSchema givenSchema) {
+            this();
+            applySchema(givenSchema);
+        }
+        
+        /**
+         * Chain constuctor (adapted to a2)
          * @param upperLevel all parent directories
          * @param rest rest of the creation query
          * @param givenComm commentary for directory
          * @param givenPath path for images
          * @param givenAnon anonymous mode flag
          */
-        dirEntry(String upperLevel, String rest, String givenComm, Boolean givenAnon) {
+        dirEntry(String upperLevel, String rest, Directories.dirSchema givenSchema) {
+            this();
             Integer joint;
             if ((joint = rest.indexOf(".")) != -1) {
                 DIR_NAME = rest.substring(0, joint);
@@ -148,26 +167,13 @@ public class Directories {
                     FULL_DIR_NAME = upperLevel + "." + DIR_NAME;
                 }
                 DIR_PATH = RibbonServer.BASE_PATH + "/" + FULL_DIR_NAME.toLowerCase().replaceAll("\\.", "/") + "/";
-                ANON_MODE = false;
                 new java.io.File(DIR_PATH).mkdirs();
                 RibbonServer.logAppend(LOG_ID, 2, "додано порожній напрямок (" + FULL_DIR_NAME + ")");
                 COMM = "Порожній напрямок";
-                FOLDED_DIR.add(new dirEntry(FULL_DIR_NAME, rest.substring(joint + 1), givenComm, givenAnon));
+                FOLDED_DIR.add(new dirEntry(FULL_DIR_NAME, rest.substring(joint + 1), givenSchema));
             } else {
-                DIR_NAME = rest;
-                if (upperLevel.isEmpty()) {
-                    FULL_DIR_NAME = DIR_NAME;
-                } else {
-                    FULL_DIR_NAME = upperLevel + "." + DIR_NAME;
-                }
-                COMM = givenComm;
-                DIR_PATH = RibbonServer.BASE_PATH + "/" + FULL_DIR_NAME.toLowerCase().replaceAll("\\.", "/") + "/";
-                ANON_MODE = givenAnon;
-                if (givenAnon == true) {
-                    RibbonServer.logAppend(LOG_ID, 2, "додано напрямок (" + FULL_DIR_NAME + ":" + COMM + ") з можливістю анонімного випуску");
-                } else {
-                    RibbonServer.logAppend(LOG_ID, 2, "додано напрямок (" + FULL_DIR_NAME + ":" + COMM + ")");
-                }
+                applySchema(givenSchema);
+                RibbonServer.logAppend(LOG_ID, 2, "додано напрямок (" + FULL_DIR_NAME + ":" + COMM + ")");
                 new java.io.File(DIR_PATH).mkdirs();
             }
         }
@@ -216,28 +222,43 @@ public class Directories {
          * Array of exports shemas names
          * @since RibbonServer a2
          */
-        public java.util.ArrayList<String> DIR_EXPORTS;
+        public java.util.ArrayList<String> DIR_EXPORTS = new java.util.ArrayList<>();
         
         /**
          * Array of directory's acceptable languages
          * @since RibbonServer a2
          */
-        public java.util.ArrayList<String> DIR_LANGS;
+        public java.util.ArrayList<String> DIR_LANGS = new java.util.ArrayList<>();
         
         /**
          * Access array of this directory
+         * @since RibbonServer a2
          */
-        public java.util.ArrayList<dirEntry.dirPermissionEntry> DIR_ACCESS;
+        public java.util.ArrayList<dirEntry.dirPermissionEntry> DIR_ACCESS = new java.util.ArrayList<>();
         
         /**
          * Last searched directory
+         * @since RibbonServer a2
          */
         private dirEntry lastEntry;
         
         /**
          * Permission object class
+         * @since RibbonServer a2
          */
         public class dirPermissionEntry {
+            
+            /**
+             * Default constructor
+             * @param rawDescriptor string descriptor of permission to directory
+             */
+            dirPermissionEntry(String rawDescriptor) {
+                String[] parsedArr = csvHandler.parseDoubleStruct(rawDescriptor);
+                KEY = parsedArr[0];
+                MAY_READ = parsedArr[1].charAt(0) == '1' ? true : false;
+                MAY_RELEASE = parsedArr[1].charAt(1) == '1' ? true : false;
+                MAY_ADMIN = parsedArr[1].charAt(2) == '1' ? true : false;
+            }
             
             /**
              * Access key (user or group)
@@ -269,7 +290,7 @@ public class Directories {
          * @param givenPath path for images
          * @param givenAnon anonymous mode flag
          */
-        public void insertDir(String upperLevel, String rest, String givenComm, Boolean givenAnon) {
+        public void insertDir(String upperLevel, String rest, Directories.dirSchema givenSchema) {
             Integer joint;
             if ((joint = rest.indexOf(".")) != -1) {
                 String inserted_DIR_NAME = rest.substring(0, joint);
@@ -280,21 +301,20 @@ public class Directories {
                     inserted_FULL_DIR_NAME = upperLevel + "." + inserted_DIR_NAME;
                 }
                 if (this.hasFoldDir(inserted_DIR_NAME)) {
-                    lastEntry.insertDir(inserted_FULL_DIR_NAME, rest.substring(joint + 1), givenComm, givenAnon);
+                    lastEntry.insertDir(inserted_FULL_DIR_NAME, rest.substring(joint + 1), givenSchema);
                 } else {
                     if (this.DIR_NAME.isEmpty()) {
-                        this.FOLDED_DIR.add(new dirEntry("", rest, givenComm, givenAnon));
+                        this.FOLDED_DIR.add(new dirEntry("", rest, givenSchema));
                     } else {
-                        this.FOLDED_DIR.add(new dirEntry(inserted_FULL_DIR_NAME, rest.substring(joint + 1), givenComm, givenAnon));
+                        this.FOLDED_DIR.add(new dirEntry(inserted_FULL_DIR_NAME, rest.substring(joint + 1), givenSchema));
                     }
                 }
             } else {
                 String inserted_DIR_NAME = rest;
-                String inserted_FULL_DIR_NAME = upperLevel + "." + inserted_DIR_NAME;
                 if (hasFoldDir(inserted_DIR_NAME)) {
-                    lastEntry.updateDir(givenComm, givenAnon);
+                    lastEntry.applySchema(givenSchema);
                 } else {
-                    FOLDED_DIR.add(new dirEntry(upperLevel, rest, givenComm, givenAnon));
+                    FOLDED_DIR.add(new dirEntry(upperLevel, rest, givenSchema));
                 }
             }
         }
@@ -328,6 +348,34 @@ public class Directories {
         }
         
         /**
+         * Apply schema to given directory;
+         * @param givenSchema 
+         */
+        public void applySchema(Directories.dirSchema givenSchema) {
+            this.FULL_DIR_NAME = givenSchema.SH_DIR_PATH;
+            this.COMM = givenSchema.SH_COMM;
+            this.DIR_LANGS = new java.util.ArrayList<>();
+            for (Integer langIndex = 0; langIndex < givenSchema.SH_LANGS.length; langIndex++) {
+                this.DIR_LANGS.add(givenSchema.SH_LANGS[langIndex]);
+            }
+            this.DIR_EXPORTS = new java.util.ArrayList<>();
+            for (Integer exportIndex = 0; exportIndex < givenSchema.SH_EXPORTS.length; exportIndex++) {
+                this.DIR_EXPORTS.add(givenSchema.SH_EXPORTS[exportIndex]);
+            }
+            this.DIR_ACCESS = new java.util.ArrayList<>();
+            if (givenSchema.SH_ACCESS.length == 1 && givenSchema.SH_ACCESS[0].isEmpty()) {
+                this.DIR_ACCESS.add(new Directories.dirEntry.dirPermissionEntry("ALL:" + RibbonServer.CURR_ALL_MASK));
+            } else {
+                for (Integer accessIndex = 0; accessIndex < givenSchema.SH_ACCESS.length; accessIndex++) {
+                    this.DIR_ACCESS.add(new Directories.dirEntry.dirPermissionEntry(givenSchema.SH_ACCESS[accessIndex]));
+                }
+            }
+            String[] chunks = this.FULL_DIR_NAME.split("\\.");
+            this.DIR_NAME = chunks[chunks.length - 1];
+            this.DIR_PATH = RibbonServer.BASE_PATH + "/" + FULL_DIR_NAME.toLowerCase().replaceAll("\\.", "/") + "/";
+        }
+        
+        /**
          * Build tree from specifed inner level
          * @param inLevel inner folding level
          * @return tree formated string
@@ -340,8 +388,7 @@ public class Directories {
             }
             String returned = "";
             if (inLevel > 0) {
-                String anonMsg = this.ANON_MODE ? "Так" : "Ні";
-                returned = spaceStr + this.DIR_NAME + ": " + this.COMM + " Анонімний режим: " + anonMsg + "\n";
+                returned = spaceStr + this.DIR_NAME + " " + csvHandler.renderGroup(this.DIR_LANGS.toArray(new String[DIR_LANGS.size()])) + " : " + this.COMM + "\n";
             } else {
                 returned = cap + "\nНапрямки системи \"Стрічка\"\n\nКореневий напрямок:\n" + cap + "\n";
             }
@@ -477,21 +524,11 @@ public class Directories {
     }
     
     /**
-     * Create full chain of directories
-     * @param dirChain full path of directory
-     * @param commentary commentary for directory
-     * @param anon_mode anonymous mode flag
-     */
-    public void createDirs(String dirChain, String commentary, Boolean anon_mode) {
-        this.rootDir.insertDir("", dirChain, commentary, anon_mode);
-    }
-    
-    /**
      * Create full chain of directories with given schema
      * @param givenSchema directory schema
      */
     public void createDirs(dirSchema givenSchema) {
-        this.rootDir.insertDir("", givenSchema.SH_DIR_PATH, givenSchema.SH_COMM, givenSchema.SH_ANON_MODE);
+        this.rootDir.insertDir("", givenSchema.SH_DIR_PATH, givenSchema);
     }
     
     /**
