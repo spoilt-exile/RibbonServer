@@ -280,6 +280,17 @@ public class Directories {
              */
             public Boolean MAY_ADMIN;
             
+            /**
+             * Return csv representation of permission object
+             * @return formated string representation of this permission object
+             */
+            public String toCsv() {
+                String returned = KEY + ":";
+                returned += this.MAY_READ == true ? "1" : "0";
+                returned += this.MAY_RELEASE == true ? "1" : "0";
+                returned += this.MAY_ADMIN == true ? "1" : "0";
+                return returned;
+            }
         }
         
         /**
@@ -403,6 +414,7 @@ public class Directories {
         /**
          * Build full text report
          * @return csv report
+         * @deprecated old code
          */
         public String report() {
             return this.FULL_DIR_NAME + "," + this.COMM + this.ANON_MODE.booleanValue() + "\n";
@@ -480,13 +492,12 @@ public class Directories {
          * @return csv formated string
          */
         public String toCsv() {
-            String anon_msg;
-            if (this.ANON_MODE == false) {
-                anon_msg = "0";
-            } else {
-                anon_msg = "1";
+            String[] stringedAccess = new String[this.DIR_ACCESS.length];
+            for (Integer strIndex = 0; strIndex < this.DIR_ACCESS.length; strIndex++) {
+                stringedAccess[strIndex] = this.DIR_ACCESS[strIndex].toCsv();
             }
-            return this.FULL_DIR_NAME + ",{" + this.COMM + "}," + anon_msg;
+            return this.FULL_DIR_NAME + ",{" + this.COMM + "}," + csvHandler.renderGroup(DIR_LANGS) + "," + 
+                    csvHandler.renderGroup(stringedAccess) + "," + csvHandler.renderGroup(this.DIR_EXPORTS);
         }
         
         /**
