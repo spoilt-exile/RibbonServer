@@ -333,28 +333,6 @@ public class RibbonProtocol {
         
         /** SERVER CONTROL PROTOCOL STACK [LEVEL_2 SUPPORT] **/
         
-        /**
-         * RIBBON_SCTL_CONTROL_LOGIN: commandlet
-         * Control console send this command to login the administrator.
-         */
-        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_SCTL_CONTROL_LOGIN", CONNECTION_TYPES.CONTROL) {
-          @Override
-          public String exec(String args) {
-              Users.userEntry tryUser = csvHandler.parseUserLine(args);
-              String returned = RibbonServer.userObj.loginUser(tryUser);
-              if (returned == null) {
-                  RibbonServer.logAppend(LOG_ID, 3, "адміністратор " + tryUser.USER_NAME + "зайшов у систему.");
-                  CURR_SESSION.USER_NAME = tryUser.USER_NAME;
-                  if (RibbonServer.CONTROL_IS_PRESENT == false) {
-                      RibbonServer.logAppend(RibbonServer.LOG_ID, 2, "ініційовано контроль системи!");
-                      RibbonServer.CONTROL_IS_PRESENT = true;
-                  }
-                  return "OK:";
-              } else {
-                  return "RIBBON_ERROR:" + returned;
-              }
-          }
-        });
     }
     
     /**
