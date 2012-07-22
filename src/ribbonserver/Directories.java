@@ -492,12 +492,18 @@ public class Directories {
          * @return csv formated string
          */
         public String toCsv() {
-            String[] stringedAccess = new String[this.DIR_ACCESS.length];
-            for (Integer strIndex = 0; strIndex < this.DIR_ACCESS.length; strIndex++) {
-                stringedAccess[strIndex] = this.DIR_ACCESS[strIndex].toCsv();
+            String accessStr;
+            if (this.DIR_ACCESS != null) {
+                String[] stringedAccess = new String[this.DIR_ACCESS.length];
+                for (Integer strIndex = 0; strIndex < this.DIR_ACCESS.length; strIndex++) {
+                    stringedAccess[strIndex] = this.DIR_ACCESS[strIndex].toCsv();
+                }
+                accessStr = csvHandler.renderGroup(stringedAccess);
+            } else {
+                accessStr = "[]";
             }
             return this.FULL_DIR_NAME + ",{" + this.COMM + "}," + csvHandler.renderGroup(DIR_LANGS) + "," + 
-                    csvHandler.renderGroup(stringedAccess) + "," + csvHandler.renderGroup(this.DIR_EXPORTS);
+                    accessStr + "," + csvHandler.renderGroup(this.DIR_EXPORTS);
         }
         
         /**
