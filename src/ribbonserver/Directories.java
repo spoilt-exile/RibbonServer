@@ -135,7 +135,7 @@ public class Directories {
         dirEntry() {
             DIR_NAME = "";
             FULL_DIR_NAME = "";
-            DIR_ACCESS.add(new dirEntry.dirPermissionEntry("ALL:" + RibbonServer.CURR_ALL_MASK));
+            DIR_ACCESS = null;
             //RibbonServer.logAppend(LOG_ID, 2, "додано кореневий напрямок");
         }
         
@@ -222,19 +222,19 @@ public class Directories {
          * Array of exports shemas names
          * @since RibbonServer a2
          */
-        public java.util.ArrayList<String> DIR_EXPORTS = new java.util.ArrayList<>();
+        public String[] DIR_EXPORTS;
         
         /**
          * Array of directory's acceptable languages
          * @since RibbonServer a2
          */
-        public java.util.ArrayList<String> DIR_LANGS = new java.util.ArrayList<>();
+        public String[] DIR_LANGS;
         
         /**
          * Access array of this directory
          * @since RibbonServer a2
          */
-        public java.util.ArrayList<dirEntry.dirPermissionEntry> DIR_ACCESS = new java.util.ArrayList<>();
+        public dirEntry.dirPermissionEntry[] DIR_ACCESS;
         
         /**
          * Last searched directory
@@ -354,20 +354,14 @@ public class Directories {
         public void applySchema(Directories.dirSchema givenSchema) {
             this.FULL_DIR_NAME = givenSchema.SH_DIR_PATH;
             this.COMM = givenSchema.SH_COMM;
-            this.DIR_LANGS = new java.util.ArrayList<>();
-            for (Integer langIndex = 0; langIndex < givenSchema.SH_LANGS.length; langIndex++) {
-                this.DIR_LANGS.add(givenSchema.SH_LANGS[langIndex]);
-            }
-            this.DIR_EXPORTS = new java.util.ArrayList<>();
-            for (Integer exportIndex = 0; exportIndex < givenSchema.SH_EXPORTS.length; exportIndex++) {
-                this.DIR_EXPORTS.add(givenSchema.SH_EXPORTS[exportIndex]);
-            }
-            this.DIR_ACCESS = new java.util.ArrayList<>();
+            this.DIR_LANGS = givenSchema.SH_LANGS;
+            this.DIR_EXPORTS = givenSchema.SH_EXPORTS;
             if (givenSchema.SH_ACCESS.length == 1 && givenSchema.SH_ACCESS[0].isEmpty()) {
-                this.DIR_ACCESS.add(new Directories.dirEntry.dirPermissionEntry("ALL:" + RibbonServer.CURR_ALL_MASK));
+                this.DIR_ACCESS = null;
             } else {
+                this.DIR_ACCESS = new dirEntry.dirPermissionEntry[givenSchema.SH_ACCESS.length];
                 for (Integer accessIndex = 0; accessIndex < givenSchema.SH_ACCESS.length; accessIndex++) {
-                    this.DIR_ACCESS.add(new Directories.dirEntry.dirPermissionEntry(givenSchema.SH_ACCESS[accessIndex]));
+                    this.DIR_ACCESS[accessIndex] = new dirEntry.dirPermissionEntry(givenSchema.SH_ACCESS[accessIndex]);
                 }
             }
             String[] chunks = this.FULL_DIR_NAME.split("\\.");
@@ -388,7 +382,7 @@ public class Directories {
             }
             String returned = "";
             if (inLevel > 0) {
-                returned = spaceStr + this.DIR_NAME + " " + csvHandler.renderGroup(this.DIR_LANGS.toArray(new String[DIR_LANGS.size()])) + " : " + this.COMM + "\n";
+                returned = spaceStr + this.DIR_NAME + " " + csvHandler.renderGroup(this.DIR_LANGS) + " : " + this.COMM + "\n";
             } else {
                 returned = cap + "\nНапрямки системи \"Стрічка\"\n\nКореневий напрямок:\n" + cap + "\n";
             }
