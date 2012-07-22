@@ -6,6 +6,8 @@
 
 package ribbonserver;
 
+import java.util.Arrays;
+
 /**
  * User accounting and authentication class
  * @author Stanislav Nepochatov
@@ -110,6 +112,7 @@ public class Users {
      * @param givenName name of user
      * @param givenDir name of dir to post
      * @return true - if user existed/false - if not
+     * @deprecated old code
      */
     public Boolean checkUser(String givenName, String givenDir) {
         java.util.ListIterator<userEntry> userIter = this.userStore.listIterator();
@@ -124,6 +127,60 @@ public class Users {
             return RibbonServer.dirObj.getAnonMode(givenDir);
         }
         return false;
+    }
+    
+    /**
+     * Check access to directory with specified mode;<br>
+     * <br>
+     * <b>Modes:</b><br>
+     * 0 - attempt to read directory;<br>
+     * 1 - attempt to release messege in directory;<br>
+     * 2 - attempt to admin directory;
+     * @param givenName user name which attempt to perform some action
+     * @param givenDir directory path 
+     * @param givenMode mode of action (read, write or admin)
+     * @return 
+     * @since RibbonServer a2
+     */
+    public Boolean checkAccess(String givenName, String givenDir, Integer givenMode) {
+        java.util.ListIterator<userEntry> userIter = this.userStore.listIterator();
+        userEntry findedUser = null;
+        while (userIter.hasNext()) {
+            userEntry currUser = userIter.next();
+            if (currUser.USER_NAME.equals(givenName)) {
+                findedUser = currUser;
+                break;
+            }
+        }
+        String[] keyArray = Arrays.copyOf(findedUser.GROUPS, findedUser.GROUPS.length + 1);
+        keyArray[keyArray.length - 1] = findedUser.USER_NAME;
+        Boolean findedAnswer;
+        Directories.dirPermissionEntry fallbackPermission = null;
+        Directories.dirPermissionEntry[] dirAccessArray = RibbonServer.dirObj.getDirAccess(givenDir);
+        for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
+            if (dirAccessArray[dirIndex].KEY.equals("ALL")) {
+                fallbackPermission = dirAccessArray[dirIndex];
+                continue;
+            }
+            for (Integer keyIndex = 0; keyIndex < findedUser.GROUPS.length; keyIndex++) {
+                if (keyArray[keyIndex].equals("ADM")) {
+                    return true;    //ADM is root-like group, all permission will be ignored
+                }
+                if (dirAccessArray[dirIndex].KEY.equals(keyArray[keyIndex])) {
+                    findedAnswer = dirAccessArray[dirIndex].checkByMode(givenMode);
+                    if (findedAnswer == true) {
+                        return findedAnswer;
+                    }
+                }
+            }
+        }
+        if (fallbackPermission == null) {
+            fallbackPermission = RibbonServer.dirObj.new dirPermissionEntry("ALL:" + RibbonServer.CURR_ALL_MASK);
+        }
+        if (findedAnswer = false) {
+            findedAnswer = fallbackPermission.checkByMode(givenMode);
+        }
+        return findedAnswer;
     }
     
     /**

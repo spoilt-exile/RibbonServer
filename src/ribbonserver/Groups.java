@@ -14,7 +14,7 @@ public class Groups {
     
     Groups() {
         groupStore = csvHandler.readGroups();
-        groupStore.add(new Groups.groupEntry(new String[] {"ADM", "SYS: Administration group"}));
+        groupStore.add(new Groups.groupEntry(new String[] {"ADM", "Службова група адміністраторів системи \"Стрічка\""}));
         RibbonServer.logAppend(LOG_ID, 3, "індекс груп опрацьвано (" + groupStore.size() + ")");
     }
     
@@ -23,7 +23,7 @@ public class Groups {
     /**
      * Group's store array
      */
-    private java.util.ArrayList<Groups.groupEntry> groupStore = new java.util.ArrayList();
+    private java.util.ArrayList<Groups.groupEntry> groupStore = new java.util.ArrayList<Groups.groupEntry>();
     
     /**
      * Group entry class

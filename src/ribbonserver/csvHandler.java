@@ -566,9 +566,9 @@ public abstract class csvHandler {
      * @since RibbonServer a2
      */
     public static java.util.ArrayList<String[]> complexParseLine(String inputLine, Integer baseArrLength, Integer groupsCount) {
-        java.util.ArrayList<String[]> returnedArr = new java.util.ArrayList();
+        java.util.ArrayList<String[]> returnedArr = new java.util.ArrayList<String[]>();
         String[] baseArray = new String[baseArrLength];
-        java.util.ArrayList<String[]> tempGroupArray = new java.util.ArrayList();
+        java.util.ArrayList<String[]> tempGroupArray = new java.util.ArrayList<String[]>();
         Integer beginSlice = 0;
         Integer acceptedIndex = -1;
         Boolean ignoreComma = false;
@@ -651,6 +651,7 @@ public abstract class csvHandler {
      * for example: "TAG:ARG"
      * @param rawString string from socket
      * @return array with command and its arguments
+     * @since RibbonServer a2
      */
     public static String[] parseDoubleStruct(String rawString) {
         String[] returnedArray = new String[2];
@@ -675,6 +676,7 @@ public abstract class csvHandler {
      * Format: <b>'[arr1,arr2,arr3,->arrN]'</b>
      * @param givenGroup group to render
      * @return rendered string 
+     * @since RibbonServer a2
      */
     public static String renderGroup(String[] givenGroup) {
         String returned = "[";

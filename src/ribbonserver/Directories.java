@@ -234,64 +234,13 @@ public class Directories {
          * Access array of this directory
          * @since RibbonServer a2
          */
-        public dirEntry.dirPermissionEntry[] DIR_ACCESS;
+        public dirPermissionEntry[] DIR_ACCESS;
         
         /**
          * Last searched directory
          * @since RibbonServer a2
          */
         private dirEntry lastEntry;
-        
-        /**
-         * Permission object class
-         * @since RibbonServer a2
-         */
-        public class dirPermissionEntry {
-            
-            /**
-             * Default constructor
-             * @param rawDescriptor string descriptor of permission to directory
-             */
-            dirPermissionEntry(String rawDescriptor) {
-                String[] parsedArr = csvHandler.parseDoubleStruct(rawDescriptor);
-                KEY = parsedArr[0];
-                MAY_READ = parsedArr[1].charAt(0) == '1' ? true : false;
-                MAY_RELEASE = parsedArr[1].charAt(1) == '1' ? true : false;
-                MAY_ADMIN = parsedArr[1].charAt(2) == '1' ? true : false;
-            }
-            
-            /**
-             * Access key (user or group)
-             */
-            public String KEY;
-            
-            /**
-             * Set if owner of key may read this directory
-             */
-            public Boolean MAY_READ;
-            
-            /**
-             * Set if owner of key may release messages within this directory
-             */
-            public Boolean MAY_RELEASE;
-            
-            /**
-             * Set if owner of key may administrate this directory
-             */
-            public Boolean MAY_ADMIN;
-            
-            /**
-             * Return csv representation of permission object
-             * @return formated string representation of this permission object
-             */
-            public String toCsv() {
-                String returned = KEY + ":";
-                returned += this.MAY_READ == true ? "1" : "0";
-                returned += this.MAY_RELEASE == true ? "1" : "0";
-                returned += this.MAY_ADMIN == true ? "1" : "0";
-                return returned;
-            }
-        }
         
         /**
          * Insert chain of directories in current directory
@@ -370,9 +319,9 @@ public class Directories {
             if (givenSchema.SH_ACCESS.length == 1 && givenSchema.SH_ACCESS[0].isEmpty()) {
                 this.DIR_ACCESS = null;
             } else {
-                this.DIR_ACCESS = new dirEntry.dirPermissionEntry[givenSchema.SH_ACCESS.length];
+                this.DIR_ACCESS = new dirPermissionEntry[givenSchema.SH_ACCESS.length];
                 for (Integer accessIndex = 0; accessIndex < givenSchema.SH_ACCESS.length; accessIndex++) {
-                    this.DIR_ACCESS[accessIndex] = new dirEntry.dirPermissionEntry(givenSchema.SH_ACCESS[accessIndex]);
+                    this.DIR_ACCESS[accessIndex] = new dirPermissionEntry(givenSchema.SH_ACCESS[accessIndex]);
                 }
             }
             String[] chunks = this.FULL_DIR_NAME.split("\\.");
@@ -532,6 +481,107 @@ public class Directories {
                 }
             }
         }
+        
+        /**
+         * Return topmost access description array
+         * @param upperLevel upper level of path
+         * @param rest rest of path
+         * @return array with dirEntry.dirPermissionEntry
+         * @see dirEntry.dirPermissionEntry
+         * @throws Exception 
+         */
+        public dirPermissionEntry[] getAccess(String upperLevel, String rest) throws Exception {
+            Integer joint;
+            if ((joint = rest.indexOf(".")) != -1) {
+                String indxed_DIR_NAME = rest.substring(0, joint);
+                if (this.hasFoldDir(indxed_DIR_NAME) == false) {
+                    RibbonServer.logAppend(LOG_ID, 1, "неможливо знайти шлях напрямку " + upperLevel + ">" + rest);
+                    throw new Exception("Неможливо знайти шлях до напрямку!");
+                } else {
+                    dirPermissionEntry[] gainedAccess = lastEntry.getAccess(this.FULL_DIR_NAME, rest.substring(joint + 1));
+                    if (gainedAccess == null) {
+                        return this.DIR_ACCESS;
+                    } else {
+                        return gainedAccess;
+                    }
+                }
+            } else {
+                String indxed_DIR_NAME = rest;
+                if (this.hasFoldDir(indxed_DIR_NAME) == false) {
+                    RibbonServer.logAppend(LOG_ID, 1, "неможливо знайти шлях напрямку " + upperLevel + ">" + rest);
+                    throw new Exception("Неможливо знайти шлях до напрямку!");
+                } else {
+                    return lastEntry.DIR_ACCESS;
+                }
+            }
+        }
+    }
+    
+    /**
+    * Permission object class
+    * @since RibbonServer a2
+    */
+    public class dirPermissionEntry {
+
+        /**
+        * Default constructor
+        * @param rawDescriptor string descriptor of permission to directory
+        */
+        dirPermissionEntry(String rawDescriptor) {
+            String[] parsedArr = csvHandler.parseDoubleStruct(rawDescriptor);
+            KEY = parsedArr[0];
+            MAY_READ = parsedArr[1].charAt(0) == '1' ? true : false;
+            MAY_RELEASE = parsedArr[1].charAt(1) == '1' ? true : false;
+            MAY_ADMIN = parsedArr[1].charAt(2) == '1' ? true : false;
+        }
+
+        /**
+        * Access key (user or group)
+        */
+        public String KEY;
+
+        /**
+        * Set if owner of key may read this directory
+        */
+        public Boolean MAY_READ;
+
+        /**
+        * Set if owner of key may release messages within this directory
+        */
+        public Boolean MAY_RELEASE;
+
+        /**
+        * Set if owner of key may administrate this directory
+        */
+        public Boolean MAY_ADMIN;
+
+        /**
+        * Return csv representation of permission object
+        * @return formated string representation of this permission object
+        */
+        public String toCsv() {
+            String returned = KEY + ":";
+            returned += this.MAY_READ == true ? "1" : "0";
+            returned += this.MAY_RELEASE == true ? "1" : "0";
+            returned += this.MAY_ADMIN == true ? "1" : "0";
+            return returned;
+        }
+        
+        public Boolean checkByMode(Integer attemptMode) {
+            Boolean answer = false;
+            switch (attemptMode) {
+                case 0:
+                    answer = MAY_ADMIN ? true : MAY_READ;
+                    break;
+                case 1:
+                    answer = MAY_ADMIN ? true : MAY_RELEASE;
+                    break;
+                case 2: 
+                    answer = MAY_ADMIN;
+                    break;
+            }
+            return answer;
+        }
     }
     
     /**
@@ -579,6 +629,7 @@ public class Directories {
      * Return anonymoys mode flag for specifed dir
      * @param givenDir given path to directory
      * @return anonymous flag
+     * @deprecated anonymous flag from now is null
      */
     public Boolean getAnonMode(String givenDir) {
         Boolean returned = rootDir.returnEndDir("", givenDir).ANON_MODE;
@@ -587,6 +638,19 @@ public class Directories {
             return false;
         }
         return returned;
+    }
+    
+    /**
+     * Return access description array from 
+     * @param givenDir
+     * @return 
+     */
+    public dirPermissionEntry[] getDirAccess(String givenDir) {
+        try {
+            return this.rootDir.getAccess("", givenDir);
+        } catch (Exception ex) {
+            return null;
+        }
     }
     
     /**
