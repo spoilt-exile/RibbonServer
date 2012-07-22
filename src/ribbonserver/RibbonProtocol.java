@@ -125,7 +125,7 @@ public class RibbonProtocol {
               String[] parsedArgs = csvHandler.commonParseLine(args, 2);
               String returned = RibbonServer.userObj.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
               if (returned == null) {
-                  RibbonServer.logAppend(LOG_ID, 3, "користувач " + parsedArgs[0] + "зайшов у систему.");
+                  RibbonServer.logAppend(LOG_ID, 3, "користувач " + parsedArgs[0] + " увійшов до системи.");
                   CURR_SESSION.USER_NAME = parsedArgs[0];
                   return "OK:";
               } else {
@@ -238,6 +238,9 @@ public class RibbonProtocol {
                 String givenDir = parsedArgs[0];
                 String givenIndex = parsedArgs[1];
                 String returnedContent = "";
+                if (RibbonServer.userObj.checkAccess(CURR_SESSION.USER_NAME, givenDir, 0) == false) {
+                    return "RIBBON_ERROR:Помилка доступу до напрямку " + givenDir;
+                }
                 String dirPath = RibbonServer.dirObj.getDirPath(givenDir);
                 if (dirPath == null) {
                     return "RIBBON_ERROR:Напрямок " + givenDir + " не існує!";
@@ -286,15 +289,15 @@ public class RibbonProtocol {
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 }
-                if (CURR_SESSION.USER_NAME.equals(matchedEntry.AUTHOR)) {
+                if (CURR_SESSION.USER_NAME.equals(matchedEntry.AUTHOR) || (RibbonServer.userObj.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) == null)) {
                     for (Integer dirIndex = 0; dirIndex < matchedEntry.DIRS.length; dirIndex++) {
-                        if (RibbonServer.userObj.checkUser(CURR_SESSION.USER_NAME, matchedEntry.DIRS[dirIndex]) == true) {
+                        if (RibbonServer.userObj.checkAccess(CURR_SESSION.USER_NAME, matchedEntry.DIRS[dirIndex], 1) == true) {
                             continue;
                         } else {
                             return "RIBBON_ERROR:Помилка доступу до напрямку " + matchedEntry.DIRS[dirIndex] +  ".";
                         }
                     }
-                    RibbonServer.logAppend(RibbonServer.LOG_ID, 3, "повідомлення за індексом " + parsedArgs[1] + "(" + parsedArgs[0] + ")" + "змінено");
+                    RibbonServer.logAppend(RibbonServer.LOG_ID, 3, "повідомлення за індексом " + parsedArgs[1] + "(" + parsedArgs[0] + ") змінено");
                     Procedures.writeMessage(matchedEntry.DIRS, matchedEntry.INDEX, messageContent);
                     BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.toCsv();
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
@@ -316,7 +319,7 @@ public class RibbonProtocol {
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 } else {
-                    if (matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME)) {
+                    if (matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME) || (RibbonServer.userObj.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) == null)) {
                         Procedures.PROC_DELETE_MESSAGE(matchedEntry);
                         BROADCAST_TAIL = "RIBBON_UCTL_DELETE_INDEX:" + matchedEntry.INDEX;
                         BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
@@ -360,7 +363,7 @@ public class RibbonProtocol {
      * @return answer form protocol to client
      */
     public String process(String input) {
-        String[] parsed = parseProtocolCommand(input);
+        String[] parsed = csvHandler.parseDoubleStruct(input);
         return this.launchCommand(parsed[0], parsed[1]);
     }
     
@@ -389,20 +392,11 @@ public class RibbonProtocol {
                 return exComm.exec(args);
             } catch (Exception ex) {
                 RibbonServer.logAppend(LOG_ID, 1, "помилка при виконанні команди " + exComm.COMMAND_NAME + "!");
+                ex.printStackTrace();
                 return "RIBBON_ERROR: помилка команди:" + ex.toString();
             }
         } else {
             return "RIBBON_ERROR:Невідома команда!";
         }
     }
-    
-    /**
-     * Parse command line to array with command name and its args
-     * @param command single command line
-     * @return parsed array, array[0] - commandWord, array[1] - arguments
-     */
-    private String[] parseProtocolCommand(String command) {
-        return new String[] {command.substring(0, command.indexOf(":")), command.substring(command.indexOf(":") + 1)};
-    }
-    
 }

@@ -154,17 +154,18 @@ public class Users {
         }
         String[] keyArray = Arrays.copyOf(findedUser.GROUPS, findedUser.GROUPS.length + 1);
         keyArray[keyArray.length - 1] = findedUser.USER_NAME;
-        Boolean findedAnswer;
+        Boolean findedAnswer = false;
         Directories.dirPermissionEntry fallbackPermission = null;
         Directories.dirPermissionEntry[] dirAccessArray = RibbonServer.dirObj.getDirAccess(givenDir);
-        for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
-            if (dirAccessArray[dirIndex].KEY.equals("ALL")) {
-                fallbackPermission = dirAccessArray[dirIndex];
-                continue;
-            }
-            for (Integer keyIndex = 0; keyIndex < findedUser.GROUPS.length; keyIndex++) {
+        //for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
+        for (Integer keyIndex = 0; keyIndex < keyArray.length; keyIndex++) {
+            for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
                 if (keyArray[keyIndex].equals("ADM")) {
                     return true;    //ADM is root-like group, all permission will be ignored
+                }
+                if (dirAccessArray[dirIndex].KEY.equals("ALL")) {
+                    fallbackPermission = dirAccessArray[dirIndex];
+                    continue;
                 }
                 if (dirAccessArray[dirIndex].KEY.equals(keyArray[keyIndex])) {
                     findedAnswer = dirAccessArray[dirIndex].checkByMode(givenMode);
@@ -177,10 +178,30 @@ public class Users {
         if (fallbackPermission == null) {
             fallbackPermission = RibbonServer.dirObj.new dirPermissionEntry("ALL:" + RibbonServer.CURR_ALL_MASK);
         }
-        if (findedAnswer = false) {
+        if (findedAnswer == false) {
             findedAnswer = fallbackPermission.checkByMode(givenMode);
         }
         return findedAnswer;
+    }
+    
+    /**
+     * Check access to directories with specified mode;<br>
+     * <br>
+     * <b>Modes:</b><br>
+     * 0 - attempt to read directory;<br>
+     * 1 - attempt to release messege in directory;<br>
+     * 2 - attempt to admin directory;
+     * @param givenName user name which attempt to perform some action
+     * @param givenDirs array with directories which should be checked
+     * @return null if success or array index which checking failed
+     */
+    public Integer checkAccessForAll(String givenName, String[] givenDirs, Integer givenMode) {
+        for (Integer dirIndex = 0; dirIndex < givenDirs.length; dirIndex++) {
+            if (this.checkAccess(givenName, givenDirs[dirIndex], givenMode) == false) {
+                return dirIndex;
+            }
+        }
+        return null;
     }
     
     /**

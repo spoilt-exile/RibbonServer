@@ -47,15 +47,9 @@ public class Procedures {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо випустити повідомлення, система не готова!");
             return "RIBBON_ERROR:Система не готова!";
         } else {
-            String acceptedDir = null;
-            for (Integer postDirIndex = 0; postDirIndex < givenMessage.DIRS.length; postDirIndex++) {
-                if (RibbonServer.userObj.checkUser(givenMessage.AUTHOR, givenMessage.DIRS[postDirIndex]) == false) {
-                    return "RIBBON_ERROR:Напрямок " + givenMessage.DIRS[postDirIndex] +" не підтримує анонімний випуск.";
-                } else {
-                    if (acceptedDir == null) {
-                        acceptedDir = givenMessage.DIRS[postDirIndex];
-                    }
-                }
+            Integer failedIndex = RibbonServer.userObj.checkAccessForAll(givenMessage.AUTHOR, givenMessage.DIRS, 1);
+            if (failedIndex != null) {
+                return "RIBBON_ERROR:Помилка доступу до напрямку " + givenMessage.DIRS[failedIndex];
             }
             RibbonServer.messageObj.addMessageToIndex(givenMessage);
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);
