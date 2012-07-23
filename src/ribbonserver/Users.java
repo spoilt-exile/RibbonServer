@@ -139,7 +139,7 @@ public class Users {
      * @param givenName user name which attempt to perform some action
      * @param givenDir directory path 
      * @param givenMode mode of action (read, write or admin)
-     * @return 
+     * @return result of access checking
      * @since RibbonServer a2
      */
     public Boolean checkAccess(String givenName, String givenDir, Integer givenMode) {
@@ -202,6 +202,32 @@ public class Users {
             }
         }
         return null;
+    }
+    
+    /**
+     * Find out is user is administrator
+     * @param givenName name to search
+     * @return result of checking
+     */
+    public Boolean isUserAdmin(String givenName) {
+        java.util.ListIterator<userEntry> userIter = this.userStore.listIterator();
+        userEntry findedUser = null;
+        while (userIter.hasNext()) {
+            userEntry currUser = userIter.next();
+            if (currUser.USER_NAME.equals(givenName)) {
+                findedUser = currUser;
+                break;
+            }
+        }
+        if (findedUser == null) {
+            return false;
+        }
+        for (String groupItem : findedUser.GROUPS) {
+            if (groupItem.equals("ADM")) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

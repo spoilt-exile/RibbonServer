@@ -90,11 +90,11 @@ public class RibbonProtocol {
         /** CONNECTION CONTROL COMMANDS [LEVEL_0 SUPPORT] **/
         
         /**
-         * RIBBON_CONNECTION_INIT: commandlet
+         * RIBBON_NCTL_INIT: commandlet
          * Client and others application send this command to register
          * this connection.
          */
-        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_CONNECTION_INIT", CONNECTION_TYPES.NULL) {
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_INIT", CONNECTION_TYPES.NULL) {
             @Override
             public String exec(String args) {
                 String[] parsedArgs = args.split(",");
@@ -116,16 +116,27 @@ public class RibbonProtocol {
         });
         
         /**
-         * RIBBON_CONNECTION_LOGIN: commandlet
+         * RIBBON_NCTL_LOGIN: commandlet
          * Client and other applications send this command to login user.
          */
-        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_CONNECTION_LOGIN", CONNECTION_TYPES.ANY) {
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_LOGIN", CONNECTION_TYPES.ANY) {
           @Override
           public String exec(String args) {
               String[] parsedArgs = csvHandler.commonParseLine(args, 2);
+              if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!RibbonServer.userObj.isUserAdmin(parsedArgs[0]))) {
+                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + "не є адміністратором системи.";
+              }
               String returned = RibbonServer.userObj.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
               if (returned == null) {
-                  RibbonServer.logAppend(LOG_ID, 3, "користувач " + parsedArgs[0] + " увійшов до системи.");
+                  if (CURR_TYPE == CONNECTION_TYPES.CLIENT) {
+                      RibbonServer.logAppend(LOG_ID, 3, "користувач " + parsedArgs[0] + " увійшов до системи.");
+                  } else if (CURR_TYPE == CONNECTION_TYPES.CONTROL) {
+                      RibbonServer.logAppend(LOG_ID, 3, "адміністратор " + parsedArgs[0] + " увійшов до системи.");
+                      if (RibbonServer.CONTROL_IS_PRESENT == false) {
+                          RibbonServer.logAppend(RibbonServer.LOG_ID, 2, "ініційовано контроль системи!");
+                          RibbonServer.CONTROL_IS_PRESENT = true;
+                      }
+                  }
                   CURR_SESSION.USER_NAME = parsedArgs[0];
                   return "OK:";
               } else {
@@ -135,10 +146,10 @@ public class RibbonProtocol {
         });
         
         /**
-         * RIBBON_CONNECTION_CLOSE: commandlet
+         * RIBBON_NCTL_CLOSE: commandlet
          * Exit command to close connection.
          */
-        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_CONNECTION_CLOSE", CONNECTION_TYPES.ANY) {
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_CLOSE", CONNECTION_TYPES.ANY) {
             @Override
             public String exec(String args) {
                 if (CURR_TYPE == CONNECTION_TYPES.CONTROL && RibbonServer.sessionObj.hasOtherControl(CURR_SESSION) == false) {
