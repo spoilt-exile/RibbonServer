@@ -27,7 +27,7 @@ public class SessionManager {
         /**
          * User name of this session
          */
-        public String USER_NAME = "Вхід не виконано";
+        public String USER_NAME;
         
         /**
          * Short session description

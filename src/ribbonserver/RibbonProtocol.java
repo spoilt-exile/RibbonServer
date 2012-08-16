@@ -169,11 +169,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_GET_DIRS", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                if (CURR_SESSION.USER_NAME == null && RibbonServer.CURR_ANON_MODE == RibbonServer.ANON_MODES.OFFLINE) {
-                    return "RIBBON_ERROR: Анонімний режим вимкнено.";
-                } else {
-                    return RibbonServer.dirObj.PROC_GET_DIRS();
-                }
+                return RibbonServer.dirObj.PROC_GET_DIRS();
             }
         });
         
@@ -184,11 +180,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_GET_TAGS", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                if (CURR_SESSION.USER_NAME == null && RibbonServer.CURR_ANON_MODE == RibbonServer.ANON_MODES.OFFLINE) {
-                    return "RIBBON_ERROR: Анонімний режим вимкнено.";
-                } else {
-                    return RibbonServer.messageObj.PROC_GET_TAGS();
-                }
+                return RibbonServer.messageObj.PROC_GET_TAGS();
             }
         });
         
@@ -368,8 +360,12 @@ public class RibbonProtocol {
         while (commIter.hasNext()) {
             CommandLet currComm = commIter.next();
             if (currComm.COMMAND_NAME.equals(command)) {
-                if (currComm.COMM_TYPE == this.CURR_TYPE || currComm.COMM_TYPE == CONNECTION_TYPES.ANY) {
-                    exComm = currComm;
+                if (currComm.COMM_TYPE == this.CURR_TYPE || currComm.COMM_TYPE == CONNECTION_TYPES.ANY || this.CURR_TYPE == CONNECTION_TYPES.CONTROL) {
+                    if (this.CURR_SESSION.USER_NAME == null && (currComm.COMM_TYPE == CONNECTION_TYPES.CLIENT || currComm.COMM_TYPE == CONNECTION_TYPES.CONTROL)) {
+                        return "RIBBON_ERROR:Вхід не виконано!\nRIBBON_GCTL_FORCE_LOGIN:";
+                    } else {
+                        exComm = currComm;
+                    }
                     break;
                 } else {
                     return "RIBBON_ERROR:Ця команда не може бути використана цим з’єднанням!";

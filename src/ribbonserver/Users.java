@@ -108,28 +108,6 @@ public class Users {
     }
     
     /**
-     * Check if given user existed it the system
-     * @param givenName name of user
-     * @param givenDir name of dir to post
-     * @return true - if user existed/false - if not
-     * @deprecated old code
-     */
-    public Boolean checkUser(String givenName, String givenDir) {
-        java.util.ListIterator<userEntry> userIter = this.userStore.listIterator();
-        while (userIter.hasNext()) {
-            if (userIter.next().USER_NAME.equals(givenName)) {
-                return true;
-            }
-        }
-        if (RibbonServer.CURR_ANON_MODE == RibbonServer.ANON_MODES.OVERRIDE) {
-            return true;
-        } else if (RibbonServer.CURR_ANON_MODE == RibbonServer.ANON_MODES.NORMAL) {
-            return RibbonServer.dirObj.getAnonMode(givenDir);
-        }
-        return false;
-    }
-    
-    /**
      * Check access to directory with specified mode;<br>
      * <br>
      * <b>Modes:</b><br>

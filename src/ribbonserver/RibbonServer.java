@@ -94,10 +94,6 @@ public class RibbonServer {
     
     public static Boolean ALLOW_REMOTE;
     
-    public static enum ANON_MODES {OFFLINE, NORMAL, OVERRIDE};
-    
-    public static ANON_MODES CURR_ANON_MODE;
-    
     public static String CURR_ALL_MASK = "100";
     
     public static String DIR_INDEX_PATH = "dir.index";
@@ -254,25 +250,11 @@ public class RibbonServer {
             ALLOW_REMOTE = true;
             REMOTE_MSG = "Мережевий доступ увімкнено.";
         }
-        String RAW_ANON_MODE = mainConfig.getProperty("anon_mode");
-        String ANON_MSG;
-        if (RAW_ANON_MODE.equals("offline")) {
-            CURR_ANON_MODE = ANON_MODES.OFFLINE;
-            ANON_MSG = "Анонімний режим вимкнено.";
-        } else if (RAW_ANON_MODE.equals("override")) {
-            CURR_ANON_MODE = ANON_MODES.OVERRIDE;
-            ANON_MSG = "Усі напрямки увімкнено як анонімні.";
-        } else {
-            //Default behavior
-            CURR_ANON_MODE = ANON_MODES.NORMAL;
-            ANON_MSG = "Анонімний режим увімкнено.";
-        }
         logAppend(LOG_ID, 3, 
                 "початкова конфігурація завершена.\n" + 
                 "Шлях до бази: " + BASE_PATH + "\n" +
                 //"Шлях до індекса: " + INDEX_PATH + "\n" +
                 "Порт мережі: " + PORT + "\n" +
-                REMOTE_MSG + "\n" + 
-                ANON_MSG);
+                REMOTE_MSG);
     }
 }
