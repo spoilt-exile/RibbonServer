@@ -154,7 +154,7 @@ public class Users {
             }
         }
         if (fallbackPermission == null) {
-            fallbackPermission = RibbonServer.dirObj.new dirPermissionEntry("ALL:" + RibbonServer.CURR_ALL_MASK);
+            fallbackPermission = RibbonServer.dirObj.new dirPermissionEntry("ALL:" + RibbonServer.ACCESS_ALL_MASK);
         }
         if (findedAnswer == false) {
             findedAnswer = fallbackPermission.checkByMode(givenMode);

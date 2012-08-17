@@ -86,15 +86,27 @@ public class RibbonServer {
     
     public static String BASE_PATH;
     
+    public static Boolean BASE_ALLOW_ATTACHMENTS;
+    
     public static String RIBBON_VER = "a2";
     
-    //public static String INDEX_PATH;
+    public static Integer NETWORK_PORT;
     
-    public static Integer PORT;
+    public static Boolean NETWORK_ALLOW_REMOTE;
     
-    public static Boolean ALLOW_REMOTE;
+    public static Integer NETWORK_MAX_CONNECTIONS;
     
-    public static String CURR_ALL_MASK = "100";
+    public static Boolean CACHE_ENABLED;
+    
+    public static Integer CACHE_SIZE;
+    
+    public static String ACCESS_ALL_MASK;
+    
+    public static Boolean ACCESS_ALLOW_MULTIPLIE_LOGIN;
+    
+    public static Boolean DEBUG_POST_EXCEPTIONS;
+    
+    public static String DEBUG_POST_DIR;
     
     public static String DIR_INDEX_PATH = "dir.index";
     
@@ -127,11 +139,11 @@ public class RibbonServer {
         logAppend(LOG_ID, 2, "налаштування мережі");
         sessionObj = new SessionManager();
         try {
-            java.net.ServerSocket RibbonServSocket = new java.net.ServerSocket(PORT);
+            java.net.ServerSocket RibbonServSocket = new java.net.ServerSocket(NETWORK_PORT);
             logAppend(LOG_ID, 3, "система готова для прийому повідомлень");
             while (true) {
                 java.net.Socket inSocket = RibbonServSocket.accept();
-                if (!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.ALLOW_REMOTE == false) {
+                if (!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.NETWORK_ALLOW_REMOTE == false) {
                     inSocket.close();
                 } else {
                     RibbonServer.sessionObj.createNewSession(inSocket);
@@ -222,6 +234,8 @@ public class RibbonServer {
      */
     private static void setSystemVariables() {
         mainConfig = new java.util.Properties();
+        
+        //Reading properties file
         try {
             mainConfig.load(new java.io.FileInputStream(new java.io.File(CurrentDirectory + "/server.properties")));
         } catch (java.io.FileNotFoundException ex) {
@@ -232,29 +246,56 @@ public class RibbonServer {
             logAppend(LOG_ID, 0, "неможливо прочитати файл конфігурації системи!");
             System.exit(2);
         }
+        
+        //Setting base variables
         try {
             BASE_PATH = new String(mainConfig.getProperty("base_path").getBytes("ISO-8859-1"), "UTF-8");
-            //INDEX_PATH = new String(mainConfig.getProperty("index_path").getBytes("ISO-8859-1"), "UTF-8");
         } catch (java.io.UnsupportedEncodingException ex) {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо визначити шлях до бази!");
             System.exit(3);
         }
-        PORT = Integer.valueOf(mainConfig.getProperty("port"));
-        String RAW_ALLOW_REMOTE = mainConfig.getProperty("allow_remote");
-        String REMOTE_MSG;
-        if (RAW_ALLOW_REMOTE.equals("0")) {
-            ALLOW_REMOTE = false;
-            REMOTE_MSG = "Мережевий доступ вимкнено.";
+        BASE_ALLOW_ATTACHMENTS = mainConfig.getProperty("base_allow_attachments").equals("0") ? false : true;
+        
+        //Setting network variables
+        NETWORK_PORT = Integer.valueOf(mainConfig.getProperty("networking_port"));
+        if (mainConfig.getProperty("networking_allow_remote").equals("0")) {
+            RibbonServer.NETWORK_ALLOW_REMOTE = false;
         } else {
-            //If ALLOW_REMOTE doesn't specified as false it will be true always
-            ALLOW_REMOTE = true;
-            REMOTE_MSG = "Мережевий доступ увімкнено.";
+            RibbonServer.NETWORK_ALLOW_REMOTE = true;
         }
+        NETWORK_MAX_CONNECTIONS = Integer.valueOf(mainConfig.getProperty("networking_max_connections"));
+        
+        //Setting cache variables
+        CACHE_ENABLED = mainConfig.getProperty("cache_enabled").equals("0") ? false : true;
+        CACHE_SIZE = Integer.valueOf(mainConfig.getProperty("cache_size"));
+        
+        //Setting access variables
+        ACCESS_ALL_MASK = mainConfig.getProperty("access_all_mask");
+        ACCESS_ALLOW_MULTIPLIE_LOGIN = mainConfig.getProperty("access_allow_multiplie_login").equals("0") ? false : true;
+        
+        //Setting debug variables
+        DEBUG_POST_EXCEPTIONS = mainConfig.getProperty("debug_post_exceptions").equals("0") ? false : true;
+        try {
+            DEBUG_POST_DIR = new String(mainConfig.getProperty("debug_post_dir").getBytes("ISO-8859-1"), "UTF-8");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            RibbonServer.logAppend(LOG_ID, 1, "неможливо визначити напрямок реєстрації помилок!");
+            if (DEBUG_POST_EXCEPTIONS == true) {
+                System.exit(3);
+            }
+        }
+        
         logAppend(LOG_ID, 3, 
                 "початкова конфігурація завершена.\n" + 
                 "Шлях до бази: " + BASE_PATH + "\n" +
-                //"Шлях до індекса: " + INDEX_PATH + "\n" +
-                "Порт мережі: " + PORT + "\n" +
-                REMOTE_MSG);
+                (RibbonServer.BASE_ALLOW_ATTACHMENTS ? "Зберігання файлів увімкнено." : "") + "\n" +
+                (RibbonServer.CACHE_ENABLED ? "Кешування бази увімкнено.\nРозмір кешу: " + RibbonServer.CACHE_SIZE + "\n" : "") +
+                (RibbonServer.NETWORK_ALLOW_REMOTE ? "Мережевий доступ увімкнено.\n"
+                + "Мережевий порт:" + RibbonServer.NETWORK_PORT + "\n"
+                + (RibbonServer.NETWORK_MAX_CONNECTIONS == -1 ? "Без ліміту з'єднань." : "Кількість з'єднань: " 
+                + RibbonServer.NETWORK_MAX_CONNECTIONS) + "\n" : "Мережевий доступ заблоковано.\n")
+                + (RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN ? "Дозволена неодноразова авторізація.\n" : "Неодноразова авторізація заблокована.\n")
+                + "Маска для системної категорії доступу ALL:" + RibbonServer.ACCESS_ALL_MASK + "\n"
+                + (RibbonServer.DEBUG_POST_EXCEPTIONS ? "Режим дебагінгу активовано.\nНапрямок реєстрації помилок: " + RibbonServer.DEBUG_POST_DIR : "")
+                );
     }
 }

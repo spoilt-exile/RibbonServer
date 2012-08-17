@@ -81,7 +81,7 @@ public class Directories {
             SH_COMM = givenComm;
             SH_LANGS = new String[] {"ALL"};
             SH_EXPORTS = null;
-            SH_ACCESS = new String[] {"ALL:" + RibbonServer.CURR_ALL_MASK};
+            SH_ACCESS = new String[] {"ALL:" + RibbonServer.ACCESS_ALL_MASK};
         }
         
         /** a1 endian **/
