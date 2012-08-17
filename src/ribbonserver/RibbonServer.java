@@ -143,7 +143,7 @@ public class RibbonServer {
             logAppend(LOG_ID, 3, "система готова для прийому повідомлень");
             while (true) {
                 java.net.Socket inSocket = RibbonServSocket.accept();
-                if (!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.NETWORK_ALLOW_REMOTE == false) {
+                if ((!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.NETWORK_ALLOW_REMOTE == false) || RibbonServer.sessionObj.checkConnectionLimit() == true) {
                     inSocket.close();
                 } else {
                     RibbonServer.sessionObj.createNewSession(inSocket);

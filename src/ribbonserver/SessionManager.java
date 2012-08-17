@@ -164,4 +164,17 @@ public class SessionManager {
         }
         return false;
     }
+    
+    /**
+     * Check server connection limit.
+     * @return true if limit achieved/fals if not;
+     */
+    public Boolean checkConnectionLimit() {
+        if (RibbonServer.NETWORK_MAX_CONNECTIONS != -1 && this.sessionsStore.size() == RibbonServer.NETWORK_MAX_CONNECTIONS) {
+            RibbonServer.logAppend(LOG_ID, 1, "досягнуто ліміту з'єднань (" + RibbonServer.NETWORK_MAX_CONNECTIONS + ")");
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
