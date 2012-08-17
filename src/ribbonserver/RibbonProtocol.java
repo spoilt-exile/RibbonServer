@@ -123,8 +123,11 @@ public class RibbonProtocol {
           @Override
           public String exec(String args) {
               String[] parsedArgs = csvHandler.commonParseLine(args, 2);
+              if (!RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN && RibbonServer.sessionObj.isAlreadyLogined(parsedArgs[0])) {
+                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!";
+              }
               if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!RibbonServer.userObj.isUserAdmin(parsedArgs[0]))) {
-                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + "не є адміністратором системи.";
+                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.";
               }
               String returned = RibbonServer.userObj.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
               if (returned == null) {
@@ -138,6 +141,7 @@ public class RibbonProtocol {
                       }
                   }
                   CURR_SESSION.USER_NAME = parsedArgs[0];
+                  CURR_SESSION.setSessionName();
                   return "OK:";
               } else {
                   return "RIBBON_ERROR:" + returned;

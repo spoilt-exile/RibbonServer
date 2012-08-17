@@ -6,6 +6,8 @@
 
 package ribbonserver;
 
+import java.util.Iterator;
+
 /**
  * Network sessions store class
  * @author Stanislav Nepochatov
@@ -176,5 +178,23 @@ public class SessionManager {
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Find out is user is already logined in system.
+     * @param givenName name of user to search;
+     * @return true if user is already logined.
+     */
+    public Boolean isAlreadyLogined(String givenName) {
+        for (Iterator<SessionThread> it = this.sessionsStore.iterator(); it.hasNext();) {
+            SessionThread iterSess = it.next();
+            if (iterSess.USER_NAME == null) {
+                continue;
+            }
+            if (iterSess.USER_NAME.equals(givenName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
