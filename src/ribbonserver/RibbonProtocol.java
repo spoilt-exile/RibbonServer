@@ -102,6 +102,10 @@ public class RibbonProtocol {
                     if (parsedArgs[1].equals(STR_VERSION)) {
                         try {
                             CURR_TYPE = CONNECTION_TYPES.valueOf(parsedArgs[0]);
+                            if (!parsedArgs[2].equals(System.getProperty("file.encoding"))) {
+                                RibbonServer.logAppend(LOG_ID, 2, "мережева сесія вимогає іншої кодової сторінки:" + parsedArgs[2]);
+                                CURR_SESSION.setReaderEncoding(parsedArgs[2]);
+                            }
                             return "OK:";
                         } catch (IllegalArgumentException ex) {
                             return "RIBBON_ERROR:Невідомий тип з'єднання!";

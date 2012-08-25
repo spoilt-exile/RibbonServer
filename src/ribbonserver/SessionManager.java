@@ -6,7 +6,11 @@
 
 package ribbonserver;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Network sessions store class
@@ -112,6 +116,19 @@ public class SessionManager {
          */
         public void setSessionName() {
             this.SESSION_TIP = "[" + this.USER_NAME + "] на " + this.SessionSocket.getInetAddress().getHostName();
+        }
+        
+        /**
+         * Set reader encoding
+         */
+        public void setReaderEncoding(String charsetName) {
+            try {
+                this.inStream = new java.io.BufferedReader(new java.io.InputStreamReader(SessionSocket.getInputStream(), charsetName));
+            } catch (java.io.UnsupportedEncodingException ex) {
+                RibbonServer.logAppend(LOG_ID, 1, "неможливо встановити кодову сторінку!");
+            } catch (java.io.IOException ex) {
+                RibbonServer.logAppend(LOG_ID, 1, "неможливо прочитати дані з сокету (" + SessionSocket.getInetAddress().getHostAddress() + ")");
+            }
         }
     }
 
