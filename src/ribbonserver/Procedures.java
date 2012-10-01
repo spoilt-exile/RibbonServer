@@ -53,7 +53,7 @@ public class Procedures {
             }
             RibbonServer.messageObj.addMessageToIndex(givenMessage);
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);
-            csvHandler.appendToBaseIndex(givenMessage.returnEntry().toCsv());
+            indexReader.appendToBaseIndex(givenMessage.returnEntry().toCsv());
             for (Integer dirIndex = 0; dirIndex < givenMessage.DIRS.length; dirIndex++) {
                 if (givenMessage.DIRS[dirIndex] == null) {
                     RibbonServer.logAppend(LOG_ID, 1, "неможливо випустити повідомлення" + givenMessage.HEADER + "на напрямок " + givenMessage.DIRS[dirIndex]);

@@ -10,21 +10,21 @@ package ribbonserver;
  * Read, parse and store CSV Ribbon configurations and base index class
  * @author Stanislav Nepochatov
  */
-public abstract class csvHandler {
+public abstract class indexReader {
     
-    private static String LOG_ID = "Обробник конфігурацій";
+    private static String LOG_ID = "Зчитувач індексів";
     
     /**
      * Read directories in directory index file
      * @return arraylist of dir shemas
      * @see Directories.dirSchema
      */
-    public static java.util.ArrayList<Directories.dirSchema> readDirectories() {
-        java.util.ArrayList<Directories.dirSchema> Dirs = new java.util.ArrayList<>();
+    public static java.util.ArrayList<DirClasses.dirSchema> readDirectories() {
+        java.util.ArrayList<DirClasses.dirSchema> Dirs = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader dirIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.DIR_INDEX_PATH));
             while (dirIndexReader.ready()) {
-                Dirs.add(new Directories.dirSchema(csvHandler.complexParseLine(dirIndexReader.readLine(), 2, 3)));
+                Dirs.add(new DirClasses.dirSchema(dirIndexReader.readLine()));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу напрявків не знайдено. Створюю новий.");
@@ -36,9 +36,9 @@ public abstract class csvHandler {
                     dirIndexWriter.write("СИСТЕМА.Розробка,{Новини про розробку},[UA,RU],[ALL:100],[]\n");
                     dirIndexWriter.write("СИСТЕМА.Тест,{Тестовий напрямок},[UA,RU],[ALL:110],[]\n");
                 }
-                Dirs.add(new Directories.dirSchema("СИСТЕМА", "Головний напрямок новин про розробку системи"));
-                Dirs.add(new Directories.dirSchema("СИСТЕМА.Розробка", "Новини про розробку"));
-                Dirs.add(new Directories.dirSchema("СИСТЕМА.Тест", "Тестовий напрямок"));
+                Dirs.add(new DirClasses.dirSchema("СИСТЕМА", "Головний напрямок новин про розробку системи"));
+                Dirs.add(new DirClasses.dirSchema("СИСТЕМА.Розробка", "Новини про розробку"));
+                Dirs.add(new DirClasses.dirSchema("СИСТЕМА.Тест", "Тестовий напрямок"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу напрямків!");
                 System.exit(4);

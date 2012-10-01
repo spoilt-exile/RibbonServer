@@ -33,7 +33,7 @@ public class Messenger {
      * Default constructor
      */
     Messenger() {
-        messageIndex = csvHandler.readBaseIndex();
+        messageIndex = indexReader.readBaseIndex();
         java.util.ListIterator<Messenger.messageEntry> messageIter = messageIndex.listIterator();
         tagIndex = new java.util.ArrayList<tagEntry>();
         while (messageIter.hasNext()) {
@@ -354,7 +354,7 @@ public class Messenger {
         Thread delayedUpdate = new Thread() {
             @Override
             public void run() {
-                csvHandler.updateBaseIndex(messageIndex);
+                indexReader.updateBaseIndex(messageIndex);
             }
         };
         delayedUpdate.start();

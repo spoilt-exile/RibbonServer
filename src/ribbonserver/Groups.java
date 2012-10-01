@@ -13,7 +13,7 @@ package ribbonserver;
 public class Groups {
     
     Groups() {
-        groupStore = csvHandler.readGroups();
+        groupStore = indexReader.readGroups();
         groupStore.add(new Groups.groupEntry(new String[] {"ADM", "Службова група адміністраторів системи \"Стрічка\""}));
         RibbonServer.logAppend(LOG_ID, 3, "індекс груп опрацьвано (" + groupStore.size() + ")");
     }

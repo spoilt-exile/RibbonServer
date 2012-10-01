@@ -126,7 +126,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_LOGIN", CONNECTION_TYPES.ANY) {
           @Override
           public String exec(String args) {
-              String[] parsedArgs = csvHandler.commonParseLine(args, 2);
+              String[] parsedArgs = indexReader.commonParseLine(args, 2);
               if (!RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN && RibbonServer.sessionObj.isAlreadyLogined(parsedArgs[0])) {
                   return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!";
               }
@@ -211,7 +211,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_POST_MESSAGE", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                Messenger.Message recievedMessage = csvHandler.net_parseMessageLine(args, 1);
+                Messenger.Message recievedMessage = indexReader.net_parseMessageLine(args, 1);
                 recievedMessage.AUTHOR = CURR_SESSION.USER_NAME;
                 Boolean collectMessage = true;
                 String messageContent = "";
@@ -352,7 +352,7 @@ public class RibbonProtocol {
      * @return answer form protocol to client
      */
     public String process(String input) {
-        String[] parsed = csvHandler.parseDoubleStruct(input);
+        String[] parsed = indexReader.parseDoubleStruct(input);
         return this.launchCommand(parsed[0], parsed[1]);
     }
     
