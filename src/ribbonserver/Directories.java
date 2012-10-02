@@ -31,6 +31,7 @@ public class Directories {
         java.util.ListIterator<DirClasses.dirSchema> readIter = readedDirs.listIterator();
         while (readIter.hasNext()) {
             DirClasses.dirSchema currDir = readIter.next();
+            RibbonServer.logAppend(LOG_ID, 3, "додано напрямок (" + currDir.FULL_DIR_NAME + ": " + currDir.COMM + ")");
             createDirs(currDir);
         }
         rootDir.deployDir(RibbonServer.BASE_PATH);
