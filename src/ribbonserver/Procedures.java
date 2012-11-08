@@ -71,7 +71,6 @@ public class Procedures {
      * @param messageContent content of the message
      */
     public static synchronized void writeMessage(String[] dirArr, String strIndex, String messageContent) {
-        Boolean origFileCreated = false;
         String origFilePath = null;
         String currPath = "";
         try {
@@ -83,14 +82,11 @@ public class Procedures {
                     if (currPath == null) {
                         continue;
                     }
-                    if (origFileCreated == false) {
+                    else {
                         java.io.FileWriter messageWriter = new java.io.FileWriter(currPath + strIndex);
                         messageWriter.write(messageContent);
                         messageWriter.close();
                         origFilePath = currPath + strIndex;
-                        origFileCreated = true;
-                    } else {
-                        java.nio.file.Files.createLink(new java.io.File(currPath + strIndex).toPath(), new java.io.File(origFilePath).toPath());
                     }
                 }
             }

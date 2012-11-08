@@ -206,8 +206,7 @@ public class RibbonServer {
             RibbonServer.sessionObj.broadcast(compiledMessage, RibbonProtocol.CONNECTION_TYPES.CONTROL);
         }
         if (logFile != null) {
-            try {
-                java.io.FileWriter logWriter = new java.io.FileWriter(logFile, true);
+            try (java.io.FileWriter logWriter = new java.io.FileWriter(logFile, true)) {
                 logWriter.write(compiledMessage + "\n");
                 logWriter.close();
             } catch (Exception ex) {
