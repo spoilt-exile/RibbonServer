@@ -214,13 +214,14 @@ public class RibbonProtocol {
                 Messenger.Message recievedMessage = indexReader.net_parseMessageLine(args, 1);
                 recievedMessage.AUTHOR = CURR_SESSION.USER_NAME;
                 Boolean collectMessage = true;
-                String messageContent = "";
+                StringBuffer messageBuffer = new StringBuffer();
                 String inLine;
                 while (collectMessage) {
                     try {
                         inLine = CURR_SESSION.inStream.readLine();
                         if (!inLine.equals("END:")) {
-                            messageContent += inLine + "\n";
+                            messageBuffer.append(inLine);
+                            messageBuffer.append("\n");
                         } else {
                             collectMessage = false;
                         }
@@ -228,7 +229,7 @@ public class RibbonProtocol {
                         return "RIBBON_ERROR:Неможливо прочитати повідомлення з сокету!";
                     }
                 }
-                recievedMessage.CONTENT = messageContent;
+                recievedMessage.CONTENT = messageBuffer.toString();
                 String answer = Procedures.PROC_POST_MESSAGE(recievedMessage);
                 if (answer.equals("OK:")) {
                     BROADCAST_TAIL = "RIBBON_UCTL_LOAD_INDEX:" + recievedMessage.returnEntry().toCsv();
@@ -248,7 +249,8 @@ public class RibbonProtocol {
                 String[] parsedArgs = args.split(",");
                 String givenDir = parsedArgs[0];
                 String givenIndex = parsedArgs[1];
-                String returnedContent = "";
+                //String returnedContent = "";
+                StringBuffer returnedMessage = new StringBuffer();
                 if (RibbonServer.userObj.checkAccess(CURR_SESSION.USER_NAME, givenDir, 0) == false) {
                     return "RIBBON_ERROR:Помилка доступу до напрямку " + givenDir;
                 }
@@ -259,9 +261,11 @@ public class RibbonProtocol {
                     try {
                         java.io.BufferedReader messageReader = new java.io.BufferedReader(new java.io.FileReader(dirPath + givenIndex));
                         while (messageReader.ready()) {
-                            returnedContent += messageReader.readLine() + "\n";
+                            //returnedContent += messageReader.readLine() + "\n";
+                            returnedMessage.append(messageReader.readLine());
+                            returnedMessage.append("\n");
                         }
-                        return returnedContent + "END:";
+                        return returnedMessage.append("END:").toString();
                     } catch (java.io.FileNotFoundException ex) {
                         return "RIBBON_ERROR:Повідмолення не існує!";
                     } catch (java.io.IOException ex) {
@@ -280,7 +284,8 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_MODIFY_MESSAGE", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                String messageContent = "";
+                String messageContent;
+                StringBuffer messageBuffer = new StringBuffer();
                 String inLine;
                 Boolean collectMessage = true;
                 String[] parsedArgs = args.split(",");
@@ -289,7 +294,8 @@ public class RibbonProtocol {
                     try {
                         inLine = CURR_SESSION.inStream.readLine();
                         if (!inLine.equals("END:")) {
-                            messageContent += inLine + "\n";
+                            messageBuffer.append(inLine);
+                            messageBuffer.append("\n");
                         } else {
                             collectMessage = false;
                         }
@@ -297,6 +303,7 @@ public class RibbonProtocol {
                         return "RIBBON_ERROR:Неможливо прочитати повідомлення з сокету!";
                     }
                 }
+                messageContent = messageBuffer.toString();
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 }
