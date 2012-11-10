@@ -19,12 +19,12 @@ public abstract class indexReader {
      * @return arraylist of dir shemas
      * @see Directories.dirSchema
      */
-    public static java.util.ArrayList<DirClasses.dirSchema> readDirectories() {
-        java.util.ArrayList<DirClasses.dirSchema> Dirs = new java.util.ArrayList<>();
+    public static java.util.ArrayList<DirClasses.DirSchema> readDirectories() {
+        java.util.ArrayList<DirClasses.DirSchema> Dirs = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader dirIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.DIR_INDEX_PATH));
             while (dirIndexReader.ready()) {
-                Dirs.add(new DirClasses.dirSchema(dirIndexReader.readLine()));
+                Dirs.add(new DirClasses.DirSchema(dirIndexReader.readLine()));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу напрявків не знайдено. Створюю новий.");
@@ -36,9 +36,9 @@ public abstract class indexReader {
                     dirIndexWriter.write("СИСТЕМА.Розробка,{Новини про розробку},[UA,RU],[ALL:100],[]\n");
                     dirIndexWriter.write("СИСТЕМА.Тест,{Тестовий напрямок},[UA,RU],[ALL:110],[]\n");
                 }
-                Dirs.add(new DirClasses.dirSchema("СИСТЕМА", "Головний напрямок новин про розробку системи"));
-                Dirs.add(new DirClasses.dirSchema("СИСТЕМА.Розробка", "Новини про розробку"));
-                Dirs.add(new DirClasses.dirSchema("СИСТЕМА.Тест", "Тестовий напрямок"));
+                Dirs.add(new DirClasses.DirSchema("СИСТЕМА", "Головний напрямок новин про розробку системи"));
+                Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Розробка", "Новини про розробку"));
+                Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Тест", "Тестовий напрямок"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу напрямків!");
                 System.exit(4);

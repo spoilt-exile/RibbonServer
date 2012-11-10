@@ -20,17 +20,17 @@ public class Directories {
     /**
      * Root directory
      */
-    private DirClasses.dirEntry rootDir;
+    private DirClasses.DirEntry rootDir;
     
     /**
      * Default constructor
      */
     Directories() {
-        rootDir = new DirClasses.dirEntry();
-        java.util.ArrayList<DirClasses.dirSchema> readedDirs = indexReader.readDirectories();
-        java.util.ListIterator<DirClasses.dirSchema> readIter = readedDirs.listIterator();
+        rootDir = new DirClasses.DirEntry();
+        java.util.ArrayList<DirClasses.DirSchema> readedDirs = indexReader.readDirectories();
+        java.util.ListIterator<DirClasses.DirSchema> readIter = readedDirs.listIterator();
         while (readIter.hasNext()) {
-            DirClasses.dirSchema currDir = readIter.next();
+            DirClasses.DirSchema currDir = readIter.next();
             RibbonServer.logAppend(LOG_ID, 3, "додано напрямок (" + currDir.FULL_DIR_NAME + ": " + currDir.COMM + ")");
             createDirs(currDir);
         }
@@ -42,7 +42,7 @@ public class Directories {
      * Create full chain of directories with given schema
      * @param givenSchema directory schema
      */
-    public void createDirs(DirClasses.dirSchema givenSchema) {
+    public void createDirs(DirClasses.DirSchema givenSchema) {
         this.rootDir.insertDir("", givenSchema.FULL_DIR_NAME, givenSchema);
     }
     
@@ -84,7 +84,7 @@ public class Directories {
      * @param givenDir
      * @return 
      */
-    public DirClasses.dirPermissionEntry[] getDirAccess(String givenDir) {
+    public DirClasses.DirPermissionEntry[] getDirAccess(String givenDir) {
         try {
             return this.rootDir.getAccess("", givenDir);
         } catch (Exception ex) {
@@ -113,7 +113,7 @@ public class Directories {
      */
     public String PROC_GET_DIRS() {
         String returned = "";
-        java.util.ListIterator<DirClasses.dirEntry> rootDirs = this.rootDir.FOLDED_DIR.listIterator();
+        java.util.ListIterator<DirClasses.DirEntry> rootDirs = this.rootDir.FOLDED_DIR.listIterator();
         while (rootDirs.hasNext()) {
             returned += rootDirs.next().PROC_GET_DIR();
         }

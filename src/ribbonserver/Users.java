@@ -133,8 +133,8 @@ public class Users {
         String[] keyArray = Arrays.copyOf(findedUser.GROUPS, findedUser.GROUPS.length + 1);
         keyArray[keyArray.length - 1] = findedUser.USER_NAME;
         Boolean findedAnswer = false;
-        DirClasses.dirPermissionEntry fallbackPermission = null;
-        DirClasses.dirPermissionEntry[] dirAccessArray = RibbonServer.dirObj.getDirAccess(givenDir);
+        DirClasses.DirPermissionEntry fallbackPermission = null;
+        DirClasses.DirPermissionEntry[] dirAccessArray = RibbonServer.dirObj.getDirAccess(givenDir);
         //for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
         for (Integer keyIndex = 0; keyIndex < keyArray.length; keyIndex++) {
             for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
@@ -154,7 +154,7 @@ public class Users {
             }
         }
         if (fallbackPermission == null) {
-            fallbackPermission = new DirClasses.dirPermissionEntry("ALL:" + RibbonServer.ACCESS_ALL_MASK);
+            fallbackPermission = new DirClasses.DirPermissionEntry("ALL:" + RibbonServer.ACCESS_ALL_MASK);
         }
         if (findedAnswer == false) {
             findedAnswer = fallbackPermission.checkByMode(givenMode);
