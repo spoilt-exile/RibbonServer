@@ -93,12 +93,12 @@ public abstract class indexReader {
      * Read users in users index file
      * @return arrayList of users entries
      */
-    public static java.util.ArrayList<Users.userEntry> readUsers() {
-        java.util.ArrayList<Users.userEntry> returnedUsers = new java.util.ArrayList<>();
+    public static java.util.ArrayList<UserClasses.UserEntry> readUsers() {
+        java.util.ArrayList<UserClasses.UserEntry> returnedUsers = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader userIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.USERS_INDEX_PATH));
             while (userIndexReader.ready()) {
-                returnedUsers.add(new Users.userEntry(complexParseLine(userIndexReader.readLine(), 4, 1)));
+                returnedUsers.add(new UserClasses.UserEntry(userIndexReader.readLine()));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу користувачів не знайдено. Створюю новий.");
@@ -109,8 +109,8 @@ public abstract class indexReader {
                     usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1\n");
                     usersIndexWriter.write("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1\n");
                 }
-                returnedUsers.add(new Users.userEntry(complexParseLine("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1", 4, 1)));
-                returnedUsers.add(new Users.userEntry(complexParseLine("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1", 4, 1)));
+                returnedUsers.add(new UserClasses.UserEntry("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1"));
+                returnedUsers.add(new UserClasses.UserEntry("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу користувачів!");
                 System.exit(5);
@@ -126,19 +126,13 @@ public abstract class indexReader {
      * Read groups in groups index file
      * @return arrayList of groups entries
      */
-    public static java.util.ArrayList<Groups.groupEntry> readGroups() {
-        java.util.ArrayList<Groups.groupEntry> returnedGroups = new java.util.ArrayList<>();
+    public static java.util.ArrayList<UserClasses.GroupEntry> readGroups() {
+        java.util.ArrayList<UserClasses.GroupEntry> returnedGroups = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader groupIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH));
             Integer currentLine = 0;
             while (groupIndexReader.ready()) {
-                String[] parsedArgs = commonParseLine(groupIndexReader.readLine(), 2);
-                if (parsedArgs != null) {
-                    returnedGroups.add(new Groups.groupEntry(parsedArgs));
-                } else {
-                    RibbonServer.logAppend(LOG_ID, 1, "помилка при опрацюванні індексу груп (" + currentLine + ")");
-                }
-                currentLine++;
+                returnedGroups.add(new UserClasses.GroupEntry(groupIndexReader.readLine()));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу груп не знайдено. Створюю новий.");
@@ -148,7 +142,7 @@ public abstract class indexReader {
                 try (java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile)) {
                     usersIndexWriter.write("{test},{Test group}\n");
                 }
-                returnedGroups.add(new Groups.groupEntry(new String[] {"test", "Test group"}));
+                returnedGroups.add(new UserClasses.GroupEntry("{test},{Test group}"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу груп!");
                 System.exit(5);
@@ -211,60 +205,6 @@ public abstract class indexReader {
             }
         }
         return false;
-    }
-    
-    /**
-     * Parse single user index line
-     * @param userLine line of config
-     * @return userEntry object
-     * @see Users.userEntry
-     * @deprecated 
-     */
-    public static Users.userEntry parseUserLine(String userLine) {
-        String[] userArray = new String[2];
-        Integer beginSlice = 0;
-        Integer acceptedIndex = -1;
-        Boolean ignoreComma = false;
-        for (Integer index = 0; index < userLine.length(); index++) {
-            char currChar = userLine.charAt(index);
-            char nextChar = '1';
-            char prevChar = '1';
-            if (index > 0) {
-                prevChar = userLine.charAt(index - 1);
-            }
-            if (index < userLine.length() - 1) {
-                nextChar = userLine.charAt(index + 1);
-            }
-            switch (parseMarker(prevChar, currChar, nextChar)) {
-                case 0:
-                    continue;
-                case 1:
-                    if (ignoreComma == false) {
-                        userArray[++acceptedIndex] = userLine.substring(beginSlice, index);
-                        beginSlice = index + 1;
-                    }
-                    break;
-                case 2:
-                    beginSlice = index + 1;
-                    ignoreComma = true;
-                    break;
-                case 3:
-                    if (ignoreComma == true) {
-                        ignoreComma = false;
-                        userArray[++acceptedIndex] = userLine.substring(beginSlice, index);
-                        beginSlice = index + 1;
-                    }
-                    break;
-                case 6:
-                    ignoreComma = true;
-                    break;
-            }
-            if ((!hasMoreSeparators(userLine.substring(index + 1))) && (index < userLine.length() - 1)) {
-                userArray[++acceptedIndex] = userLine.substring(index + 1);
-                break;
-            }
-        }
-        return new Users.userEntry(userArray);
     }
     
     /**

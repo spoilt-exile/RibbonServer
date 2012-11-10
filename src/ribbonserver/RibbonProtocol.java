@@ -130,10 +130,10 @@ public class RibbonProtocol {
               if (!RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN && RibbonServer.sessionObj.isAlreadyLogined(parsedArgs[0])) {
                   return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!";
               }
-              if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!RibbonServer.userObj.isUserAdmin(parsedArgs[0]))) {
+              if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserAdmin(parsedArgs[0]))) {
                   return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.";
               }
-              String returned = RibbonServer.userObj.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
+              String returned = AccessHandler.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
               if (returned == null) {
                   if (CURR_TYPE == CONNECTION_TYPES.CLIENT) {
                       RibbonServer.logAppend(LOG_ID, 3, "користувач " + parsedArgs[0] + " увійшов до системи.");
@@ -251,7 +251,7 @@ public class RibbonProtocol {
                 String givenIndex = parsedArgs[1];
                 //String returnedContent = "";
                 StringBuffer returnedMessage = new StringBuffer();
-                if (RibbonServer.userObj.checkAccess(CURR_SESSION.USER_NAME, givenDir, 0) == false) {
+                if (AccessHandler.checkAccess(CURR_SESSION.USER_NAME, givenDir, 0) == false) {
                     return "RIBBON_ERROR:Помилка доступу до напрямку " + givenDir;
                 }
                 String dirPath = RibbonServer.dirObj.getDirPath(givenDir);
@@ -307,9 +307,9 @@ public class RibbonProtocol {
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 }
-                if (CURR_SESSION.USER_NAME.equals(matchedEntry.AUTHOR) || (RibbonServer.userObj.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) == null)) {
+                if (CURR_SESSION.USER_NAME.equals(matchedEntry.AUTHOR) || (AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) == null)) {
                     for (Integer dirIndex = 0; dirIndex < matchedEntry.DIRS.length; dirIndex++) {
-                        if (RibbonServer.userObj.checkAccess(CURR_SESSION.USER_NAME, matchedEntry.DIRS[dirIndex], 1) == true) {
+                        if (AccessHandler.checkAccess(CURR_SESSION.USER_NAME, matchedEntry.DIRS[dirIndex], 1) == true) {
                             continue;
                         } else {
                             return "RIBBON_ERROR:Помилка доступу до напрямку " + matchedEntry.DIRS[dirIndex] +  ".";
@@ -337,7 +337,7 @@ public class RibbonProtocol {
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 } else {
-                    if (matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME) || (RibbonServer.userObj.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) == null)) {
+                    if (matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME) || (AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) == null)) {
                         Procedures.PROC_DELETE_MESSAGE(matchedEntry);
                         BROADCAST_TAIL = "RIBBON_UCTL_DELETE_INDEX:" + matchedEntry.INDEX;
                         BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;

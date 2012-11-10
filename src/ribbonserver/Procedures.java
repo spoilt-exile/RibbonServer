@@ -47,7 +47,7 @@ public class Procedures {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо випустити повідомлення, система не готова!");
             return "RIBBON_ERROR:Система не готова!";
         } else {
-            Integer failedIndex = RibbonServer.userObj.checkAccessForAll(givenMessage.AUTHOR, givenMessage.DIRS, 1);
+            Integer failedIndex = AccessHandler.checkAccessForAll(givenMessage.AUTHOR, givenMessage.DIRS, 1);
             if (failedIndex != null) {
                 return "RIBBON_ERROR:Помилка доступу до напрямку " + givenMessage.DIRS[failedIndex];
             }

@@ -18,16 +18,6 @@ public class RibbonServer {
     public static Directories dirObj;
     
     /**
-     * Groups handle object
-     */
-    public static Groups groupObj;
-    
-    /**
-     * Users handle object
-     */
-    public static Users userObj;
-    
-    /**
      * Messages and tags handle object
      */
     public static Messenger messageObj;
@@ -126,10 +116,8 @@ public class RibbonServer {
         logAppend(LOG_ID, 2, "Версія системи: " + RIBBON_VER);
         CURR_STATE = RibbonServer.SYS_STATES.INIT;
         setSystemVariables();
-        logAppend(LOG_ID, 3, "початок налаштування груп доступу");
-        groupObj = new Groups();
-        logAppend(LOG_ID, 3, "початок налаштування користувачів");
-        userObj = new Users();
+        logAppend(LOG_ID, 3, "початок налаштування контролю доступу");
+        AccessHandler.init();
         logAppend(LOG_ID, 3, "початок налаштування напрявків");
         dirObj = new Directories();
         logAppend(LOG_ID, 3, "зчитування індексу бази повідомленнь");
