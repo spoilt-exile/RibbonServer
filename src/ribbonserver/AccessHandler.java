@@ -64,7 +64,7 @@ public final class AccessHandler {
         keyArray[keyArray.length - 1] = findedUser.USER_NAME;
         Boolean findedAnswer = false;
         DirClasses.DirPermissionEntry fallbackPermission = null;
-        DirClasses.DirPermissionEntry[] dirAccessArray = RibbonServer.dirObj.getDirAccess(givenDir);
+        DirClasses.DirPermissionEntry[] dirAccessArray = Directories.getDirAccess(givenDir);
         for (Integer keyIndex = 0; keyIndex < keyArray.length; keyIndex++) {
             for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
                 if (keyArray[keyIndex].equals("ADM")) {

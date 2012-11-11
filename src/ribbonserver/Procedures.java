@@ -51,7 +51,7 @@ public class Procedures {
             if (failedIndex != null) {
                 return "RIBBON_ERROR:Помилка доступу до напрямку " + givenMessage.DIRS[failedIndex];
             }
-            RibbonServer.messageObj.addMessageToIndex(givenMessage);
+            Messenger.addMessageToIndex(givenMessage);
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);
             indexReader.appendToBaseIndex(givenMessage.returnEntry().toCsv());
             for (Integer dirIndex = 0; dirIndex < givenMessage.DIRS.length; dirIndex++) {
@@ -78,7 +78,7 @@ public class Procedures {
                 if (dirArr[pathIndex] == null) {
                     continue;
                 } else {
-                    currPath = RibbonServer.dirObj.getDirPath(dirArr[pathIndex]);
+                    currPath = Directories.getDirPath(dirArr[pathIndex]);
                     if (currPath == null) {
                         continue;
                     }
@@ -104,14 +104,14 @@ public class Procedures {
      */
     public static synchronized void PROC_DELETE_MESSAGE(Messenger.messageEntry givenEntry) {
         for (Integer pathIndex = 0; pathIndex < givenEntry.DIRS.length; pathIndex++) {
-            String currPath = RibbonServer.dirObj.getDirPath(givenEntry.DIRS[pathIndex]) + givenEntry.INDEX;
+            String currPath = Directories.getDirPath(givenEntry.DIRS[pathIndex]) + givenEntry.INDEX;
             try {
                 java.nio.file.Files.delete(new java.io.File(currPath).toPath());
             } catch (java.io.IOException ex) {
                 RibbonServer.logAppend(LOG_ID, 1, "неможливо видалити повідомлення: " + currPath);
             }
         }
-        RibbonServer.messageObj.deleteMessageEntryFromIndex(givenEntry);
+        Messenger.deleteMessageEntryFromIndex(givenEntry);
         RibbonServer.logAppend(LOG_ID, 3, "повідомлення за індексом " + givenEntry.INDEX + "вилучено з системи.");
     }
     

@@ -10,22 +10,22 @@ package ribbonserver;
  * Directories handle class
  * @author Stanislav Nepochatov
  */
-public class Directories {
+public final class Directories {
     
     /**
      * ID of this component or object for loging
      */
-    private String LOG_ID = "Обробник напрямків";
+    private static String LOG_ID = "Обробник напрямків";
     
     /**
      * Root directory
      */
-    private DirClasses.DirEntry rootDir;
+    private static DirClasses.DirEntry rootDir;
     
     /**
-     * Default constructor
+     * Init directory's component
      */
-    Directories() {
+    public static void init() {
         rootDir = new DirClasses.DirEntry();
         java.util.ArrayList<DirClasses.DirSchema> readedDirs = indexReader.readDirectories();
         java.util.ListIterator<DirClasses.DirSchema> readIter = readedDirs.listIterator();
@@ -42,17 +42,17 @@ public class Directories {
      * Create full chain of directories with given schema
      * @param givenSchema directory schema
      */
-    public void createDirs(DirClasses.DirSchema givenSchema) {
-        this.rootDir.insertDir("", givenSchema.FULL_DIR_NAME, givenSchema);
+    public static void createDirs(DirClasses.DirSchema givenSchema) {
+        Directories.rootDir.insertDir("", givenSchema.FULL_DIR_NAME, givenSchema);
     }
     
     /**
      * Dump current tree as text report
      */
-    private void dumpTree() {
+    private static void dumpTree() {
         try {
             java.io.FileWriter treeWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/tree");
-            treeWriter.write(this.rootDir.treeReport(0));
+            treeWriter.write(Directories.rootDir.treeReport(0));
             treeWriter.close();
         } catch (java.io.IOException ex) {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо створити файл дерева напрямків!");
@@ -66,8 +66,8 @@ public class Directories {
      * @param givenDir directory in which index will be added
      * @param givenIndex index identifier
      */
-    public void addIndexToDir(String givenDir, String givenIndex) {
-        this.rootDir.addIndex("", givenDir, givenIndex);
+    public static void addIndexToDir(String givenDir, String givenIndex) {
+        Directories.rootDir.addIndex("", givenDir, givenIndex);
     }
     
     /**
@@ -75,8 +75,8 @@ public class Directories {
      * @param givenDir directory from which index will be removed
      * @param givenIndex index indentifier
      */
-    public void removeIndexFromDir(String givenDir, String givenIndex) {
-        this.rootDir.removeIndex("", givenDir, givenIndex);
+    public static void removeIndexFromDir(String givenDir, String givenIndex) {
+        Directories.rootDir.removeIndex("", givenDir, givenIndex);
     }
     
     /**
@@ -84,9 +84,9 @@ public class Directories {
      * @param givenDir
      * @return 
      */
-    public DirClasses.DirPermissionEntry[] getDirAccess(String givenDir) {
+    public static DirClasses.DirPermissionEntry[] getDirAccess(String givenDir) {
         try {
-            return this.rootDir.getAccess("", givenDir);
+            return Directories.rootDir.getAccess("", givenDir);
         } catch (Exception ex) {
             return null;
         }
@@ -97,7 +97,7 @@ public class Directories {
      * @param givenDir given path to directory
      * @return path to file directory
      */
-    public String getDirPath(String givenDir) {
+    public static String getDirPath(String givenDir) {
         String returned = rootDir.returnEndDir("", givenDir).DIR_PATH;
         if (returned == null) {
             RibbonServer.logAppend(LOG_ID, 1, "не удалось получить доступ к данным директории: " + givenDir);
@@ -111,9 +111,9 @@ public class Directories {
      * Return all dirs to protocol commandlet
      * @return dirs in csv form;
      */
-    public String PROC_GET_DIRS() {
+    public static String PROC_GET_DIRS() {
         String returned = "";
-        java.util.ListIterator<DirClasses.DirEntry> rootDirs = this.rootDir.FOLDED_DIR.listIterator();
+        java.util.ListIterator<DirClasses.DirEntry> rootDirs = Directories.rootDir.FOLDED_DIR.listIterator();
         while (rootDirs.hasNext()) {
             returned += rootDirs.next().PROC_GET_DIR();
         }

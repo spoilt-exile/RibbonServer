@@ -10,29 +10,29 @@ package ribbonserver;
  * Messages store, indexing, search and manipulation class
  * @author Stanislav Nepochatov
  */
-public class Messenger {
+public final class Messenger {
     
-    private String LOG_ID = "Індексатор повідомлень";
+    private static String LOG_ID = "Індексатор повідомлень";
     
     /**
      * Storage of message entries
      */
-    public java.util.ArrayList<Messenger.messageEntry> messageIndex;
+    public static java.util.ArrayList<Messenger.messageEntry> messageIndex;
     
     /**
      * Storage of tag etries
      */
-    public java.util.ArrayList<tagEntry> tagIndex;
+    public static java.util.ArrayList<tagEntry> tagIndex;
     
     /**
      * Index for new message
      */
-    private Integer newIndex = 0;
+    private static Integer newIndex = 0;
     
     /**
-     * Default constructor
+     * Init message index handle component
      */
-    Messenger() {
+    public static void init() {
         messageIndex = indexReader.readBaseIndex();
         java.util.ListIterator<Messenger.messageEntry> messageIter = messageIndex.listIterator();
         tagIndex = new java.util.ArrayList<tagEntry>();
@@ -47,7 +47,7 @@ public class Messenger {
             }
             String[] currDirs = currEntry.DIRS;
             for (Integer dirIndex = 0; dirIndex < currDirs.length; dirIndex++) {
-                RibbonServer.dirObj.addIndexToDir(currDirs[dirIndex], currEntry.INDEX);
+                Directories.addIndexToDir(currDirs[dirIndex], currEntry.INDEX);
             }
             String[] currTags = currEntry.TAGS;
             for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
@@ -193,7 +193,7 @@ public class Messenger {
     /**
      * Tag entry
      */
-    public class tagEntry {
+    public static class tagEntry {
         
         /**
          * Name of the tag
@@ -236,8 +236,8 @@ public class Messenger {
      * @param tagName name of the tag
      * @return tagEntry or null
      */
-    private tagEntry isTagExist(String tagName) {
-        java.util.ListIterator<tagEntry> tagIter = this.tagIndex.listIterator();
+    private static tagEntry isTagExist(String tagName) {
+        java.util.ListIterator<tagEntry> tagIter = Messenger.tagIndex.listIterator();
         while (tagIter.hasNext()) {
             tagEntry currTag = tagIter.next();
             if (currTag.NAME.equals(tagName)) {
@@ -252,12 +252,12 @@ public class Messenger {
      * @param tagName name of the tag
      * @param index index of message which contain this tag
      */
-    public void tagMessage(String tagName, String index) {
-        tagEntry namedTag = this.isTagExist(tagName);
+    public static void tagMessage(String tagName, String index) {
+        tagEntry namedTag = Messenger.isTagExist(tagName);
         if (namedTag == null) {
             namedTag = new tagEntry(tagName);
             namedTag.INDEXES.add(index);
-            this.tagIndex.add(namedTag);
+            Messenger.tagIndex.add(namedTag);
         } else {
             namedTag.INDEXES.add(index);
         }
@@ -267,7 +267,7 @@ public class Messenger {
      * Get index for new message
      * @return string expresion of new index
      */
-    private String getNewIndex() {
+    private static String getNewIndex() {
         String newIndexStr = String.valueOf(++newIndex);
         while (newIndexStr.length() < 10) {
             newIndexStr = "0" + newIndexStr;
@@ -279,10 +279,10 @@ public class Messenger {
      * Add message entry to index and update original message object
      * @param givenEntry given message entry
      */
-    public void addMessageToIndex(Messenger.Message givenMessage) {
-        givenMessage.INDEX = this.getNewIndex();
+    public static void addMessageToIndex(Messenger.Message givenMessage) {
+        givenMessage.INDEX = Messenger.getNewIndex();
         givenMessage.DATE = RibbonServer.getCurrentDate();
-        this.messageIndex.add(givenMessage.returnEntry());
+        Messenger.messageIndex.add(givenMessage.returnEntry());
         String[] currTags = givenMessage.TAGS;
         for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
             tagMessage(currTags[tag_Index], givenMessage.INDEX);
@@ -294,9 +294,9 @@ public class Messenger {
      * Return tags in csv line form
      * @return all tags as csv line
      */
-    public String PROC_GET_TAGS() {
+    public static String PROC_GET_TAGS() {
         String returned = "";
-        java.util.ListIterator<tagEntry> tagIter = this.tagIndex.listIterator();
+        java.util.ListIterator<tagEntry> tagIter = Messenger.tagIndex.listIterator();
         while (tagIter.hasNext()) {
             returned += "RIBBON_UCTL_LOAD_TAG:" + tagIter.next().toCsv() + "\n";
         }
@@ -308,12 +308,12 @@ public class Messenger {
      * Return messages beginning form specified index.
      * @return messages on csv form;
      */
-    public String PROC_LOAD_BASE_FROM_INDEX(String givenIndex) {
+    public static String PROC_LOAD_BASE_FROM_INDEX(String givenIndex) {
         String returned = "";
-        if (Integer.parseInt(givenIndex) > this.newIndex) {
+        if (Integer.parseInt(givenIndex) > Messenger.newIndex) {
             return "END:";
         } else {
-            java.util.ListIterator<messageEntry> messageIter = this.messageIndex.listIterator(Integer.parseInt(givenIndex));
+            java.util.ListIterator<messageEntry> messageIter = Messenger.messageIndex.listIterator(Integer.parseInt(givenIndex));
             while (messageIter.hasNext()) {
                 returned += "RIBBON_UCTL_LOAD_INDEX:" + messageIter.next().toCsv() + "\n";
             }
@@ -326,8 +326,8 @@ public class Messenger {
      * @param givenIndex index of message for search
      * @return message entry object or null
      */
-    public Messenger.messageEntry getMessageEntryByIndex(String givenIndex) {
-        java.util.ListIterator<Messenger.messageEntry> messageIter = this.messageIndex.listIterator();
+    public static Messenger.messageEntry getMessageEntryByIndex(String givenIndex) {
+        java.util.ListIterator<Messenger.messageEntry> messageIter = Messenger.messageIndex.listIterator();
         while (messageIter.hasNext()) {
             Messenger.messageEntry currEntry = messageIter.next();
             if (currEntry.INDEX.equals(givenIndex)) {
@@ -341,12 +341,12 @@ public class Messenger {
      * Delete messege entry from messenger index and check tags
      * @param givenEntry entry to delete
      */
-    public void deleteMessageEntryFromIndex(Messenger.messageEntry givenEntry) {
-        this.messageIndex.remove(givenEntry);
+    public static void deleteMessageEntryFromIndex(Messenger.messageEntry givenEntry) {
+        Messenger.messageIndex.remove(givenEntry);
         for (Integer removeTagIndex = 0; removeTagIndex < givenEntry.TAGS.length; removeTagIndex++) {
-            Messenger.tagEntry currTag = this.isTagExist(givenEntry.TAGS[removeTagIndex]);
+            Messenger.tagEntry currTag = Messenger.isTagExist(givenEntry.TAGS[removeTagIndex]);
             if (currTag.INDEXES.size() == 1 && (currTag.INDEXES.get(0).equals(givenEntry.INDEX))) {
-                this.tagIndex.remove(currTag);
+                Messenger.tagIndex.remove(currTag);
             } else {
                 currTag.INDEXES.remove(givenEntry.INDEX);
             }

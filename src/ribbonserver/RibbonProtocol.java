@@ -127,7 +127,7 @@ public class RibbonProtocol {
           @Override
           public String exec(String args) {
               String[] parsedArgs = indexReader.commonParseLine(args, 2);
-              if (!RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN && RibbonServer.sessionObj.isAlreadyLogined(parsedArgs[0])) {
+              if (!RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN && SessionManager.isAlreadyLogined(parsedArgs[0])) {
                   return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!";
               }
               if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserAdmin(parsedArgs[0]))) {
@@ -160,7 +160,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_CLOSE", CONNECTION_TYPES.ANY) {
             @Override
             public String exec(String args) {
-                if (CURR_TYPE == CONNECTION_TYPES.CONTROL && RibbonServer.sessionObj.hasOtherControl(CURR_SESSION) == false) {
+                if (CURR_TYPE == CONNECTION_TYPES.CONTROL && SessionManager.hasOtherControl(CURR_SESSION) == false) {
                     RibbonServer.logAppend(RibbonServer.LOG_ID, 2, "контроль над системою завершено!");
                     RibbonServer.CONTROL_IS_PRESENT = false;
                 }
@@ -177,7 +177,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_GET_DIRS", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                return RibbonServer.dirObj.PROC_GET_DIRS();
+                return Directories.PROC_GET_DIRS();
             }
         });
         
@@ -188,7 +188,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_GET_TAGS", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                return RibbonServer.messageObj.PROC_GET_TAGS();
+                return Messenger.PROC_GET_TAGS();
             }
         });
         
@@ -199,7 +199,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_LOAD_BASE_FROM_INDEX", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                return RibbonServer.messageObj.PROC_LOAD_BASE_FROM_INDEX(args);
+                return Messenger.PROC_LOAD_BASE_FROM_INDEX(args);
             }
         });
         
@@ -254,7 +254,7 @@ public class RibbonProtocol {
                 if (AccessHandler.checkAccess(CURR_SESSION.USER_NAME, givenDir, 0) == false) {
                     return "RIBBON_ERROR:Помилка доступу до напрямку " + givenDir;
                 }
-                String dirPath = RibbonServer.dirObj.getDirPath(givenDir);
+                String dirPath = Directories.getDirPath(givenDir);
                 if (dirPath == null) {
                     return "RIBBON_ERROR:Напрямок " + givenDir + " не існує!";
                 } else {
@@ -289,7 +289,7 @@ public class RibbonProtocol {
                 String inLine;
                 Boolean collectMessage = true;
                 String[] parsedArgs = args.split(",");
-                Messenger.messageEntry matchedEntry = RibbonServer.messageObj.getMessageEntryByIndex(parsedArgs[1]);
+                Messenger.messageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[1]);
                 while (collectMessage) {
                     try {
                         inLine = CURR_SESSION.inStream.readLine();
@@ -333,7 +333,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_DELETE_MESSAGE", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                Messenger.messageEntry matchedEntry = RibbonServer.messageObj.getMessageEntryByIndex(args);
+                Messenger.messageEntry matchedEntry = Messenger.getMessageEntryByIndex(args);
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 } else {

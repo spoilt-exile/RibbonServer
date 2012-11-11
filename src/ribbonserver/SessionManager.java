@@ -6,29 +6,25 @@
 
 package ribbonserver;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Network sessions store class
  * @author Stanislav Nepochatov
  */
-public class SessionManager {
+public final class SessionManager {
     
     private static String LOG_ID = "Менеджер мережевих сесій";
     
     /**
      * Arraylist with active network sessions
      */
-    private java.util.ArrayList<SessionManager.SessionThread> sessionsStore = new java.util.ArrayList<>();
+    private static java.util.ArrayList<SessionManager.SessionThread> sessionsStore = new java.util.ArrayList<>();
     
     /**
      * Single client session class
      */
-    public class SessionThread extends Thread {
+    public static class SessionThread extends Thread {
         
         /**
          * User name of this session
@@ -101,13 +97,13 @@ public class SessionManager {
                 this.outStream.close();
                 this.SessionSocket.close();
                 RibbonServer.logAppend(LOG_ID, 3, "мережеву сесію зачинено (" + SessionSocket.getInetAddress().getHostAddress() + ")");
-                RibbonServer.sessionObj.closeSession(this);
+                SessionManager.closeSession(this);
             } catch (java.lang.NullPointerException ex) {
                 RibbonServer.logAppend(LOG_ID, 1, "з'єднання аварійно разірване!");
-                RibbonServer.sessionObj.closeSession(this);
+                SessionManager.closeSession(this);
             } catch (java.io.IOException ex) {
                 RibbonServer.logAppend(LOG_ID, 1, "неможливо прочитати дані з сокету (" + SessionSocket.getInetAddress().getHostAddress() + ")");
-                RibbonServer.sessionObj.closeSession(this);
+                SessionManager.closeSession(this);
             }
         }
         
@@ -136,10 +132,10 @@ public class SessionManager {
      * Create new session and add it into session list;
      * @param givenSocket socket to open session;
      */
-    public void createNewSession(java.net.Socket givenSocket) {
+    public static void createNewSession(java.net.Socket givenSocket) {
         SessionManager.SessionThread createdThread = new SessionManager.SessionThread(givenSocket);
         if (createdThread.isAlive) {
-            this.sessionsStore.add(createdThread);
+            SessionManager.sessionsStore.add(createdThread);
             createdThread.start();
         }
     }
@@ -148,9 +144,9 @@ public class SessionManager {
      * Close session and delete it from sessaion array;
      * @param givenSession sessionb to close;
      */
-    public void closeSession(SessionManager.SessionThread givenSession) {
+    public static void closeSession(SessionManager.SessionThread givenSession) {
         if (!givenSession.isAlive) {
-            this.sessionsStore.remove(givenSession);
+            SessionManager.sessionsStore.remove(givenSession);
         }
     }
     
@@ -158,8 +154,8 @@ public class SessionManager {
      * Broadcast message to all users
      * @param message a single line message
      */
-    public void broadcast(String message, RibbonProtocol.CONNECTION_TYPES type) {
-        java.util.ListIterator<SessionThread> sessionIter = this.sessionsStore.listIterator();
+    public static void broadcast(String message, RibbonProtocol.CONNECTION_TYPES type) {
+        java.util.ListIterator<SessionThread> sessionIter = SessionManager.sessionsStore.listIterator();
         while (sessionIter.hasNext()) {
             SessionThread currSession = sessionIter.next();
             if (currSession.ProtocolHandler.CURR_TYPE == type) {
@@ -173,8 +169,8 @@ public class SessionManager {
      * @param closingControlThread thread which going to close
      * @return result of checking
      */
-    public Boolean hasOtherControl(SessionThread closingControlThread) {
-        java.util.ListIterator<SessionThread> sessionIter = this.sessionsStore.listIterator();
+    public static Boolean hasOtherControl(SessionThread closingControlThread) {
+        java.util.ListIterator<SessionThread> sessionIter = SessionManager.sessionsStore.listIterator();
         while (sessionIter.hasNext()) {
             SessionThread currSession = sessionIter.next();
             if (currSession.ProtocolHandler.CURR_TYPE == RibbonProtocol.CONNECTION_TYPES.CONTROL && !currSession.equals(closingControlThread)) {
@@ -188,8 +184,8 @@ public class SessionManager {
      * Check server connection limit.
      * @return true if limit achieved/fals if not;
      */
-    public Boolean checkConnectionLimit() {
-        if (RibbonServer.NETWORK_MAX_CONNECTIONS != -1 && this.sessionsStore.size() == RibbonServer.NETWORK_MAX_CONNECTIONS) {
+    public static Boolean checkConnectionLimit() {
+        if (RibbonServer.NETWORK_MAX_CONNECTIONS != -1 && SessionManager.sessionsStore.size() == RibbonServer.NETWORK_MAX_CONNECTIONS) {
             RibbonServer.logAppend(LOG_ID, 1, "досягнуто ліміту з'єднань (" + RibbonServer.NETWORK_MAX_CONNECTIONS + ")");
             return true;
         } else {
@@ -202,8 +198,8 @@ public class SessionManager {
      * @param givenName name of user to search;
      * @return true if user is already logined.
      */
-    public Boolean isAlreadyLogined(String givenName) {
-        for (Iterator<SessionThread> it = this.sessionsStore.iterator(); it.hasNext();) {
+    public static Boolean isAlreadyLogined(String givenName) {
+        for (Iterator<SessionThread> it = SessionManager.sessionsStore.iterator(); it.hasNext();) {
             SessionThread iterSess = it.next();
             if (iterSess.USER_NAME == null) {
                 continue;

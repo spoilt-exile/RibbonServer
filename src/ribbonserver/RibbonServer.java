@@ -13,16 +13,6 @@ package ribbonserver;
 public class RibbonServer {
     
     /**
-     * Directories handle object
-     */
-    public static Directories dirObj;
-    
-    /**
-     * Messages and tags handle object
-     */
-    public static Messenger messageObj;
-    
-    /**
      * Session and network handle object
      */
     public static SessionManager sessionObj;
@@ -119,22 +109,21 @@ public class RibbonServer {
         logAppend(LOG_ID, 3, "початок налаштування контролю доступу");
         AccessHandler.init();
         logAppend(LOG_ID, 3, "початок налаштування напрявків");
-        dirObj = new Directories();
+        Directories.init();
         logAppend(LOG_ID, 3, "зчитування індексу бази повідомленнь");
-        messageObj = new Messenger();
+        Messenger.init();
         CURR_STATE = RibbonServer.SYS_STATES.READY;
         Procedures.postInitMessage();
         logAppend(LOG_ID, 2, "налаштування мережі");
-        sessionObj = new SessionManager();
         try {
             java.net.ServerSocket RibbonServSocket = new java.net.ServerSocket(NETWORK_PORT);
             logAppend(LOG_ID, 3, "система готова для прийому повідомлень");
             while (true) {
                 java.net.Socket inSocket = RibbonServSocket.accept();
-                if ((!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.NETWORK_ALLOW_REMOTE == false) || RibbonServer.sessionObj.checkConnectionLimit() == true) {
+                if ((!inSocket.getInetAddress().getHostAddress().equals("127.0.0.1") && RibbonServer.NETWORK_ALLOW_REMOTE == false) || SessionManager.checkConnectionLimit() == true) {
                     inSocket.close();
                 } else {
-                    RibbonServer.sessionObj.createNewSession(inSocket);
+                    SessionManager.createNewSession(inSocket);
                 }
             }
         } catch (java.io.IOException ex) {
@@ -191,7 +180,7 @@ public class RibbonServer {
         String compiledMessage = getCurrentDate() + " ["+ component + "] " + typeStr + ">> '" + message + "';";
         System.out.println(compiledMessage);
         if (CONTROL_IS_PRESENT == true) {
-            RibbonServer.sessionObj.broadcast(compiledMessage, RibbonProtocol.CONNECTION_TYPES.CONTROL);
+            SessionManager.broadcast(compiledMessage, RibbonProtocol.CONNECTION_TYPES.CONTROL);
         }
         if (logFile != null) {
             try (java.io.FileWriter logWriter = new java.io.FileWriter(logFile, true)) {
