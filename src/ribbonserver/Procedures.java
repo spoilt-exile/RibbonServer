@@ -15,34 +15,12 @@ public class Procedures {
     private static String LOG_ID = "Бібліотека процедур";
     
     /**
-     * RIBBON_ERROR Exception class
-     */
-    public static class RIBBON_ERROR extends Exception {
-        
-        RIBBON_ERROR(String givenMessage) {
-            super();
-            ERROR_MESSAGE = givenMessage;
-            PROC_ERROR_MESSAGE = "RIBBON_ERROR:" + ERROR_MESSAGE;
-        }
-        
-        /**
-         * Error message;
-         */
-        public String ERROR_MESSAGE;
-        
-        /**
-         * Error message in protocol form;
-         */
-        public String PROC_ERROR_MESSAGE;
-    }
-    
-    /**
      * <b>[RIBBON a1]</b><br>
      * Post given message into the system information stream
      * @param givenMessage message which should be released
      * @return processing status;
      */
-    public static synchronized String PROC_POST_MESSAGE(Messenger.Message givenMessage) {
+    public static synchronized String PROC_POST_MESSAGE(MessageClasses.Message givenMessage) {
         if (RibbonServer.CURR_STATE != RibbonServer.SYS_STATES.READY) {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо випустити повідомлення, система не готова!");
             return "RIBBON_ERROR:Система не готова!";
@@ -50,6 +28,11 @@ public class Procedures {
             Integer failedIndex = AccessHandler.checkAccessForAll(givenMessage.AUTHOR, givenMessage.DIRS, 1);
             if (failedIndex != null) {
                 return "RIBBON_ERROR:Помилка доступу до напрямку " + givenMessage.DIRS[failedIndex];
+            }
+            if (givenMessage.ORIG_INDEX.equals("-1")) {
+                givenMessage.ORIG_AUTHOR = givenMessage.AUTHOR;
+            } else {
+                givenMessage.ORIG_AUTHOR = Messenger.getMessageEntryByIndex(givenMessage.ORIG_INDEX).AUTHOR;
             }
             Messenger.addMessageToIndex(givenMessage);
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);
@@ -102,7 +85,7 @@ public class Procedures {
      * Delete message from all indexes.
      * @param givenEntry entry to delete
      */
-    public static synchronized void PROC_DELETE_MESSAGE(Messenger.messageEntry givenEntry) {
+    public static synchronized void PROC_DELETE_MESSAGE(MessageClasses.MessageEntry givenEntry) {
         for (Integer pathIndex = 0; pathIndex < givenEntry.DIRS.length; pathIndex++) {
             String currPath = Directories.getDirPath(givenEntry.DIRS[pathIndex]) + givenEntry.INDEX;
             try {
@@ -120,9 +103,10 @@ public class Procedures {
      */
     public static void postInitMessage() {
         String formatLine = "======================================================================================";
-        PROC_POST_MESSAGE(new Messenger.Message(
+        PROC_POST_MESSAGE(new MessageClasses.Message(
             "Системне повідомлення",
             "root",
+            "UA",
             new String[] {"СИСТЕМА.Тест"},
             new String[] {"оголошення", "ІТУ"},
             formatLine + "\nСистема \"Стрічка\" " + RibbonServer.RIBBON_VER + "\n" + formatLine + "\n"

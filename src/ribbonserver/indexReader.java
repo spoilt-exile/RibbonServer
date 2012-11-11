@@ -211,12 +211,12 @@ public abstract class indexReader {
      * Read message indexes in base index file
      * @return arraylist with index entries
      */
-    public static java.util.ArrayList<Messenger.messageEntry> readBaseIndex() {
-        java.util.ArrayList<Messenger.messageEntry> returnedIndex = new java.util.ArrayList<>();
+    public static java.util.ArrayList<MessageClasses.MessageEntry> readBaseIndex() {
+        java.util.ArrayList<MessageClasses.MessageEntry> returnedIndex = new java.util.ArrayList<>();
         try {
             java.io.BufferedReader baseIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH));
             while (baseIndexReader.ready()) {
-                returnedIndex.add(parseBaseLine(baseIndexReader.readLine()));
+                returnedIndex.add(new MessageClasses.MessageEntry(baseIndexReader.readLine()));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу бази не знайдено. Створюю новий.");
@@ -329,8 +329,8 @@ public abstract class indexReader {
      * Update base index file after message manipulations
      * @param currStore arrayList of messages entries
      */
-    public static void updateBaseIndex(java.util.ArrayList<Messenger.messageEntry> currStore) {
-        java.util.ListIterator<Messenger.messageEntry> storeIter = currStore.listIterator();
+    public static void updateBaseIndex(java.util.ArrayList<MessageClasses.MessageEntry> currStore) {
+        java.util.ListIterator<MessageClasses.MessageEntry> storeIter = currStore.listIterator();
         String newIndexFileContent = "";
         while (storeIter.hasNext()) {
             newIndexFileContent += storeIter.next().toCsv() + "\n";

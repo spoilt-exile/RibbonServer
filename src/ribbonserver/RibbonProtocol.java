@@ -211,7 +211,8 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_POST_MESSAGE", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                Messenger.Message recievedMessage = indexReader.net_parseMessageLine(args, 1);
+                MessageClasses.Message recievedMessage = new MessageClasses.Message();
+                recievedMessage.CreateMessageForPost(args);
                 recievedMessage.AUTHOR = CURR_SESSION.USER_NAME;
                 Boolean collectMessage = true;
                 StringBuffer messageBuffer = new StringBuffer();
@@ -289,7 +290,7 @@ public class RibbonProtocol {
                 String inLine;
                 Boolean collectMessage = true;
                 String[] parsedArgs = args.split(",");
-                Messenger.messageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[1]);
+                MessageClasses.MessageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[1]);
                 while (collectMessage) {
                     try {
                         inLine = CURR_SESSION.inStream.readLine();
@@ -333,7 +334,7 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_DELETE_MESSAGE", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                Messenger.messageEntry matchedEntry = Messenger.getMessageEntryByIndex(args);
+                MessageClasses.MessageEntry matchedEntry = Messenger.getMessageEntryByIndex(args);
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 } else {
