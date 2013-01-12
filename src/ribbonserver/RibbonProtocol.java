@@ -352,6 +352,12 @@ public class RibbonProtocol {
         
         /** SERVER CONTROL PROTOCOL STACK [LEVEL_2 SUPPORT] **/
         
+        this.RIBBON_COMMANDS.add(new CommandLet("RIB_EX", CONNECTION_TYPES.ANY) {
+            public String exec(String args) {
+                throw new NullPointerException();
+            }
+        });
+        
     }
     
     /**
@@ -392,8 +398,22 @@ public class RibbonProtocol {
             try {
                 return exComm.exec(args);
             } catch (Exception ex) {
+                if (RibbonServer.DEBUG_POST_EXCEPTIONS) {
+                    StringBuffer exMesgBuf = new StringBuffer();
+                    exMesgBuf.append("Помилка при роботі сесії ").append(this.CURR_SESSION.SESSION_TIP).append("(").append(RibbonServer.getCurrentDate()).append(")\n\n");
+                    exMesgBuf.append(ex.getClass().getName() + "\n");
+                    StackTraceElement[] stackTrace = ex.getStackTrace();
+                    for (StackTraceElement element : stackTrace) {
+                        exMesgBuf.append(element.toString() + "\n");
+                    }
+                    MessageClasses.Message exMessage = new MessageClasses.Message(
+                            "Звіт про помилку", "root", "UA", new String[] {RibbonServer.DEBUG_POST_DIR}, 
+                            new String[] {"ІТУ", "ПОМИЛКИ"}, exMesgBuf.toString());
+                    Procedures.PROC_POST_MESSAGE(exMessage);
+                    BROADCAST_TAIL = "RIBBON_UCTL_LOAD_INDEX:" + exMessage.returnEntry().toCsv();
+                    BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
+                }
                 RibbonServer.logAppend(LOG_ID, 1, "помилка при виконанні команди " + exComm.COMMAND_NAME + "!");
-                ex.printStackTrace();
                 return "RIBBON_ERROR: помилка команди:" + ex.toString();
             }
         } else {
