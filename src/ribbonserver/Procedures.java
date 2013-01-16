@@ -54,7 +54,7 @@ public class Procedures {
      * @param fullPath full path to message file
      * @param messageContent content of the message
      */
-    public static synchronized void writeMessage(String[] dirArr, String strIndex, String messageContent) {
+    public static void writeMessage(String[] dirArr, String strIndex, String messageContent) {
         String currPath = "";
         try {
             for (Integer pathIndex = 0; pathIndex < dirArr.length; pathIndex++) {
@@ -76,6 +76,40 @@ public class Procedures {
             RibbonServer.logAppend(LOG_ID, 1, "Неможливо записити файл за шлязом: " + currPath + strIndex);
         } catch (UnsupportedOperationException ex) {
             RibbonServer.logAppend(LOG_ID, 1, "Неможливо створити посилання на файл!");
+        }
+    }
+    
+    /**
+     * <b>[RIBBON a2]</b><br>
+     * Modify message by given template message.
+     */
+    public static synchronized void PROC_MODIFY_MESSAGE(MessageClasses.MessageEntry oldMessage, MessageClasses.Message newMessage) {
+        makeCleanup(oldMessage.DIRS, newMessage.DIRS, oldMessage.INDEX);
+        oldMessage.modifyMessageEntry(newMessage);
+        writeMessage(oldMessage.DIRS, oldMessage.INDEX, newMessage.CONTENT);
+    }
+    
+    /**
+     * Make cleanup within old unused dirs in modifyed message;
+     * @param oldDirs array with old dirs;
+     * @param newDirs array with new dirs;
+     */
+    private static void makeCleanup(String[] oldDirs, String[] newDirs, String strIndex) {
+        for (Integer oldIndex = 0; oldIndex < oldDirs.length; oldIndex++) {
+            for (Integer newIndex = 0; newIndex < newDirs.length; newIndex++) {
+                if(oldDirs[oldIndex].equals(newDirs[newIndex])) {
+                    oldDirs[oldIndex] = null;
+                    break;
+                }
+            }
+            if (oldDirs[oldIndex] != null) {
+                String path = Directories.getDirPath(oldDirs[oldIndex]) + strIndex;
+                try {
+                    java.nio.file.Files.delete(new java.io.File(path).toPath());
+                } catch (java.io.IOException ex) {
+                    RibbonServer.logAppend(LOG_ID, 1, "неможливо видалити повідомлення: " + path);
+                }
+            }
         }
     }
     

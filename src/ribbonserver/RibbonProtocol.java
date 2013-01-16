@@ -212,7 +212,7 @@ public class RibbonProtocol {
             @Override
             public String exec(String args) {
                 MessageClasses.Message recievedMessage = new MessageClasses.Message();
-                recievedMessage.CreateMessageForPost(args);
+                recievedMessage.createMessageForPost(args);
                 recievedMessage.AUTHOR = CURR_SESSION.USER_NAME;
                 Boolean collectMessage = true;
                 StringBuffer messageBuffer = new StringBuffer();
@@ -285,12 +285,13 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_MODIFY_MESSAGE", CONNECTION_TYPES.CLIENT) {
             @Override
             public String exec(String args) {
-                String messageContent;
                 StringBuffer messageBuffer = new StringBuffer();
                 String inLine;
                 Boolean collectMessage = true;
-                String[] parsedArgs = args.split(",");
-                MessageClasses.MessageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[1]);
+                String[] parsedArgs = Generic.CsvFormat.splitCsv(args);
+                MessageClasses.MessageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[0]);
+                MessageClasses.Message modTemplate = new MessageClasses.Message();
+                modTemplate.createMessageForModify(parsedArgs[1]);
                 while (collectMessage) {
                     try {
                         inLine = CURR_SESSION.inStream.readLine();
@@ -304,11 +305,13 @@ public class RibbonProtocol {
                         return "RIBBON_ERROR:Неможливо прочитати повідомлення з сокету!";
                     }
                 }
-                messageContent = messageBuffer.toString();
+                modTemplate.CONTENT = messageBuffer.toString();
                 if (matchedEntry == null) {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 }
-                if (CURR_SESSION.USER_NAME.equals(matchedEntry.AUTHOR) || (AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) == null)) {
+                Integer oldIntFlag = AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2);
+                Integer newIntFlag = AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, modTemplate.DIRS, 1);
+                if ((CURR_SESSION.USER_NAME.equals(matchedEntry.AUTHOR) && (newIntFlag == null)) || ((oldIntFlag == null) && (newIntFlag == null))) {
                     for (Integer dirIndex = 0; dirIndex < matchedEntry.DIRS.length; dirIndex++) {
                         if (AccessHandler.checkAccess(CURR_SESSION.USER_NAME, matchedEntry.DIRS[dirIndex], 1) == true) {
                             continue;
@@ -316,13 +319,19 @@ public class RibbonProtocol {
                             return "RIBBON_ERROR:Помилка доступу до напрямку " + matchedEntry.DIRS[dirIndex] +  ".";
                         }
                     }
-                    RibbonServer.logAppend(RibbonServer.LOG_ID, 3, "повідомлення за індексом " + parsedArgs[1] + "(" + parsedArgs[0] + ") змінено");
-                    Procedures.writeMessage(matchedEntry.DIRS, matchedEntry.INDEX, messageContent);
+                    //RibbonServer.logAppend(RibbonServer.LOG_ID, 3, "повідомлення за індексом " + parsedArgs[1] + "(" + parsedArgs[0] + ") змінено");
+                    //Procedures.writeMessage(matchedEntry.DIRS, matchedEntry.INDEX, messageContent);
+                    Procedures.PROC_MODIFY_MESSAGE(matchedEntry, modTemplate);
                     BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.toCsv();
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
                     return "OK:";
                 } else {
-                    return "RIBBON_ERROR:Помилка доступу до повідомлення";
+                    //return "RIBBON_ERROR:Помилка доступу до повідомлення";
+                    if (oldIntFlag != null) {
+                        return "RIBBON_ERROR:Помилка доступу до напрямку " + matchedEntry.DIRS[oldIntFlag] +  ".";
+                    } else {
+                        return "RIBBON_ERROR:Помилка доступу до напрямку " + modTemplate.DIRS[newIntFlag] +  ".";
+                    }
                 }
             }
         });
