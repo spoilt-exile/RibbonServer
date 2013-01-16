@@ -10,7 +10,7 @@ package ribbonserver;
  * Read, parse and store CSV Ribbon configurations and base index class
  * @author Stanislav Nepochatov
  */
-public abstract class indexReader {
+public abstract class IndexReader {
     
     private static String LOG_ID = "Зчитувач індексів";
     
@@ -160,18 +160,24 @@ public abstract class indexReader {
      * Update base index file after message manipulations
      * @param currStore arrayList of messages entries
      */
-    public static void updateBaseIndex(java.util.ArrayList<MessageClasses.MessageEntry> currStore) {
-        java.util.ListIterator<MessageClasses.MessageEntry> storeIter = currStore.listIterator();
-        String newIndexFileContent = "";
-        while (storeIter.hasNext()) {
-            newIndexFileContent += storeIter.next().toCsv() + "\n";
-        }
-        try {
-            try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH)) {
-                messageWriter.write(newIndexFileContent);
+    public static void updateBaseIndex() {
+        Thread delayExec = new Thread() {
+            @Override
+            public void run() {
+                java.util.ListIterator<MessageClasses.MessageEntry> storeIter = Messenger.messageIndex.listIterator();
+                String newIndexFileContent = "";
+                while (storeIter.hasNext()) {
+                    newIndexFileContent += storeIter.next().toCsv() + "\n";
+                }
+                try {
+                    try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH)) {
+                        messageWriter.write(newIndexFileContent);
+                    }
+                } catch (java.io.IOException ex) {
+                    RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
+                }
             }
-        } catch (java.io.IOException ex) {
-            RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
-        }
+        };
+        delayExec.start();
     }
 }

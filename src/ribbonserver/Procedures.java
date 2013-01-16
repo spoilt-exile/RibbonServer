@@ -37,7 +37,7 @@ public class Procedures {
             Messenger.addMessageToIndex(givenMessage);
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);
             givenMessage.CONTENT = null;
-            indexReader.appendToBaseIndex(givenMessage.returnEntry().toCsv());
+            IndexReader.appendToBaseIndex(givenMessage.returnEntry().toCsv());
             for (Integer dirIndex = 0; dirIndex < givenMessage.DIRS.length; dirIndex++) {
                 if (givenMessage.DIRS[dirIndex] == null) {
                     RibbonServer.logAppend(LOG_ID, 1, "неможливо випустити повідомлення" + givenMessage.HEADER + "на напрямок " + givenMessage.DIRS[dirIndex]);
@@ -87,6 +87,7 @@ public class Procedures {
         makeCleanup(oldMessage.DIRS, newMessage.DIRS, oldMessage.INDEX);
         oldMessage.modifyMessageEntry(newMessage);
         writeMessage(oldMessage.DIRS, oldMessage.INDEX, newMessage.CONTENT);
+        IndexReader.updateBaseIndex();
     }
     
     /**

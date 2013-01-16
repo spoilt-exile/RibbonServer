@@ -30,10 +30,10 @@ public final class AccessHandler {
      * Init this component;
      */
     public static void init() {
-        AccessHandler.groupStore = indexReader.readGroups();
+        AccessHandler.groupStore = IndexReader.readGroups();
         AccessHandler.groupStore.add(new UserClasses.GroupEntry("{ADM},{Службова група адміністраторів системи \"Стрічка\"}"));
         RibbonServer.logAppend(LOG_ID, 3, "індекс груп опрацьвано (" + groupStore.size() + ")");
-        AccessHandler.userStore = indexReader.readUsers();
+        AccessHandler.userStore = IndexReader.readUsers();
         RibbonServer.logAppend(LOG_ID, 3, "індекс користувачів опрацьвано (" + userStore.size() + ")");
     }
     

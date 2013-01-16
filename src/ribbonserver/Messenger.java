@@ -33,7 +33,7 @@ public final class Messenger {
      * Init message index handle component
      */
     public static void init() {
-        messageIndex = indexReader.readBaseIndex();
+        messageIndex = IndexReader.readBaseIndex();
         java.util.ListIterator<MessageClasses.MessageEntry> messageIter = messageIndex.listIterator();
         tagIndex = new java.util.ArrayList<>();
         while (messageIter.hasNext()) {
@@ -177,12 +177,6 @@ public final class Messenger {
                 currTag.INDEXES.remove(givenEntry.INDEX);
             }
         }
-        Thread delayedUpdate = new Thread() {
-            @Override
-            public void run() {
-                indexReader.updateBaseIndex(messageIndex);
-            }
-        };
-        delayedUpdate.start();
+        IndexReader.updateBaseIndex();
     }
 }

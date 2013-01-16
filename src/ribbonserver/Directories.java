@@ -27,7 +27,7 @@ public final class Directories {
      */
     public static void init() {
         rootDir = new DirClasses.DirEntry();
-        java.util.ArrayList<DirClasses.DirSchema> readedDirs = indexReader.readDirectories();
+        java.util.ArrayList<DirClasses.DirSchema> readedDirs = IndexReader.readDirectories();
         java.util.ListIterator<DirClasses.DirSchema> readIter = readedDirs.listIterator();
         while (readIter.hasNext()) {
             DirClasses.DirSchema currDir = readIter.next();
