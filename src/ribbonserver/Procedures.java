@@ -36,6 +36,7 @@ public class Procedures {
             }
             Messenger.addMessageToIndex(givenMessage);
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);
+            givenMessage.CONTENT = null;
             indexReader.appendToBaseIndex(givenMessage.returnEntry().toCsv());
             for (Integer dirIndex = 0; dirIndex < givenMessage.DIRS.length; dirIndex++) {
                 if (givenMessage.DIRS[dirIndex] == null) {
@@ -54,7 +55,6 @@ public class Procedures {
      * @param messageContent content of the message
      */
     public static synchronized void writeMessage(String[] dirArr, String strIndex, String messageContent) {
-        String origFilePath = null;
         String currPath = "";
         try {
             for (Integer pathIndex = 0; pathIndex < dirArr.length; pathIndex++) {
@@ -69,7 +69,6 @@ public class Procedures {
                         java.io.FileWriter messageWriter = new java.io.FileWriter(currPath + strIndex);
                         messageWriter.write(messageContent);
                         messageWriter.close();
-                        origFilePath = currPath + strIndex;
                     }
                 }
             }
