@@ -352,12 +352,6 @@ public class RibbonProtocol {
         
         /** SERVER CONTROL PROTOCOL STACK [LEVEL_2 SUPPORT] **/
         
-        this.RIBBON_COMMANDS.add(new CommandLet("RIB_EX", CONNECTION_TYPES.ANY) {
-            public String exec(String args) {
-                throw new NullPointerException();
-            }
-        });
-        
     }
     
     /**
