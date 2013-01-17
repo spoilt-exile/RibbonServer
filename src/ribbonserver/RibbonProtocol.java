@@ -359,6 +359,10 @@ public class RibbonProtocol {
             }
         });
         
+        /**
+         * RIBBON_ADD_MESSAGE_PROPERTY: commandlet
+         * Add custom property to message.
+         */
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_ADD_MESSAGE_PROPERTY", CONNECTION_TYPES.CLIENT) {
             public String exec(String args) {
                 String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 3);
@@ -374,7 +378,7 @@ public class RibbonProtocol {
                     newProp.USER = CURR_SESSION.USER_NAME;
                     matchedEntry.PROPERTIES.add(newProp);
                     IndexReader.updateBaseIndex();
-                    BROADCAST_TAIL = "RIBBON_UCTL_DELETE_INDEX:" + matchedEntry.INDEX;
+                    BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.INDEX;
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
                     return "OK:";
                 } else {
@@ -428,6 +432,7 @@ public class RibbonProtocol {
                 if (RibbonServer.DEBUG_POST_EXCEPTIONS) {
                     StringBuffer exMesgBuf = new StringBuffer();
                     exMesgBuf.append("Помилка при роботі сесії ").append(this.CURR_SESSION.SESSION_TIP).append("(").append(RibbonServer.getCurrentDate()).append(")\n\n");
+                    exMesgBuf.append("Команда:" + command + ":" + args + "\n\n");
                     exMesgBuf.append(ex.getClass().getName() + "\n");
                     StackTraceElement[] stackTrace = ex.getStackTrace();
                     for (StackTraceElement element : stackTrace) {
