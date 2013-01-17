@@ -146,7 +146,7 @@ public abstract class IndexReader {
      * Append new message csv to base index file
      * @param csvReport csv formated string
      */
-    public static void appendToBaseIndex(String csvReport) {
+    public synchronized static void appendToBaseIndex(String csvReport) {
         try {
             try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH, true)) {
                 messageWriter.write(csvReport + "\n");
@@ -158,9 +158,8 @@ public abstract class IndexReader {
     
     /**
      * Update base index file after message manipulations
-     * @param currStore arrayList of messages entries
      */
-    public static void updateBaseIndex() {
+    public synchronized static void updateBaseIndex() {
         Thread delayExec = new Thread() {
             @Override
             public void run() {

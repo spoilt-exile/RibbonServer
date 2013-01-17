@@ -359,6 +359,30 @@ public class RibbonProtocol {
             }
         });
         
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_ADD_MESSAGE_PROPERTY", CONNECTION_TYPES.CLIENT) {
+            public String exec(String args) {
+                String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 3);
+                MessageClasses.MessageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[0]);
+                if (matchedEntry == null) {
+                    return "RIBBON_ERROR:Повідмолення не існує!";
+                }
+                if ((matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME) || (AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) != null))) {
+                    MessageClasses.MessageProperty newProp = new MessageClasses.MessageProperty();
+                    newProp.PROPERTY_PREFIX = MessageClasses.MessagePropertyTypes.valueOf(parsedArgs[1]);
+                    newProp.TEXT_MESSAGE = parsedArgs[2];
+                    newProp.DATE = RibbonServer.getCurrentDate();
+                    newProp.USER = CURR_SESSION.USER_NAME;
+                    matchedEntry.PROPERTIES.add(newProp);
+                    IndexReader.updateBaseIndex();
+                    BROADCAST_TAIL = "RIBBON_UCTL_DELETE_INDEX:" + matchedEntry.INDEX;
+                    BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
+                    return "OK:";
+                } else {
+                    return "RIBBON_ERROR:Помилка доступу до повідомлення.";
+                }
+            }
+        });
+        
         /** SERVER CONTROL PROTOCOL STACK [LEVEL_2 SUPPORT] **/
         
     }
