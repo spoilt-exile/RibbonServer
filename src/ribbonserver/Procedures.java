@@ -85,6 +85,7 @@ public class Procedures {
      */
     public static synchronized void PROC_MODIFY_MESSAGE(MessageClasses.MessageEntry oldMessage, MessageClasses.Message newMessage) {
         makeCleanup(oldMessage.DIRS, newMessage.DIRS, oldMessage.INDEX);
+        Messenger.modTagIndex(oldMessage, oldMessage);
         oldMessage.modifyMessageEntry(newMessage);
         writeMessage(oldMessage.DIRS, oldMessage.INDEX, newMessage.CONTENT);
         IndexReader.updateBaseIndex();

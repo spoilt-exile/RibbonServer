@@ -49,10 +49,10 @@ public final class Messenger {
             for (Integer dirIndex = 0; dirIndex < currDirs.length; dirIndex++) {
                 Directories.addIndexToDir(currDirs[dirIndex], currEntry.INDEX);
             }
-            String[] currTags = currEntry.TAGS;
-            for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
+            addToTagIndex(currEntry);
+            /**for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
                 tagMessage(currTags[tag_Index], currEntry.INDEX);
-            }
+            }**/
         }
         RibbonServer.logAppend(LOG_ID, 3, "база повідомлень завантажена (" + messageIndex.size() + ")");
     }
@@ -77,6 +77,9 @@ public final class Messenger {
      * Add to tag index or create new tag
      * @param tagName name of the tag
      * @param index index of message which contain this tag
+     * @deprecated operate only with single tag<br>
+     * use addToTagIndex() method instead;
+     * @see #addToTagIndex(MessageClasses.MessageEntry) 
      */
     public static void tagMessage(String tagName, String index) {
         MessageClasses.TagEntry namedTag = Messenger.isTagExist(tagName);
@@ -86,6 +89,46 @@ public final class Messenger {
             Messenger.tagIndex.add(namedTag);
         } else {
             namedTag.INDEXES.add(index);
+        }
+    }
+    
+    /**
+     * Add to tag index or create new tag.
+     * @param givenEntry message entry with tags;
+     */
+    public static void addToTagIndex(MessageClasses.MessageEntry givenEntry) {
+        for (String currTag : givenEntry.TAGS) {
+            MessageClasses.TagEntry namedTag = Messenger.isTagExist(currTag);
+            if (namedTag == null) {
+                namedTag = new MessageClasses.TagEntry(currTag);
+                namedTag.INDEXES.add(givenEntry.INDEX);
+                Messenger.tagIndex.add(namedTag);
+            } else {
+                namedTag.INDEXES.add(givenEntry.INDEX);
+            }
+        }
+    }
+    
+    /**
+     * Modify tag index (may create or delete tags).
+     * @param oldEntry message entry with tags to modify;
+     * @param newEntry message entry with new tags;
+     */
+    public static void modTagIndex(MessageClasses.MessageEntry oldEntry, MessageClasses.MessageEntry newEntry) {
+        removeTagIndex(oldEntry);
+        addToTagIndex(newEntry);
+    }
+    
+    /**
+     * Remove message presense from tag index.
+     * @param givenEntry entry with tags to remove;
+     */
+    public static void removeTagIndex(MessageClasses.MessageEntry givenEntry) {
+        for (String currTag : givenEntry.TAGS) {
+            MessageClasses.TagEntry namedTag = Messenger.isTagExist(currTag);
+            if (namedTag != null) {
+                namedTag.INDEXES.remove(givenEntry.INDEX);
+            }
         }
     }
     
@@ -109,10 +152,10 @@ public final class Messenger {
         givenMessage.INDEX = Messenger.getNewIndex();
         givenMessage.DATE = RibbonServer.getCurrentDate();
         Messenger.messageIndex.add(givenMessage.returnEntry());
-        String[] currTags = givenMessage.TAGS;
-        for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
+        addToTagIndex(givenMessage);
+        /**for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
             tagMessage(currTags[tag_Index], givenMessage.INDEX);
-        }
+        }**/
     }
     
     /**
@@ -169,14 +212,15 @@ public final class Messenger {
      */
     public static void deleteMessageEntryFromIndex(MessageClasses.MessageEntry givenEntry) {
         Messenger.messageIndex.remove(givenEntry);
-        for (Integer removeTagIndex = 0; removeTagIndex < givenEntry.TAGS.length; removeTagIndex++) {
+        /**for (Integer removeTagIndex = 0; removeTagIndex < givenEntry.TAGS.length; removeTagIndex++) {
             MessageClasses.TagEntry currTag = Messenger.isTagExist(givenEntry.TAGS[removeTagIndex]);
             if (currTag.INDEXES.size() == 1 && (currTag.INDEXES.get(0).equals(givenEntry.INDEX))) {
                 Messenger.tagIndex.remove(currTag);
             } else {
                 currTag.INDEXES.remove(givenEntry.INDEX);
             }
-        }
+        }**/
+        Messenger.removeTagIndex(givenEntry);
         IndexReader.updateBaseIndex();
     }
 }
