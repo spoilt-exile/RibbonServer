@@ -378,7 +378,7 @@ public class RibbonProtocol {
                     newProp.USER = CURR_SESSION.USER_NAME;
                     matchedEntry.PROPERTIES.add(newProp);
                     IndexReader.updateBaseIndex();
-                    BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.INDEX;
+                    BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.toCsv();
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
                     return "OK:";
                 } else {
