@@ -364,6 +364,7 @@ public class RibbonProtocol {
          * Add custom property to message.
          */
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_ADD_MESSAGE_PROPERTY", CONNECTION_TYPES.CLIENT) {
+            @Override
             public String exec(String args) {
                 String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 3);
                 MessageClasses.MessageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[0]);
@@ -381,6 +382,43 @@ public class RibbonProtocol {
                     BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.toCsv();
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
                     return "OK:";
+                } else {
+                    return "RIBBON_ERROR:Помилка доступу до повідомлення.";
+                }
+            }
+        });
+        
+        /**
+         * RIBBON_DEL_MESSAGE_PROPERTY: commandlet
+         * Del custom property from specified message.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_DEL_MESSAGE_PROPERTY", CONNECTION_TYPES.CLIENT) {
+            @Override
+            public String exec(String args) {
+                String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 3);
+                MessageClasses.MessageEntry matchedEntry = Messenger.getMessageEntryByIndex(parsedArgs[0]);
+                if (matchedEntry == null) {
+                    return "RIBBON_ERROR:Повідмолення не існує!";
+                }
+                if ((matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME) || (AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) != null))) {
+                    MessageClasses.MessageProperty findedProp = null;
+                    java.util.ListIterator<MessageClasses.MessageProperty> propIter = matchedEntry.PROPERTIES.listIterator();
+                    while (propIter.hasNext()) {
+                        MessageClasses.MessageProperty currProp = propIter.next();
+                        if (currProp.PROPERTY_PREFIX == MessageClasses.MessagePropertyTypes.valueOf(parsedArgs[1]) && currProp.DATE.equals(parsedArgs[2])) {
+                            findedProp = currProp;
+                            break;
+                        }
+                    }
+                    if (findedProp != null) {
+                        matchedEntry.PROPERTIES.remove(findedProp);
+                        IndexReader.updateBaseIndex();
+                        BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.toCsv();
+                        BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
+                        return "OK:";
+                    } else {
+                        return "RIBBON_ERROR:Системної ознаки не існує!";
+                    }
                 } else {
                     return "RIBBON_ERROR:Помилка доступу до повідомлення.";
                 }
