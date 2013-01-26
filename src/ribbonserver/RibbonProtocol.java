@@ -106,7 +106,7 @@ public class RibbonProtocol {
                                 RibbonServer.logAppend(LOG_ID, 2, "мережева сесія вимогає іншої кодової сторінки:" + parsedArgs[2]);
                                 CURR_SESSION.setReaderEncoding(parsedArgs[2]);
                             }
-                            return "OK:";
+                            return "OK:\nRIBBON_GCTL_FORCE_LOGIN:";
                         } catch (IllegalArgumentException ex) {
                             return "RIBBON_ERROR:Невідомий тип з'єднання!";
                         }
@@ -128,10 +128,10 @@ public class RibbonProtocol {
           public String exec(String args) {
               String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 2);
               if (!RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN && SessionManager.isAlreadyLogined(parsedArgs[0])) {
-                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!";
+                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!\nRIBBON_GCTL_FORCE_LOGIN:";
               }
               if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserAdmin(parsedArgs[0]))) {
-                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.";
+                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.\nRIBBON_GCTL_FORCE_LOGIN:";
               }
               String returned = AccessHandler.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
               if (returned == null) {
@@ -148,7 +148,7 @@ public class RibbonProtocol {
                   CURR_SESSION.setSessionName();
                   return "OK:";
               } else {
-                  return "RIBBON_ERROR:" + returned;
+                  return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
               }
           }
         });
