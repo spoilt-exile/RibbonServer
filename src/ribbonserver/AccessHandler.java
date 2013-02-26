@@ -170,7 +170,7 @@ public final class AccessHandler {
         if (findedUser != null) {
             if (findedUser.H_PASSWORD.equals(givenHash)) {
                 if (!findedUser.IS_ENABLED) {
-                    return "Користувача заблоковано!";
+                    return "Користувач " + givenName + " заблоковано!";
                 } else {
                     return null;
                 }
@@ -178,7 +178,7 @@ public final class AccessHandler {
                 return "Невірний пароль!";
             }
         } else {
-            return "Користувача не знайдено!";
+            return "Користувача " + givenName + " не знайдено!";
         }
     }
     
