@@ -28,7 +28,7 @@ public final class Directories {
     /**
      * ID of this component or object for loging
      */
-    private static String LOG_ID = "Обробник напрямків";
+    private static String LOG_ID = "НАПРЯМКИ";
     
     /**
      * Root directory

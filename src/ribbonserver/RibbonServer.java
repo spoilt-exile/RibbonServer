@@ -38,7 +38,7 @@ public class RibbonServer {
     /**
      * ID of this component or object for loging
      */
-    public static String LOG_ID = "Укрінформ \"Стрічка\"";
+    public static String LOG_ID = "СИСТЕМА";
     
     /**
      * Current dir variable

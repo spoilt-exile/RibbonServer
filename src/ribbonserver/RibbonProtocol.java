@@ -25,7 +25,7 @@ package ribbonserver;
  */
 public class RibbonProtocol {
     
-    private String LOG_ID = "Мережевий протокол \"Стрічка\"";
+    private String LOG_ID = "ПРОТОКОЛ";
     
     /**
      * Tail of protocol result which should be delivered to all peers;

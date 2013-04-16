@@ -25,7 +25,7 @@ package ribbonserver;
  */
 public final class Messenger {
     
-    private static String LOG_ID = "Індексатор повідомлень";
+    private static String LOG_ID = "ПОВІДОМЛЕННЯ";
     
     /**
      * Storage of message entries

@@ -27,7 +27,7 @@ import java.util.Arrays;
  */
 public final class AccessHandler {
     
-    private static String LOG_ID = "Контроль доступу";
+    private static String LOG_ID = "ДОСТУП";
     
     /**
      * User storage class;

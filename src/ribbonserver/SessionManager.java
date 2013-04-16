@@ -27,7 +27,7 @@ import java.util.Iterator;
  */
 public final class SessionManager {
     
-    private static String LOG_ID = "Менеджер мережевих сесій";
+    private static String LOG_ID = "СЕСІЯ";
     
     /**
      * Arraylist with active network sessions

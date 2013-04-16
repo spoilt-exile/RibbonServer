@@ -25,7 +25,7 @@ package ribbonserver;
  */
 public class Procedures {
     
-    private static String LOG_ID = "Бібліотека процедур";
+    private static String LOG_ID = "ПРОЦЕДУРИ";
     
     /**
      * <b>[RIBBON a1]</b><br>

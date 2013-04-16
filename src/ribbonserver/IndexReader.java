@@ -25,7 +25,7 @@ package ribbonserver;
  */
 public abstract class IndexReader {
     
-    private static String LOG_ID = "Зчитувач індексів";
+    private static String LOG_ID = "ІНДЕКСАТОР";
     
     /**
      * Read directories in directory index file
