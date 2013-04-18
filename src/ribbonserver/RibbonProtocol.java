@@ -385,8 +385,8 @@ public class RibbonProtocol {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 }
                 if ((matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME) || (AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) != null))) {
-                    MessageClasses.MessageProperty newProp = new MessageClasses.MessageProperty();
-                    newProp.PROPERTY_PREFIX = MessageClasses.MessagePropertyTypes.valueOf(parsedArgs[1]);
+                    MessageClasses.MessageProperty newProp = new MessageClasses.MessageProperty(parsedArgs[1], CURR_SESSION.USER_NAME, parsedArgs[2], RibbonServer.getCurrentDate());
+                    newProp.TYPE = parsedArgs[1];
                     newProp.TEXT_MESSAGE = parsedArgs[2];
                     newProp.DATE = RibbonServer.getCurrentDate();
                     newProp.USER = CURR_SESSION.USER_NAME;
@@ -418,7 +418,7 @@ public class RibbonProtocol {
                     java.util.ListIterator<MessageClasses.MessageProperty> propIter = matchedEntry.PROPERTIES.listIterator();
                     while (propIter.hasNext()) {
                         MessageClasses.MessageProperty currProp = propIter.next();
-                        if (currProp.PROPERTY_PREFIX == MessageClasses.MessagePropertyTypes.valueOf(parsedArgs[1]) && currProp.DATE.equals(parsedArgs[2])) {
+                        if (currProp.TYPE.equals(parsedArgs[1]) && currProp.DATE.equals(parsedArgs[2])) {
                             findedProp = currProp;
                             break;
                         }
