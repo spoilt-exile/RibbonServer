@@ -19,6 +19,8 @@
 
 package ribbonserver;
 
+import Utils.IOControl;
+
 /**
  * Main Ribbon server class
  * @author Stanislav Nepochatov
@@ -108,6 +110,40 @@ public class RibbonServer {
     public static String GROUPS_INDEX_PATH = "groups.index";
     
     public static String BASE_INDEX_PATH = "base.index";
+    
+    public static Import.Quene ImportQuene;
+    
+    private static class IOWrapper extends Utils.SystemWrapper {
+
+        @Override
+        public void log(String logSource, Integer logLevel, String logMessage) {
+            RibbonServer.logAppend(logSource, logLevel, logMessage);
+        }
+
+        @Override
+        public void addMessage(MessageClasses.Message givenMessage) {
+            Procedures.PROC_POST_MESSAGE(givenMessage);
+        }
+
+        @Override
+        public void registerPropertyName(String givenName) {
+            Boolean result = MessageClasses.MessageProperty.Types.registerTypeIfNotExist(givenName);
+            if (result) {
+                this.log(IOControl.IMPORT_LOGID, 2, "зареєстровано новий тип ознак '" + givenName + "'");
+            }
+        }
+
+        @Override
+        public String getDate() {
+            return RibbonServer.getCurrentDate();
+        }
+
+        @Override
+        public String getProperty(String key) {
+            return RibbonServer.mainConfig.getProperty(key);
+        }
+        
+    }
 
     /**
      * Main server's function
@@ -119,6 +155,9 @@ public class RibbonServer {
         logAppend(LOG_ID, 2, "Версія системи: " + RIBBON_VER);
         CURR_STATE = RibbonServer.SYS_STATES.INIT;
         setSystemVariables();
+        logAppend(LOG_ID, 2, "налаштування бібліотек імпорту до системи");
+        Utils.IOControl.initWrapper(new IOWrapper());
+        ImportQuene = new Import.Quene(CurrentDirectory + "/imports/", BASE_PATH + "/import/");
         logAppend(LOG_ID, 3, "початок налаштування контролю доступу");
         AccessHandler.init();
         logAppend(LOG_ID, 3, "початок налаштування напрявків");
@@ -127,6 +166,7 @@ public class RibbonServer {
         Messenger.init();
         CURR_STATE = RibbonServer.SYS_STATES.READY;
         Procedures.postInitMessage();
+        ImportQuene.importRun();
         logAppend(LOG_ID, 2, "налаштування мережі");
         try {
             java.net.ServerSocket RibbonServSocket = new java.net.ServerSocket(NETWORK_PORT);
