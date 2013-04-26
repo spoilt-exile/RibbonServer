@@ -61,16 +61,52 @@ public class RibbonServer {
      * System states enumeration
      */
     public static enum SYS_STATES {
-        INIT,       //Initialication state
-        READY,      //System is ready to recieve messages
-        MAINTAINING,//System is under maintaining
-        CLOSING     //System is going to shoutdown
+        
+        /**
+         * Initialization state.<br>
+         * <b>LIMIT:</b> login, posting, IO operations.
+         */
+        INIT,
+        
+        /**
+         * System is ready to recieve messages.<br>
+         * <b>NO LIMIT</b>.
+         */
+        READY,
+        
+        /**
+         * I/O subsystem emergency state.<br>
+         * <b>LIMIT:</b> some IO operations.
+         */
+        DIRTY,
+        
+        /**
+         * Maintaince state.<br>
+         * <b>LIMIT:</b> posting, IO operations.
+         */
+        MAINTAINING,
+        
+        /**
+         * Closing state.<br>
+         * <b>LIMIT:</b> login, posting, IO operations.
+         */
+        CLOSING
     }
     
     /**
      * Current system state variable
      */
     public static SYS_STATES CURR_STATE = null;
+    
+    /**
+     * List of IO modules strings with errors.
+     */
+    public static java.util.ArrayList<String> DIRTY_LIST = new java.util.ArrayList<>();
+    
+    /**
+     * Lock for system status concurent operations.
+     */
+    protected static Object DIRTY_LOCK = new Object();
     
     /**
      * Is system controled by administrator control console
@@ -142,7 +178,37 @@ public class RibbonServer {
         public String getProperty(String key) {
             return RibbonServer.mainConfig.getProperty(key);
         }
-        
+
+        @Override
+        public void enableDirtyState(String moduleType, String moduleScheme, String modulePrint) {
+            String moduleString = moduleType + ":" + modulePrint;
+            if (RibbonServer.DIRTY_LIST.contains(moduleString)) {
+                return;
+            }
+            if (RibbonServer.DIRTY_LIST.isEmpty()) {
+                RibbonServer.logAppend(RibbonServer.LOG_ID, 2, "модуль " + moduleType + " за схемою " + moduleScheme + " отримав помилку при роботі.");
+                RibbonServer.logAppend(RibbonServer.LOG_ID, 1, "система переходить у \'брудний\' режим!");
+                //TODO add admin remote notification of such event
+            }
+            synchronized (RibbonServer.DIRTY_LOCK) {
+                RibbonServer.CURR_STATE = RibbonServer.SYS_STATES.DIRTY;
+                RibbonServer.DIRTY_LIST.add(moduleType + ":" + modulePrint);
+            }
+        }
+
+        @Override
+        public void disableDirtyState(String moduleType, String moduleScheme, String modulePrint) {
+            String moduleString = moduleType + ":" + modulePrint;
+            synchronized (RibbonServer.DIRTY_LOCK) {
+                if (!RibbonServer.DIRTY_LIST.remove(moduleString)) {
+                    RibbonServer.logAppend(RibbonServer.LOG_ID, 1, "запису " + moduleScheme + " немає у списку збійних модулів!");
+                }
+                if (RibbonServer.DIRTY_LIST.isEmpty() && RibbonServer.CURR_STATE == RibbonServer.SYS_STATES.DIRTY) {
+                    RibbonServer.logAppend(RibbonServer.LOG_ID, 2, "система працює у штатному режимі");
+                    RibbonServer.CURR_STATE = RibbonServer.SYS_STATES.READY;
+                }
+            }
+        }
     }
 
     /**
