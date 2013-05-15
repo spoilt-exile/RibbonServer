@@ -28,6 +28,11 @@ public abstract class IndexReader {
     private static String LOG_ID = "ІНДЕКСАТОР";
     
     /**
+     * Lock object for concurent safe index operations.
+     */
+    private static final Object INDEX_LOCK = new Object();
+    
+    /**
      * Read directories in directory index file
      * @return arraylist of dir shemas
      * @see Directories.dirSchema
@@ -160,33 +165,38 @@ public abstract class IndexReader {
      * @param csvReport csv formated string
      */
     public synchronized static void appendToBaseIndex(String csvReport) {
-        try {
-            try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH, true)) {
-                messageWriter.write(csvReport + "\n");
+        synchronized (INDEX_LOCK) {
+            try {
+                try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH, true)) {
+                    messageWriter.write(csvReport + "\n");
+                    messageWriter.close();
+                }
+            } catch (java.io.IOException ex) {
+                RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
             }
-        } catch (java.io.IOException ex) {
-            RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
         }
     }
     
     /**
-     * Update base index file after message manipulations
+     * Update base index file after message manipulations.
      */
     public synchronized static void updateBaseIndex() {
         Thread delayExec = new Thread() {
             @Override
             public void run() {
-                java.util.ListIterator<MessageClasses.MessageEntry> storeIter = Messenger.messageIndex.listIterator();
-                String newIndexFileContent = "";
-                while (storeIter.hasNext()) {
-                    newIndexFileContent += storeIter.next().toCsv() + "\n";
-                }
-                try {
-                    try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH)) {
-                        messageWriter.write(newIndexFileContent);
+                synchronized (INDEX_LOCK) {
+                    java.util.ListIterator<MessageClasses.MessageEntry> storeIter = Messenger.messageIndex.listIterator();
+                    String newIndexFileContent = "";
+                    while (storeIter.hasNext()) {
+                        newIndexFileContent += storeIter.next().toCsv() + "\n";
                     }
-                } catch (java.io.IOException ex) {
-                    RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
+                    try {
+                        try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH)) {
+                            messageWriter.write(newIndexFileContent);
+                        }
+                    } catch (java.io.IOException ex) {
+                        RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");
+                    }
                 }
             }
         };

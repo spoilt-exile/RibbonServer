@@ -149,6 +149,8 @@ public class RibbonServer {
     
     public static Import.Quene ImportQuene;
     
+    public static Export.Dispatcher ExportDispatcher;
+    
     private static class IOWrapper extends Utils.SystemWrapper {
 
         @Override
@@ -209,6 +211,11 @@ public class RibbonServer {
                 }
             }
         }
+
+        @Override
+        public void updateIndex() {
+            IndexReader.updateBaseIndex();
+        }
     }
 
     /**
@@ -224,6 +231,7 @@ public class RibbonServer {
         logAppend(LOG_ID, 2, "налаштування бібліотек імпорту до системи");
         Utils.IOControl.initWrapper(new IOWrapper());
         ImportQuene = new Import.Quene(CurrentDirectory + "/imports/", BASE_PATH + "/import/");
+        ExportDispatcher = new Export.Dispatcher(CurrentDirectory + "/exports/", BASE_PATH + "/export/");
         logAppend(LOG_ID, 3, "початок налаштування контролю доступу");
         AccessHandler.init();
         logAppend(LOG_ID, 3, "початок налаштування напрявків");
