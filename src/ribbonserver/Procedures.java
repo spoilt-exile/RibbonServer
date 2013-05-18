@@ -19,6 +19,8 @@
 
 package ribbonserver;
 
+import Utils.IOControl;
+
 /**
  * Main system procedures
  * @author Stanislav Nepochatov
@@ -38,7 +40,7 @@ public class Procedures {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо випустити повідомлення, система не готова!");
             return "RIBBON_ERROR:Система не готова!";
         } else {
-            Integer failedIndex = AccessHandler.checkAccessForAll(givenMessage.AUTHOR, givenMessage.DIRS, 1);
+           Integer failedIndex = AccessHandler.checkAccessForAll(givenMessage.AUTHOR, givenMessage.DIRS, 1);
             if (failedIndex != null) {
                 return "RIBBON_ERROR:Помилка доступу до напрямку " + givenMessage.DIRS[failedIndex];
             }
@@ -48,6 +50,9 @@ public class Procedures {
                 givenMessage.ORIG_AUTHOR = Messenger.getMessageEntryByIndex(givenMessage.ORIG_INDEX).AUTHOR;
             }
             Messenger.addMessageToIndex(givenMessage);
+            if (IOControl.dispathcer.checkExport(givenMessage.DIRS)) {
+                IOControl.dispathcer.initExport(givenMessage);
+            }
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);
             givenMessage.CONTENT = null;
             IndexReader.appendToBaseIndex(givenMessage.returnEntry().toCsv());
