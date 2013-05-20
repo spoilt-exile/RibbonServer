@@ -28,17 +28,22 @@ import Utils.IOControl;
 public final class Directories {
     
     /**
-     * ID of this component or object for loging
+     * ID of this component or object for loging.
      */
     private static String LOG_ID = "НАПРЯМКИ";
     
     /**
-     * Root directory
+     * Root directory.
      */
     private static DirClasses.DirEntry rootDir;
     
     /**
-     * Init directory's component
+     * Directories global lock.
+     */
+    private static final Object dirLock = new Object();
+    
+    /**
+     * Init directory's component.
      */
     public static void init() {
         rootDir = new DirClasses.DirEntry();
@@ -83,7 +88,9 @@ public final class Directories {
      * @param givenIndex index identifier
      */
     public static void addIndexToDir(String givenDir, String givenIndex) {
-        Directories.rootDir.addIndex("", givenDir, givenIndex);
+        synchronized (dirLock) {
+            Directories.rootDir.addIndex("", givenDir, givenIndex);
+        }
     }
     
     /**
@@ -92,7 +99,9 @@ public final class Directories {
      * @param givenIndex index indentifier
      */
     public static void removeIndexFromDir(String givenDir, String givenIndex) {
-        Directories.rootDir.removeIndex("", givenDir, givenIndex);
+        synchronized (dirLock) {
+            Directories.rootDir.removeIndex("", givenDir, givenIndex);
+        }
     }
     
     /**

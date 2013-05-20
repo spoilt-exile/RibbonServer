@@ -43,6 +43,16 @@ public final class Messenger {
     private static Integer newIndex = 0;
     
     /**
+     * Message index list sync lock.
+     */
+    private static final Object messageLock = new Object();
+    
+    /**
+     * Tag index list sync lock.
+     */
+    private static final Object tagLock = new Object();
+    
+    /**
      * Init message index handle component
      */
     public static void init() {
@@ -76,32 +86,15 @@ public final class Messenger {
      * @return tagEntry or null
      */
     private static MessageClasses.TagEntry isTagExist(String tagName) {
-        java.util.ListIterator<MessageClasses.TagEntry> tagIter = Messenger.tagIndex.listIterator();
-        while (tagIter.hasNext()) {
-            MessageClasses.TagEntry currTag = tagIter.next();
-            if (currTag.NAME.equals(tagName)) {
-                return currTag;
+        synchronized (tagLock) {
+            java.util.ListIterator<MessageClasses.TagEntry> tagIter = Messenger.tagIndex.listIterator();
+            while (tagIter.hasNext()) {
+                MessageClasses.TagEntry currTag = tagIter.next();
+                if (currTag.NAME.equals(tagName)) {
+                    return currTag;
+                }
             }
-        }
-        return null;
-    }
-    
-    /**
-     * Add to tag index or create new tag
-     * @param tagName name of the tag
-     * @param index index of message which contain this tag
-     * @deprecated operate only with single tag<br>
-     * use addToTagIndex() method instead;
-     * @see #addToTagIndex(MessageClasses.MessageEntry) 
-     */
-    public static void tagMessage(String tagName, String index) {
-        MessageClasses.TagEntry namedTag = Messenger.isTagExist(tagName);
-        if (namedTag == null) {
-            namedTag = new MessageClasses.TagEntry(tagName);
-            namedTag.INDEXES.add(index);
-            Messenger.tagIndex.add(namedTag);
-        } else {
-            namedTag.INDEXES.add(index);
+            return null;
         }
     }
     
@@ -110,14 +103,16 @@ public final class Messenger {
      * @param givenEntry message entry with tags;
      */
     public static void addToTagIndex(MessageClasses.MessageEntry givenEntry) {
-        for (String currTag : givenEntry.TAGS) {
-            MessageClasses.TagEntry namedTag = Messenger.isTagExist(currTag);
-            if (namedTag == null) {
-                namedTag = new MessageClasses.TagEntry(currTag);
-                namedTag.INDEXES.add(givenEntry.INDEX);
-                Messenger.tagIndex.add(namedTag);
-            } else {
-                namedTag.INDEXES.add(givenEntry.INDEX);
+        synchronized (tagLock) {
+            for (String currTag : givenEntry.TAGS) {
+                MessageClasses.TagEntry namedTag = Messenger.isTagExist(currTag);
+                if (namedTag == null) {
+                    namedTag = new MessageClasses.TagEntry(currTag);
+                    namedTag.INDEXES.add(givenEntry.INDEX);
+                    Messenger.tagIndex.add(namedTag);
+                } else {
+                    namedTag.INDEXES.add(givenEntry.INDEX);
+                }
             }
         }
     }
@@ -137,10 +132,12 @@ public final class Messenger {
      * @param givenEntry entry with tags to remove;
      */
     public static void removeTagIndex(MessageClasses.MessageEntry givenEntry) {
-        for (String currTag : givenEntry.TAGS) {
-            MessageClasses.TagEntry namedTag = Messenger.isTagExist(currTag);
-            if (namedTag != null) {
-                namedTag.INDEXES.remove(givenEntry.INDEX);
+        synchronized (tagLock) {
+            for (String currTag : givenEntry.TAGS) {
+                MessageClasses.TagEntry namedTag = Messenger.isTagExist(currTag);
+                if (namedTag != null) {
+                    namedTag.INDEXES.remove(givenEntry.INDEX);
+                }
             }
         }
     }
@@ -149,7 +146,7 @@ public final class Messenger {
      * Get index for new message
      * @return string expresion of new index
      */
-    private static String getNewIndex() {
+    private static synchronized String getNewIndex() {
         String newIndexStr = String.valueOf(++newIndex);
         while (newIndexStr.length() < 10) {
             newIndexStr = "0" + newIndexStr;
@@ -164,11 +161,10 @@ public final class Messenger {
     public static void addMessageToIndex(MessageClasses.Message givenMessage) {
         givenMessage.INDEX = Messenger.getNewIndex();
         givenMessage.DATE = RibbonServer.getCurrentDate();
-        Messenger.messageIndex.add(givenMessage.returnEntry());
+        synchronized (messageLock) {
+            Messenger.messageIndex.add(givenMessage.returnEntry());
+        }
         addToTagIndex(givenMessage);
-        /**for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
-            tagMessage(currTags[tag_Index], givenMessage.INDEX);
-        }**/
     }
     
     /**
@@ -177,12 +173,14 @@ public final class Messenger {
      * @return all tags as csv line
      */
     public static String PROC_GET_TAGS() {
-        String returned = "";
-        java.util.ListIterator<MessageClasses.TagEntry> tagIter = Messenger.tagIndex.listIterator();
-        while (tagIter.hasNext()) {
-            returned += "RIBBON_UCTL_LOAD_TAG:" + tagIter.next().toCsv() + "\n";
+        synchronized (tagLock) {
+            StringBuffer getBuf = new StringBuffer();
+            java.util.ListIterator<MessageClasses.TagEntry> tagIter = Messenger.tagIndex.listIterator();
+            while (tagIter.hasNext()) {
+                getBuf.append("RIBBON_UCTL_LOAD_TAG:").append(tagIter.next().toCsv()).append("\n");
+            }
+            return getBuf.append("END:").toString();
         }
-        return returned + "END:";
     }
     
     /**
@@ -191,16 +189,18 @@ public final class Messenger {
      * @return messages on csv form;
      */
     public static String PROC_LOAD_BASE_FROM_INDEX(String givenIndex) {
-        String returned = "";
+        StringBuffer getBuf = new StringBuffer();
         if (Integer.parseInt(givenIndex) > Messenger.newIndex) {
             return "END:";
         } else {
-            java.util.ListIterator<MessageClasses.MessageEntry> messageIter = Messenger.messageIndex.listIterator(Integer.parseInt(givenIndex));
-            while (messageIter.hasNext()) {
-                returned += "RIBBON_UCTL_LOAD_INDEX:" + messageIter.next().toCsv() + "\n";
+            synchronized (messageLock) {
+                java.util.ListIterator<MessageClasses.MessageEntry> messageIter = Messenger.messageIndex.listIterator(Integer.parseInt(givenIndex));
+                while (messageIter.hasNext()) {
+                    getBuf.append("RIBBON_UCTL_LOAD_INDEX:").append(messageIter.next().toCsv()).append("\n");
+                }
             }
         }
-        return returned + "END:";
+        return getBuf.append("END:").toString();
     }
     
     /**
@@ -209,11 +209,13 @@ public final class Messenger {
      * @return message entry object or null
      */
     public static MessageClasses.MessageEntry getMessageEntryByIndex(String givenIndex) {
-        java.util.ListIterator<MessageClasses.MessageEntry> messageIter = Messenger.messageIndex.listIterator();
-        while (messageIter.hasNext()) {
-            MessageClasses.MessageEntry currEntry = messageIter.next();
-            if (currEntry.INDEX.equals(givenIndex)) {
-                return currEntry;
+        synchronized (tagLock) {
+            java.util.ListIterator<MessageClasses.MessageEntry> messageIter = Messenger.messageIndex.listIterator();
+            while (messageIter.hasNext()) {
+                MessageClasses.MessageEntry currEntry = messageIter.next();
+                if (currEntry.INDEX.equals(givenIndex)) {
+                    return currEntry;
+                }
             }
         }
         return null;
@@ -224,15 +226,9 @@ public final class Messenger {
      * @param givenEntry entry to delete
      */
     public static void deleteMessageEntryFromIndex(MessageClasses.MessageEntry givenEntry) {
-        Messenger.messageIndex.remove(givenEntry);
-        /**for (Integer removeTagIndex = 0; removeTagIndex < givenEntry.TAGS.length; removeTagIndex++) {
-            MessageClasses.TagEntry currTag = Messenger.isTagExist(givenEntry.TAGS[removeTagIndex]);
-            if (currTag.INDEXES.size() == 1 && (currTag.INDEXES.get(0).equals(givenEntry.INDEX))) {
-                Messenger.tagIndex.remove(currTag);
-            } else {
-                currTag.INDEXES.remove(givenEntry.INDEX);
-            }
-        }**/
+        synchronized (messageLock) {
+            Messenger.messageIndex.remove(givenEntry);
+        }
         Messenger.removeTagIndex(givenEntry);
         IndexReader.updateBaseIndex();
     }
