@@ -115,42 +115,99 @@ public class RibbonServer {
     
     /** SYSTEM VARIABLES **/
     
+    /**
+     * Path to Ribbon base.
+     */
     public static String BASE_PATH;
     
+    /**
+     * Allow attachments switch <b>[not yet implemented]</b>.
+     */
     public static Boolean BASE_ALLOW_ATTACHMENTS;
     
+    /**
+     * Version of the server.
+     */
     public static String RIBBON_VER = "a2";
     
+    /**
+     * Port number for listening.
+     */
     public static Integer NETWORK_PORT;
     
+    /**
+     * Allow remote connection (not only localhost) switch.
+     */
     public static Boolean NETWORK_ALLOW_REMOTE;
     
+    /**
+     * Network connections limit variable.
+     */
     public static Integer NETWORK_MAX_CONNECTIONS;
     
+    /**
+     * Cache switch <b>[not yet implemented]</b>.
+     */
     public static Boolean CACHE_ENABLED;
     
+    /**
+     * Size of cache <b>[not yet implemented]</b>.
+     */
     public static Integer CACHE_SIZE;
     
+    /**
+     * Defalut ALL group permissions.
+     */
     public static String ACCESS_ALL_MASK;
     
+    /**
+     * Allow to login user to more than one session.
+     */
     public static Boolean ACCESS_ALLOW_MULTIPLIE_LOGIN;
     
+    /**
+     * Post system exception to specified directory.
+     */
     public static Boolean DEBUG_POST_EXCEPTIONS;
     
+    /**
+     * Directory to post exception messages.
+     */
     public static String DEBUG_POST_DIR;
     
+    /**
+     * Name of directory index file.
+     */
     public static String DIR_INDEX_PATH = "dir.index";
     
+    /**
+     * Name of users index file.
+     */
     public static String USERS_INDEX_PATH = "users.index";
     
+    /**
+     * Name of group index file.
+     */
     public static String GROUPS_INDEX_PATH = "groups.index";
     
+    /**
+     * Name of messages index file.
+     */
     public static String BASE_INDEX_PATH = "base.index";
     
+    /**
+     * Import quene object.
+     */
     public static Import.Quene ImportQuene;
     
+    /**
+     * Export dispatcher object.
+     */
     public static Export.Dispatcher ExportDispatcher;
     
+    /**
+     * System wrapper for system to libRibbonIO communication.
+     */
     private static class IOWrapper extends Utils.SystemWrapper {
 
         @Override
