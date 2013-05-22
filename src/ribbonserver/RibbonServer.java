@@ -218,6 +218,7 @@ public class RibbonServer {
         @Override
         public void addMessage(MessageClasses.Message givenMessage) {
             Procedures.PROC_POST_MESSAGE(givenMessage);
+            SessionManager.broadcast("RIBBON_UCTL_LOAD_INDEX:" + givenMessage.toCsv(), RibbonProtocol.CONNECTION_TYPES.CLIENT);
         }
 
         @Override
@@ -270,8 +271,9 @@ public class RibbonServer {
         }
 
         @Override
-        public void updateIndex() {
+        public void updateIndex(String givenIndex) {
             IndexReader.updateBaseIndex();
+            SessionManager.broadcast("RIBBON_UCTL_UPDATE_INDEX:" + Messenger.getMessageEntryByIndex(givenIndex).toCsv(), RibbonProtocol.CONNECTION_TYPES.CLIENT);
         }
     }
 
