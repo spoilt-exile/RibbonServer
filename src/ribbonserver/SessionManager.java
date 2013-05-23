@@ -70,6 +70,11 @@ public final class SessionManager {
         public java.io.PrintWriter outStream;
         
         /**
+         * Lock object for <code>outStream</code>.
+         */
+        public final Object outputLock = new Object();
+        
+        /**
          * Protocol handler, parser and executor
          */
         private RibbonProtocol ProtocolHandler;
@@ -99,7 +104,9 @@ public final class SessionManager {
                     if (answer.equals("COMMIT_CLOSE:")) {
                         isAlive = false;
                     }
-                    this.outStream.println(answer);
+                    synchronized (outputLock) {
+                        this.outStream.println(answer);
+                    }
                     if (this.ProtocolHandler.BROADCAST_TAIL != null) {
                         broadcast(this.ProtocolHandler.BROADCAST_TAIL, this.ProtocolHandler.BROADCAST_TYPE);
                         this.ProtocolHandler.BROADCAST_TAIL = null;
@@ -172,7 +179,9 @@ public final class SessionManager {
         while (sessionIter.hasNext()) {
             SessionThread currSession = sessionIter.next();
             if (currSession.ProtocolHandler.CURR_TYPE == type) {
-                currSession.outStream.println(message);
+                synchronized (currSession.outputLock) {
+                    currSession.outStream.println(message);
+                }
             }
         }
     }
