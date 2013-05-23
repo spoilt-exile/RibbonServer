@@ -100,11 +100,11 @@ public final class SessionManager {
             try {
                 while (this.isAlive == true) {
                     inputLine = inStream.readLine();
-                    String answer = this.ProtocolHandler.process(inputLine);
-                    if (answer.equals("COMMIT_CLOSE:")) {
-                        isAlive = false;
-                    }
                     synchronized (outputLock) {
+                        String answer = this.ProtocolHandler.process(inputLine);
+                        if (answer.equals("COMMIT_CLOSE:")) {
+                            isAlive = false;
+                        }
                         this.outStream.println(answer);
                     }
                     if (this.ProtocolHandler.BROADCAST_TAIL != null) {
