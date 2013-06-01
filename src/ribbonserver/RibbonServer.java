@@ -297,6 +297,8 @@ public class RibbonServer {
         Directories.init();
         logAppend(LOG_ID, 3, "зчитування індексу бази повідомленнь");
         Messenger.init();
+        logAppend(LOG_ID, 3, "зчитування індексу сесій системи");
+        SessionManager.init();
         CURR_STATE = RibbonServer.SYS_STATES.READY;
         Procedures.postInitMessage();
         ImportQuene.importRun();

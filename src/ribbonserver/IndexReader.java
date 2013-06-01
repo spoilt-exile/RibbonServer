@@ -28,9 +28,14 @@ public abstract class IndexReader {
     private static String LOG_ID = "ІНДЕКСАТОР";
     
     /**
-     * Lock object for concurent safe index operations.
+     * Lock object for concurent safe base index operations.
      */
-    private static final Object INDEX_LOCK = new Object();
+    private static final Object BASE_LOCK = new Object();
+    
+    /**
+     * Lock object for concurent safe session index operations.
+     */
+    private static final Object SESSION_LOCK = new Object();
     
     /**
      * Read directories in directory index file
@@ -161,11 +166,78 @@ public abstract class IndexReader {
     }
     
     /**
+     * Read session index file.
+     * @return array list with session index;
+     */
+    public static java.util.ArrayList<SessionManager.SessionEntry> readSessionIndex() {
+        java.util.ArrayList<SessionManager.SessionEntry> returnedIndex = new java.util.ArrayList<>();
+        try {
+            java.io.BufferedReader baseIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + "session.index"));
+            while (baseIndexReader.ready()) {
+                returnedIndex.add(new SessionManager.SessionEntry(baseIndexReader.readLine()));
+            }
+        } catch (java.io.FileNotFoundException ex) {
+            RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу сесій не знайдено. Створюю новий.");
+            java.io.File usersIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + "session.index");
+            try {
+                usersIndexFile.createNewFile();
+            } catch (java.io.IOException exq) {
+                RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу сесій!");
+                System.exit(5);
+            }
+        } catch (java.io.IOException ex) {
+            RibbonServer.logAppend(LOG_ID, 0, "помилка читання файлу індекса сесій!");
+            System.exit(4);
+        }
+        return returnedIndex;
+    }
+    
+    /**
+     * Append new message csv to session index file
+     * @param csvReport csv formated string
+     */
+    public synchronized static void appendToSessionIndex(String csvReport) {
+        synchronized (SESSION_LOCK) {
+            try {
+                try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index", true)) {
+                    messageWriter.write(csvReport + "\n");
+                    messageWriter.close();
+                }
+            } catch (java.io.IOException ex) {
+                RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса сесій!");
+            }
+        }
+    }
+    
+    public synchronized static void updateSessionIndex() {
+        Thread delayExec = new Thread() {
+            @Override
+            public void run() {
+                synchronized (SESSION_LOCK) {
+                    java.util.ListIterator<MessageClasses.MessageEntry> storeIter = Messenger.messageIndex.listIterator();
+                    String newIndexFileContent = "";
+                    while (storeIter.hasNext()) {
+                        newIndexFileContent += storeIter.next().toCsv() + "\n";
+                    }
+                    try {
+                        try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index")) {
+                            messageWriter.write(newIndexFileContent);
+                        }
+                    } catch (java.io.IOException ex) {
+                        RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса сесій!");
+                    }
+                }
+            }
+        };
+        delayExec.start();
+    }
+    
+    /**
      * Append new message csv to base index file
      * @param csvReport csv formated string
      */
     public synchronized static void appendToBaseIndex(String csvReport) {
-        synchronized (INDEX_LOCK) {
+        synchronized (BASE_LOCK) {
             try {
                 try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH, true)) {
                     messageWriter.write(csvReport + "\n");
@@ -184,7 +256,7 @@ public abstract class IndexReader {
         Thread delayExec = new Thread() {
             @Override
             public void run() {
-                synchronized (INDEX_LOCK) {
+                synchronized (BASE_LOCK) {
                     java.util.ListIterator<MessageClasses.MessageEntry> storeIter = Messenger.messageIndex.listIterator();
                     String newIndexFileContent = "";
                     while (storeIter.hasNext()) {

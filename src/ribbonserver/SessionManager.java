@@ -235,7 +235,8 @@ public final class SessionManager {
      * Init session manager.
      */
     public static void init() {
-        
+        SessionManager.sessionCookie = IndexReader.readSessionIndex();
+        RibbonServer.logAppend(LOG_ID, 3, "індекс сесій вдало завантажено");
     }
 
     /**
@@ -333,11 +334,13 @@ public final class SessionManager {
         SessionManager.SessionEntry returned = null;
         if (existed != null) {
             existed.initWithName(givenUser);
+            IndexReader.updateSessionIndex();
             return existed;
         } else {
             returned = new SessionManager.SessionEntry();
             returned.initWithName(givenUser);
             SessionManager.sessionCookie.add(returned);
+            IndexReader.appendToSessionIndex(returned.toCsv());
             return returned;
         }
     }
