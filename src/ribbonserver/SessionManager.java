@@ -30,9 +30,78 @@ public final class SessionManager {
     private static String LOG_ID = "СЕСІЯ";
     
     /**
-     * Arraylist with active network sessions
+     * Arraylist with active network sessions.
      */
     private static java.util.ArrayList<SessionManager.SessionThread> sessionsStore = new java.util.ArrayList<>();
+    
+    /**
+     * List with stored session entries.
+     */
+    private static java.util.ArrayList<SessionManager.SessionEntry> sessionCookie = new java.util.ArrayList<>();
+    
+    /**
+     * Session entry class for quick session resume.
+     */
+    private static class SessionEntry extends Generic.CsvElder {
+        
+        /**
+         * Hash id of the session.
+         */
+        public String SESSION_HASH_ID;
+        
+        /**
+         * Name of the user in that session.
+         */
+        public String SESSION_USER_NAME;
+        
+        /**
+         * Count of how many times this session used.
+         */
+        private Integer COUNT;
+        
+        /**
+         * If this entry is obselete.
+         */
+        public Boolean IS_OBSELETE = false;
+        
+        private final Integer COUNT_MAX = 10;
+        
+        /**
+         * Empty constructor.
+         */
+        public SessionEntry() {
+            this.baseCount = 3;
+            this.currentFormat = Generic.CsvElder.csvFormatType.SimpleCsv;
+        }
+        
+        /**
+         * Build object with given csv string.
+         * @param givenCsv 
+         */
+        public SessionEntry(String givenCsv) {
+            this();
+            java.util.ArrayList<String[]> parsedStruct = Generic.CsvFormat.fromCsv(this, givenCsv);
+            String[] baseArray = parsedStruct.get(0);
+            this.SESSION_HASH_ID = baseArray[0];
+            this.SESSION_USER_NAME = baseArray[1];
+            this.COUNT = Integer.parseInt(baseArray[2]);
+        }
+        
+        /**
+         * Use this entry.
+         */
+        public void useEntry() {
+            ++this.COUNT;
+            if (this.COUNT == this.COUNT_MAX) {
+                this.IS_OBSELETE = true;
+            }
+        }
+
+        @Override
+        public String toCsv() {
+            return this.SESSION_HASH_ID + ",{" + this.SESSION_USER_NAME + "}," + this.COUNT;
+        }
+    }
     
     /**
      * Single client session class
@@ -231,5 +300,31 @@ public final class SessionManager {
             }
         }
         return false;
+    }
+    
+    /**
+     * Get login from persistent session store.
+     * @param givenHashId hash id of the session;
+     * @return username of user or null;
+     */
+    public static String loginBySessionEntry(String givenHashId) {
+        SessionManager.SessionEntry findedSession = null;
+        java.util.ListIterator<SessionManager.SessionEntry> cookIter = SessionManager.sessionCookie.listIterator();
+        while (cookIter.hasNext()) {
+            SessionManager.SessionEntry currEntry = cookIter.next();
+            if (currEntry.SESSION_HASH_ID.equals(givenHashId)) {
+                findedSession = currEntry;
+                break;
+            }
+        }
+        if (findedSession != null) {
+            findedSession.useEntry();
+            if (findedSession.IS_OBSELETE) {
+                SessionManager.sessionCookie.remove(findedSession);
+            }
+            return findedSession.SESSION_USER_NAME;
+        } else {
+            return null;
+        }
     }
 }
