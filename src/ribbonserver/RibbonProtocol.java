@@ -22,6 +22,7 @@ package ribbonserver;
 /**
  * Ribbon protocol server side class
  * @author Stanislav Nepochatov
+ * @since RibbonServer a1
  */
 public class RibbonProtocol {
     
@@ -29,14 +30,21 @@ public class RibbonProtocol {
     
     /**
      * Tail of protocol result which should be delivered to all peers;
+     * @since RibbonServer a1
      */
     public String BROADCAST_TAIL;
     
     /**
      * Type of broadcasting;
+     * @since RibbonServer a1
      */
     public CONNECTION_TYPES BROADCAST_TYPE;
     
+    /**
+     * Default constructor.
+     * @param upperThread given session thread to link with;
+     * @since RibbonServer a1
+     */
     RibbonProtocol(SessionManager.SessionThread upperThread) {
         InitProtocol();
         CURR_SESSION = upperThread;
@@ -44,59 +52,103 @@ public class RibbonProtocol {
     
     /**
      * Link to upper level thread
+     * @since RibbonServer a1
      */
     private SessionManager.SessionThread CURR_SESSION;
     
     /**
-     * Protocol revision digit;
+     * Protocol revision digit.
+     * @since RibbonServer a1
      */
     private Integer INT_VERSION = 2;
     
     /**
-     * String protocol revision version;
+     * String protocol revision version.
+     * @since RibbonServer a1
      */
     private String STR_VERSION = RibbonServer.RIBBON_VER;
     
     /**
-     * Connection type enumeration
+     * Connection type enumeration.
+     * @since RibbonServer a1
      */
     public enum CONNECTION_TYPES {
+        
+        /**
+         * NULL connection: peer didn't call RIBBON_NCTL_INIT: yet.
+         */
         NULL,
+        
+        /**
+         * CLIENT connection for all user applications.
+         */
         CLIENT,
+        
+        /**
+         * CONTROL connection for all adm applications.
+         */
         CONTROL,
+        
+        /**
+         * Connection for any application.
+         */
         ANY
     };
     
     /**
-     * Current type of connection
+     * Current type of connection.
+     * @since RibbonServer a1
      */
     public CONNECTION_TYPES CURR_TYPE = CONNECTION_TYPES.NULL;
     
     /**
-     * ArrayList of commands objects
+     * ArrayList of commands objects.
+     * @since RibbonServer a1
      */
     private java.util.ArrayList<CommandLet> RIBBON_COMMANDS = new java.util.ArrayList<CommandLet>();
     
     /**
-     * Command template class
+     * Command template class.
+     * @since RibbonServer a1
      */
     private class CommandLet {
         
+        /**
+         * Default constroctor.
+         * @param givenName name of command;
+         * @param givenType type of connections which may use this command;
+         * @since RibbonServer a1
+         */
         CommandLet(String givenName, CONNECTION_TYPES givenType) {
             this.COMMAND_NAME = givenName;
             this.COMM_TYPE = givenType;
         }
         
+        /**
+         * Name of command.
+         * @since RibbonServer a1
+         */
         public String COMMAND_NAME;
         
+        /**
+         * Type of connections which may use this command.
+         * @since RibbonServer a1
+         */
         public CONNECTION_TYPES COMM_TYPE;
         
+        /**
+         * Main command body.
+         * @param args arguments from application <i>(may be in CSV format)</i>;
+         * @return command answer;
+         * @since RibbonServer a1
+         */
         public String exec(String args) {return "";};
         
     }
     
     /**
-     * Init protocol and load commands
+     * Init protocol and load commands.
+     * @since RibbonServer a1
      */
     private void InitProtocol() {
         
@@ -304,7 +356,6 @@ public class RibbonProtocol {
                 String[] parsedArgs = args.split(",");
                 String givenDir = parsedArgs[0];
                 String givenIndex = parsedArgs[1];
-                //String returnedContent = "";
                 StringBuffer returnedMessage = new StringBuffer();
                 if (AccessHandler.checkAccess(CURR_SESSION.USER_NAME, givenDir, 0) == false) {
                     return "RIBBON_ERROR:Помилка доступу до напрямку " + givenDir;
@@ -316,7 +367,6 @@ public class RibbonProtocol {
                     try {
                         java.io.BufferedReader messageReader = new java.io.BufferedReader(new java.io.FileReader(dirPath + givenIndex));
                         while (messageReader.ready()) {
-                            //returnedContent += messageReader.readLine() + "\n";
                             returnedMessage.append(messageReader.readLine());
                             returnedMessage.append("\n");
                         }
@@ -373,14 +423,11 @@ public class RibbonProtocol {
                             return "RIBBON_ERROR:Помилка доступу до напрямку " + matchedEntry.DIRS[dirIndex] +  ".";
                         }
                     }
-                    //RibbonServer.logAppend(RibbonServer.LOG_ID, 3, "повідомлення за індексом " + parsedArgs[1] + "(" + parsedArgs[0] + ") змінено");
-                    //Procedures.writeMessage(matchedEntry.DIRS, matchedEntry.INDEX, messageContent);
                     Procedures.PROC_MODIFY_MESSAGE(matchedEntry, modTemplate);
                     BROADCAST_TAIL = "RIBBON_UCTL_UPDATE_INDEX:" + matchedEntry.toCsv();
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
                     return "OK:";
                 } else {
-                    //return "RIBBON_ERROR:Помилка доступу до повідомлення";
                     if (oldIntFlag != null) {
                         return "RIBBON_ERROR:Помилка доступу до напрямку " + matchedEntry.DIRS[oldIntFlag] +  ".";
                     } else {
@@ -487,6 +534,7 @@ public class RibbonProtocol {
      * Process input from session socket and return answer;
      * @param input input line from client
      * @return answer form protocol to client
+     * @since RibbonServer a1
      */
     public String process(String input) {
         String[] parsed = Generic.CsvFormat.parseDoubleStruct(input);
@@ -498,6 +546,7 @@ public class RibbonProtocol {
      * @param command command word
      * @param args command's arguments
      * @return return form commandlet object
+     * @since RibbonServer a1
      */
     private String launchCommand(String command, String args) {
         CommandLet exComm = null;

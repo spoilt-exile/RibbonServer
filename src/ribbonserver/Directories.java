@@ -24,6 +24,7 @@ import Utils.IOControl;
 /**
  * Directories handle class
  * @author Stanislav Nepochatov
+ * @since RibbonServer a1
  */
 public final class Directories {
     
@@ -34,16 +35,19 @@ public final class Directories {
     
     /**
      * Root directory.
+     * @since RibbonServer a1
      */
     private static DirClasses.DirEntry rootDir;
     
     /**
      * Directories global lock.
+     * @since RibbonServer a2
      */
     private static final Object dirLock = new Object();
     
     /**
      * Init directory's component.
+     * @since RibbonServer a2
      */
     public static void init() {
         rootDir = new DirClasses.DirEntry();
@@ -62,6 +66,7 @@ public final class Directories {
     /**
      * Create full chain of directories with given schema
      * @param givenSchema directory schema
+     * @since RibbonServer a1
      */
     public static void createDirs(DirClasses.DirSchema givenSchema) {
         Directories.rootDir.insertDir("", givenSchema.FULL_DIR_NAME, givenSchema);
@@ -69,6 +74,7 @@ public final class Directories {
     
     /**
      * Dump current tree as text report
+     * @since RibbonServer a1
      */
     private static void dumpTree() {
         try {
@@ -86,6 +92,7 @@ public final class Directories {
      * Add given index to specified directory
      * @param givenDir directory in which index will be added
      * @param givenIndex index identifier
+     * @since RibbonServer a1
      */
     public static void addIndexToDir(String givenDir, String givenIndex) {
         synchronized (dirLock) {
@@ -97,6 +104,7 @@ public final class Directories {
      * Remove given index from specified directory
      * @param givenDir directory from which index will be removed
      * @param givenIndex index indentifier
+     * @since RibbonServer a1
      */
     public static void removeIndexFromDir(String givenDir, String givenIndex) {
         synchronized (dirLock) {
@@ -106,8 +114,9 @@ public final class Directories {
     
     /**
      * Return access description array from 
-     * @param givenDir
-     * @return 
+     * @param givenDir dir to search;
+     * @return array with permission entries;
+     * @since RibbonServer a2
      */
     public static DirClasses.DirPermissionEntry[] getDirAccess(String givenDir) {
         try {
@@ -121,6 +130,7 @@ public final class Directories {
      * Return anonymoys mode flag for specifed dir
      * @param givenDir given path to directory
      * @return path to file directory
+     * @since RibbonServer a1
      */
     public static String getDirPath(String givenDir) {
         String returned = rootDir.returnEndDir("", givenDir).DIR_PATH;
@@ -132,9 +142,9 @@ public final class Directories {
     }
     
     /**
-     * <b>[RIBBON a1]</b><br>
-     * Return all dirs to protocol commandlet
+     * Return all dirs to protocol commandlet.
      * @return dirs in csv form;
+     * @since RibbonServer a1
      */
     public static String PROC_GET_DIRS() {
         String returned = "";

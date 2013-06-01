@@ -24,6 +24,7 @@ import java.util.Iterator;
 /**
  * Network sessions store class
  * @author Stanislav Nepochatov
+ * @since RibbonServer a1
  */
 public final class SessionManager {
     
@@ -31,16 +32,19 @@ public final class SessionManager {
     
     /**
      * Arraylist with active network sessions.
+     * @since RibbonServer a1
      */
     private static java.util.ArrayList<SessionManager.SessionThread> sessionsStore = new java.util.ArrayList<>();
     
     /**
      * List with stored session entries.
+     * @since RibbonServer a2
      */
     public static java.util.ArrayList<SessionManager.SessionEntry> sessionCookie = new java.util.ArrayList<>();
     
     /**
      * Session entry class for quick session resume.
+     * @since RibbonServer a2
      */
     public static class SessionEntry extends Generic.CsvElder {
         
@@ -113,12 +117,13 @@ public final class SessionManager {
     }
     
     /**
-     * Single client session class
+     * Single client session class.
+     * @since RibbonServer a1
      */
     public static class SessionThread extends Thread {
         
         /**
-         * User name of this session
+         * User name of this session.
          */
         public String USER_NAME;
         
@@ -128,40 +133,46 @@ public final class SessionManager {
         public SessionEntry CURR_ENTRY;
         
         /**
-         * Short session description
+         * Short session description.
+         * @since RibbonServer a2
          */
         public String SESSION_TIP;
         
         /**
-         * Is session alive
+         * Is session alive.
          */
         public Boolean isAlive = false;
         
         /**
-         * Session network socket
+         * Session network socket.
          */
         private java.net.Socket SessionSocket;
         
         /**
-         * Input stream from client
+         * Input stream from client.
          */
         public java.io.BufferedReader inStream;
         
         /**
-         * Output writer to client
+         * Output writer to client.
          */
         public java.io.PrintWriter outStream;
         
         /**
          * Lock object for <code>outStream</code>.
+         * @since RibbonServer a2
          */
         public final Object outputLock = new Object();
         
         /**
-         * Protocol handler, parser and executor
+         * Protocol handler, parser and executor.
          */
         private RibbonProtocol ProtocolHandler;
         
+        /**
+         * Default constructor.
+         * @param givenSocket session socket;
+         */
         SessionThread(java.net.Socket givenSocket) {
             SessionSocket = givenSocket;
             try {
@@ -211,14 +222,16 @@ public final class SessionManager {
         }
         
         /**
-         * Set name of session thread
+         * Set name of session thread.
+         * @since RibbonServer a2
          */
         public void setSessionName() {
             this.SESSION_TIP = "[" + this.USER_NAME + "] на " + this.SessionSocket.getInetAddress().getHostName();
         }
         
         /**
-         * Set reader encoding
+         * Set reader encoding.
+         * @since RibbonServer a2
          */
         public void setReaderEncoding(String charsetName) {
             try {
@@ -233,6 +246,7 @@ public final class SessionManager {
     
     /**
      * Init session manager.
+     * @since RibbonServer a2
      */
     public static void init() {
         SessionManager.sessionCookie = IndexReader.readSessionIndex();
@@ -242,6 +256,7 @@ public final class SessionManager {
     /**
      * Create new session and add it into session list;
      * @param givenSocket socket to open session;
+     * @since RibbonServer a1
      */
     public static void createNewSession(java.net.Socket givenSocket) {
         SessionManager.SessionThread createdThread = new SessionManager.SessionThread(givenSocket);
@@ -254,6 +269,7 @@ public final class SessionManager {
     /**
      * Close session and delete it from sessaion array;
      * @param givenSession sessionb to close;
+     * @since RibbonServer a1
      */
     public static void closeSession(SessionManager.SessionThread givenSession) {
         if (!givenSession.isAlive) {
@@ -264,6 +280,7 @@ public final class SessionManager {
     /**
      * Broadcast message to all users
      * @param message a single line message
+     * @since RibbonServer a1
      */
     public static void broadcast(String message, RibbonProtocol.CONNECTION_TYPES type) {
         java.util.ListIterator<SessionThread> sessionIter = SessionManager.sessionsStore.listIterator();
@@ -281,6 +298,7 @@ public final class SessionManager {
      * Check if there is other control connection for the system
      * @param closingControlThread thread which going to close
      * @return result of checking
+     * @since RibbonServer a2
      */
     public static Boolean hasOtherControl(SessionThread closingControlThread) {
         java.util.ListIterator<SessionThread> sessionIter = SessionManager.sessionsStore.listIterator();
@@ -296,6 +314,7 @@ public final class SessionManager {
     /**
      * Check server connection limit.
      * @return true if limit achieved/fals if not;
+     * @since RibbonServer a2
      */
     public static Boolean checkConnectionLimit() {
         if (RibbonServer.NETWORK_MAX_CONNECTIONS != -1 && SessionManager.sessionsStore.size() == RibbonServer.NETWORK_MAX_CONNECTIONS) {
@@ -310,6 +329,7 @@ public final class SessionManager {
      * Find out is user is already logined in system.
      * @param givenName name of user to search;
      * @return true if user is already logined.
+     * @since RibbonServer a2
      */
     public static Boolean isAlreadyLogined(String givenName) {
         for (Iterator<SessionThread> it = SessionManager.sessionsStore.iterator(); it.hasNext();) {
@@ -328,6 +348,7 @@ public final class SessionManager {
      * Create new session entry and add it to list.
      * @param givenUser user name for session;
      * @return new created session entry;
+     * @since RibbonServer a2
      */
     public static SessionManager.SessionEntry createSessionEntry(String givenUser) {
         SessionManager.SessionEntry existed = SessionManager.getUserBySessionEntry(givenUser);
@@ -349,6 +370,7 @@ public final class SessionManager {
      * Get session entry from persistent session store.
      * @param givenHashId hash id of the session;
      * @return username of user or null;
+     * @since RibbonServer a2
      */
     public static SessionManager.SessionEntry getUserBySessionEntry(String givenHashId) {
         SessionManager.SessionEntry findedSession = null;
@@ -370,6 +392,7 @@ public final class SessionManager {
     /**
      * Renew session entry index file or remove it from index.
      * @param givenEntry entry to check;
+     * @since RibbonServer a2
      */
     public static void reniewEntry(SessionManager.SessionEntry givenEntry) {
         if (givenEntry.IS_OBSELETE) {

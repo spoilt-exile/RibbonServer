@@ -24,23 +24,27 @@ import java.util.Arrays;
 /**
  * Access control class and handler
  * @author Stanislav Nepochatov
+ * @since RibbonServer a2
  */
 public final class AccessHandler {
     
     private static String LOG_ID = "ДОСТУП";
     
     /**
-     * User storage class;
+     * User storage list.
+     * @since RibbonServer a2
      */
     private static java.util.ArrayList<UserClasses.UserEntry> userStore;
     
     /**
-     * 
+     * Group storage list.
+     * @since RibbonServer a2
      */
     private static java.util.ArrayList<UserClasses.GroupEntry> groupStore;
     
     /**
      * Init this component;
+     * @since RibbonServer a2
      */
     public static void init() {
         AccessHandler.groupStore = IndexReader.readGroups();
@@ -114,6 +118,7 @@ public final class AccessHandler {
      * @param givenName user name which attempt to perform some action
      * @param givenDirs array with directories which should be checked
      * @return null if success or array index which checking failed
+     * @since RibbonServer a2
      */
     public static Integer checkAccessForAll(String givenName, String[] givenDirs, Integer givenMode) {
         for (Integer dirIndex = 0; dirIndex < givenDirs.length; dirIndex++) {
@@ -128,6 +133,7 @@ public final class AccessHandler {
      * Find out is user is administrator
      * @param givenName name to search
      * @return result of checking
+     * @since RibbonServer a2
      */
     public static Boolean isUserAdmin(String givenName) {
         java.util.ListIterator<UserClasses.UserEntry> userIter = AccessHandler.userStore.listIterator();
@@ -214,6 +220,7 @@ public final class AccessHandler {
      * Find out if there is group with given name
      * @param givenGroupName given name to search
      * @return true if group existed/false if not
+     * @since RibbonServer a2
      */
     public static Boolean isGroupExisted(String givenGroupName) {
         java.util.ListIterator<UserClasses.GroupEntry> groupIter = groupStore.listIterator();

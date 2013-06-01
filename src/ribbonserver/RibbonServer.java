@@ -28,37 +28,38 @@ import Utils.IOControl;
 public class RibbonServer {
     
     /**
-     * Session and network handle object
-     */
-    public static SessionManager sessionObj;
-    
-    /**
-     * Date format
+     * Default time and date format for server.
+     * @since RibbonServer a1
      */
     private static java.text.DateFormat dateFormat = new java.text.SimpleDateFormat("HH:mm:ss dd.MM.yyyy");
     
     /**
-     * ID of this component or object for loging
+     * ID of this component or object for loging.
+     * @since RibbonServer a1
      */
     public static String LOG_ID = "СИСТЕМА";
     
     /**
-     * Current dir variable
+     * Current dir variable.
+     * @since RibbonServer a1
      */
     public static String CurrentDirectory = System.getProperty("user.dir");
     
     /**
-     * Log file object
+     * Log file object.
+     * @since RibbonServer a1
      */
     private static java.io.File logFile;
     
     /**
-     * Ribbon main configuration
+     * RibbonServer main configuration.
+     * @since RibbonServer a1
      */
     public static java.util.Properties mainConfig;
     
     /**
-     * System states enumeration
+     * System states enumeration.
+     * @since RibbonServer a1
      */
     public static enum SYS_STATES {
         
@@ -94,22 +95,26 @@ public class RibbonServer {
     }
     
     /**
-     * Current system state variable
+     * Current system state variable.
+     * @since RibbonServer a1
      */
     public static SYS_STATES CURR_STATE = null;
     
     /**
      * List of IO modules strings with errors.
+     * @since RibbonServer a2
      */
     public static java.util.ArrayList<String> DIRTY_LIST = new java.util.ArrayList<>();
     
     /**
      * Lock for system status concurent operations.
+     * @since RibbonServer a2
      */
     protected static Object DIRTY_LOCK = new Object();
     
     /**
-     * Is system controled by administrator control console
+     * Is system controled by administrator control console.
+     * @since RibbonServer a1
      */
     public static Boolean CONTROL_IS_PRESENT = false;
     
@@ -117,96 +122,115 @@ public class RibbonServer {
     
     /**
      * Path to Ribbon base.
+     * @since RibbonServer a1
      */
     public static String BASE_PATH;
     
     /**
      * Allow attachments switch <b>[not yet implemented]</b>.
+     * @since RibbonServer a2
      */
     public static Boolean BASE_ALLOW_ATTACHMENTS;
     
     /**
      * Version of the server.
+     * @since RibbonServer a1
      */
     public static String RIBBON_VER = "a2";
     
     /**
      * Port number for listening.
+     * @since RibbonServer a1
      */
     public static Integer NETWORK_PORT;
     
     /**
      * Allow remote connection (not only localhost) switch.
+     * @since RibbonServer a2
      */
     public static Boolean NETWORK_ALLOW_REMOTE;
     
     /**
      * Network connections limit variable.
+     * @since RibbonServer a2
      */
     public static Integer NETWORK_MAX_CONNECTIONS;
     
     /**
      * Cache switch <b>[not yet implemented]</b>.
+     * @since RibbonServer a2
      */
     public static Boolean CACHE_ENABLED;
     
     /**
      * Size of cache <b>[not yet implemented]</b>.
+     * @since RibbonServer a2
      */
     public static Integer CACHE_SIZE;
     
     /**
      * Defalut ALL group permissions.
+     * @since RibbonServer a2
      */
     public static String ACCESS_ALL_MASK;
     
     /**
      * Allow to login user to more than one session.
+     * @since RibbonServer a2
      */
     public static Boolean ACCESS_ALLOW_MULTIPLIE_LOGIN;
     
     /**
      * Post system exception to specified directory.
+     * @since RibbonServer a2
      */
     public static Boolean DEBUG_POST_EXCEPTIONS;
     
     /**
      * Directory to post exception messages.
+     * @since RibbonServer a2
      */
     public static String DEBUG_POST_DIR;
     
     /**
      * Name of directory index file.
+     * @since RibbonServer a1
      */
     public static String DIR_INDEX_PATH = "dir.index";
     
     /**
      * Name of users index file.
+     * @since RibbonServer a1
      */
     public static String USERS_INDEX_PATH = "users.index";
     
     /**
      * Name of group index file.
+     * @since RibbonServer a2
      */
     public static String GROUPS_INDEX_PATH = "groups.index";
     
     /**
      * Name of messages index file.
+     * @since RibbonServer a1
      */
     public static String BASE_INDEX_PATH = "base.index";
     
     /**
      * Import quene object.
+     * @since RibbonServer a2
      */
     public static Import.Quene ImportQuene;
     
     /**
      * Export dispatcher object.
+     * @since RibbonServer a2
      */
     public static Export.Dispatcher ExportDispatcher;
     
     /**
      * System wrapper for system to libRibbonIO communication.
+     * @since RibbonServer a2
      */
     private static class IOWrapper extends Utils.SystemWrapper {
 
@@ -321,7 +345,8 @@ public class RibbonServer {
     }
     
     /**
-     * Create Ribbon log file if it doesn't exist
+     * Create Ribbon log file if it doesn't exist.
+     * @since RibbonServer a1
      */
     private static void createLogFile() {
         logFile = new java.io.File(CurrentDirectory + "/ribbonserver.log");
@@ -348,6 +373,7 @@ public class RibbonServer {
      * @param component component which call this method;
      * @param type message type (see below);
      * @param message string of text message;
+     * @since RibbonServer a1
      */
     public static synchronized void logAppend(String component, Integer type, String message) {
         String typeStr = "";
@@ -383,8 +409,9 @@ public class RibbonServer {
     }
     
     /**
-     * Get current date with default date format
+     * Get current date with default date format.
      * @return current date
+     * @since RibbonServer a1
      */
     public static String getCurrentDate() {
         java.util.Date now = new java.util.Date();
@@ -393,8 +420,9 @@ public class RibbonServer {
     }
     
     /**
-     * Read system variables from properties file<br>
-     * and set them to local variables;
+     * Read system variables from properties file 
+     * and set them to local variables.
+     * @since RibbonServer a1
      */
     private static void setSystemVariables() {
         mainConfig = new java.util.Properties();
@@ -467,6 +495,7 @@ public class RibbonServer {
      * Get hash sum of given string.
      * @param givenStr given string;
      * @return md5 hash sum representation;
+     * @since RibbonServer a2
      */
     public static String getHash(String givenStr) {
         StringBuffer hexString = new StringBuffer();

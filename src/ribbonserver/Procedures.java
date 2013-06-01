@@ -24,16 +24,17 @@ import Utils.IOControl;
 /**
  * Main system procedures
  * @author Stanislav Nepochatov
+ * @since RibbonServer a1
  */
 public class Procedures {
     
     private static String LOG_ID = "ПРОЦЕДУРИ";
     
     /**
-     * <b>[RIBBON a1]</b><br>
      * Post given message into the system information stream
      * @param givenMessage message which should be released
      * @return processing status;
+     * @since RibbonServer a1
      */
     public static synchronized String PROC_POST_MESSAGE(MessageClasses.Message givenMessage) {
         if (RibbonServer.CURR_STATE != RibbonServer.SYS_STATES.READY) {
@@ -71,6 +72,7 @@ public class Procedures {
      * Write message content to file and create links
      * @param fullPath full path to message file
      * @param messageContent content of the message
+     * @since RibbonServer a1
      */
     public static void writeMessage(String[] dirArr, String strIndex, String messageContent) {
         String currPath = "";
@@ -98,8 +100,10 @@ public class Procedures {
     }
     
     /**
-     * <b>[RIBBON a2]</b><br>
      * Modify message by given template message.
+     * @param oldMessage original message to modify;
+     * @param newMessage override template message;
+     * @since RibbonServer a2
      */
     public static synchronized void PROC_MODIFY_MESSAGE(MessageClasses.MessageEntry oldMessage, MessageClasses.Message newMessage) {
         makeCleanup(oldMessage.DIRS, newMessage.DIRS, oldMessage.INDEX);
@@ -113,6 +117,7 @@ public class Procedures {
      * Make cleanup within old unused dirs in modifyed message;
      * @param oldDirs array with old dirs;
      * @param newDirs array with new dirs;
+     * @since RibbonServer a2
      */
     private static void makeCleanup(String[] oldDirs, String[] newDirs, String strIndex) {
         for (Integer oldIndex = 0; oldIndex < oldDirs.length; oldIndex++) {
@@ -134,9 +139,9 @@ public class Procedures {
     }
     
     /**
-     * <b>[RIBBON a1]</b><br>
      * Delete message from all indexes.
      * @param givenEntry entry to delete
+     * @since RibbonServer a1
      */
     public static synchronized void PROC_DELETE_MESSAGE(MessageClasses.MessageEntry givenEntry) {
         for (Integer pathIndex = 0; pathIndex < givenEntry.DIRS.length; pathIndex++) {
@@ -152,7 +157,8 @@ public class Procedures {
     }
     
     /**
-     * Post system launch notification
+     * Post system launch notification.
+     * @since RibbonServer a1
      */
     public static void postInitMessage() {
         String formatLine = "======================================================================================";

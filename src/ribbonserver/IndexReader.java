@@ -22,6 +22,7 @@ package ribbonserver;
 /**
  * Read, parse and store CSV Ribbon configurations and base index class
  * @author Stanislav Nepochatov
+ * @since RibbonServer a1
  */
 public abstract class IndexReader {
     
@@ -29,11 +30,13 @@ public abstract class IndexReader {
     
     /**
      * Lock object for concurent safe base index operations.
+     * @since RibbonServer a2
      */
     private static final Object BASE_LOCK = new Object();
     
     /**
      * Lock object for concurent safe session index operations.
+     * @since RibbonServer a2
      */
     private static final Object SESSION_LOCK = new Object();
     
@@ -41,6 +44,7 @@ public abstract class IndexReader {
      * Read directories in directory index file
      * @return arraylist of dir shemas
      * @see Directories.dirSchema
+     * @since RibbonServer a1
      */
     public static java.util.ArrayList<DirClasses.DirSchema> readDirectories() {
         java.util.ArrayList<DirClasses.DirSchema> Dirs = new java.util.ArrayList<>();
@@ -76,6 +80,7 @@ public abstract class IndexReader {
     /**
      * Read users in users index file
      * @return arrayList of users entries
+     * @since RibbonServer a1
      */
     public static java.util.ArrayList<UserClasses.UserEntry> readUsers() {
         java.util.ArrayList<UserClasses.UserEntry> returnedUsers = new java.util.ArrayList<>();
@@ -109,6 +114,7 @@ public abstract class IndexReader {
     /**
      * Read groups in groups index file
      * @return arrayList of groups entries
+     * @since RibbonServer a2
      */
     public static java.util.ArrayList<UserClasses.GroupEntry> readGroups() {
         java.util.ArrayList<UserClasses.GroupEntry> returnedGroups = new java.util.ArrayList<>();
@@ -141,6 +147,7 @@ public abstract class IndexReader {
     /**
      * Read message indexes in base index file
      * @return arraylist with index entries
+     * @since RibbonServer a1
      */
     public static java.util.ArrayList<MessageClasses.MessageEntry> readBaseIndex() {
         java.util.ArrayList<MessageClasses.MessageEntry> returnedIndex = new java.util.ArrayList<>();
@@ -168,6 +175,7 @@ public abstract class IndexReader {
     /**
      * Read session index file.
      * @return array list with session index;
+     * @since RibbonServer a2
      */
     public static java.util.ArrayList<SessionManager.SessionEntry> readSessionIndex() {
         java.util.ArrayList<SessionManager.SessionEntry> returnedIndex = new java.util.ArrayList<>();
@@ -195,6 +203,7 @@ public abstract class IndexReader {
     /**
      * Append new message csv to session index file
      * @param csvReport csv formated string
+     * @since RibbonServer a2
      */
     public synchronized static void appendToSessionIndex(String csvReport) {
         synchronized (SESSION_LOCK) {
@@ -209,19 +218,24 @@ public abstract class IndexReader {
         }
     }
     
+    /**
+     * Update session index file after session manipulations.
+     * @since RibbonServer a2
+     */
     public synchronized static void updateSessionIndex() {
         Thread delayExec = new Thread() {
             @Override
             public void run() {
                 synchronized (SESSION_LOCK) {
                     java.util.ListIterator<SessionManager.SessionEntry> sesIter = SessionManager.sessionCookie.listIterator();
-                    String newIndexFileContent = "";
+                    StringBuffer contentBuf = new StringBuffer();
                     while (sesIter.hasNext()) {
-                        newIndexFileContent += sesIter.next().toCsv() + "\n";
+                        contentBuf.append(sesIter.next().toCsv());
+                        contentBuf.append("\n");
                     }
                     try {
                         try (java.io.FileWriter sesWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index")) {
-                            sesWriter.write(newIndexFileContent);
+                            sesWriter.write(contentBuf.toString());
                         }
                     } catch (java.io.IOException ex) {
                         RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса сесій!");
@@ -235,6 +249,7 @@ public abstract class IndexReader {
     /**
      * Append new message csv to base index file
      * @param csvReport csv formated string
+     * @since RibbonServer a1
      */
     public synchronized static void appendToBaseIndex(String csvReport) {
         synchronized (BASE_LOCK) {
@@ -251,6 +266,7 @@ public abstract class IndexReader {
     
     /**
      * Update base index file after message manipulations.
+     * @since RibbonServer a1
      */
     public synchronized static void updateBaseIndex() {
         Thread delayExec = new Thread() {
@@ -258,13 +274,14 @@ public abstract class IndexReader {
             public void run() {
                 synchronized (BASE_LOCK) {
                     java.util.ListIterator<MessageClasses.MessageEntry> storeIter = Messenger.messageIndex.listIterator();
-                    String newIndexFileContent = "";
+                    StringBuffer contentBuf = new StringBuffer();
                     while (storeIter.hasNext()) {
-                        newIndexFileContent += storeIter.next().toCsv() + "\n";
+                        contentBuf.append(storeIter.next().toCsv());
+                        contentBuf.append("\n");
                     }
                     try {
                         try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH)) {
-                            messageWriter.write(newIndexFileContent);
+                            messageWriter.write(contentBuf.toString());
                         }
                     } catch (java.io.IOException ex) {
                         RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса бази повідомлень!");

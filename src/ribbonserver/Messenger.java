@@ -22,38 +22,45 @@ package ribbonserver;
 /**
  * Messages store, indexing, search and manipulation class
  * @author Stanislav Nepochatov
+ * @since RibbonServer a1
  */
 public final class Messenger {
     
     private static String LOG_ID = "ПОВІДОМЛЕННЯ";
     
     /**
-     * Storage of message entries
+     * Storage of message entries.
+     * @since RibbonServer a1
      */
     public static java.util.ArrayList<MessageClasses.MessageEntry> messageIndex;
     
     /**
-     * Storage of tag etries
+     * Storage of tag etries.
+     * @since RibbonServer a1
      */
     public static java.util.ArrayList<MessageClasses.TagEntry> tagIndex;
     
     /**
-     * Index for new message
+     * Index for new message.
+     * @since RibbonServer a1
      */
     private static Integer newIndex = 0;
     
     /**
      * Message index list sync lock.
+     * @since RibbonServer a2
      */
     private static final Object messageLock = new Object();
     
     /**
      * Tag index list sync lock.
+     * @since RibbonServer a2
      */
     private static final Object tagLock = new Object();
     
     /**
-     * Init message index handle component
+     * Init message index handle component.
+     * @since RibbonServer a2
      */
     public static void init() {
         messageIndex = IndexReader.readBaseIndex();
@@ -73,9 +80,6 @@ public final class Messenger {
                 Directories.addIndexToDir(currDirs[dirIndex], currEntry.INDEX);
             }
             addToTagIndex(currEntry);
-            /**for (Integer tag_Index = 0; tag_Index < currTags.length; tag_Index++) {
-                tagMessage(currTags[tag_Index], currEntry.INDEX);
-            }**/
         }
         RibbonServer.logAppend(LOG_ID, 3, "база повідомлень завантажена (" + messageIndex.size() + ")");
     }
@@ -84,6 +88,7 @@ public final class Messenger {
      * Find out if there is tag with given name
      * @param tagName name of the tag
      * @return tagEntry or null
+     * @since RibbonServer a1
      */
     private static MessageClasses.TagEntry isTagExist(String tagName) {
         synchronized (tagLock) {
@@ -101,6 +106,7 @@ public final class Messenger {
     /**
      * Add to tag index or create new tag.
      * @param givenEntry message entry with tags;
+     * @since RibbonServer a2
      */
     public static void addToTagIndex(MessageClasses.MessageEntry givenEntry) {
         synchronized (tagLock) {
@@ -121,6 +127,7 @@ public final class Messenger {
      * Modify tag index (may create or delete tags).
      * @param oldEntry message entry with tags to modify;
      * @param newEntry message entry with new tags;
+     * @since RibbonServer a2
      */
     public static void modTagIndex(MessageClasses.MessageEntry oldEntry, MessageClasses.MessageEntry newEntry) {
         removeTagIndex(oldEntry);
@@ -130,6 +137,7 @@ public final class Messenger {
     /**
      * Remove message presense from tag index.
      * @param givenEntry entry with tags to remove;
+     * @since RibbonServer a2
      */
     public static void removeTagIndex(MessageClasses.MessageEntry givenEntry) {
         synchronized (tagLock) {
@@ -145,6 +153,7 @@ public final class Messenger {
     /**
      * Get index for new message
      * @return string expresion of new index
+     * @since RibbonServer a1
      */
     private static synchronized String getNewIndex() {
         String newIndexStr = String.valueOf(++newIndex);
@@ -157,6 +166,7 @@ public final class Messenger {
     /**
      * Add message entry to index and update original message object
      * @param givenEntry given message entry
+     * @since RibbonServer a1
      */
     public static void addMessageToIndex(MessageClasses.Message givenMessage) {
         givenMessage.INDEX = Messenger.getNewIndex();
@@ -168,9 +178,9 @@ public final class Messenger {
     }
     
     /**
-     * <b>[RIBBON a1]</b><br>
      * Return tags in csv line form
      * @return all tags as csv line
+     * @since RibbonServer a1
      */
     public static String PROC_GET_TAGS() {
         synchronized (tagLock) {
@@ -184,9 +194,9 @@ public final class Messenger {
     }
     
     /**
-     * <b>[RIBBON a1]</b><br>
      * Return messages beginning form specified index.
      * @return messages on csv form;
+     * @since RibbonServer a1
      */
     public static String PROC_LOAD_BASE_FROM_INDEX(String givenIndex) {
         StringBuffer getBuf = new StringBuffer();
@@ -207,6 +217,7 @@ public final class Messenger {
      * Get message entry object by index or null if message is absent.
      * @param givenIndex index of message for search
      * @return message entry object or null
+     * @since RibbonServer a1
      */
     public static MessageClasses.MessageEntry getMessageEntryByIndex(String givenIndex) {
         synchronized (tagLock) {
@@ -224,6 +235,7 @@ public final class Messenger {
     /**
      * Delete messege entry from messenger index and check tags
      * @param givenEntry entry to delete
+     * @since RibbonServer a1
      */
     public static void deleteMessageEntryFromIndex(MessageClasses.MessageEntry givenEntry) {
         synchronized (messageLock) {
