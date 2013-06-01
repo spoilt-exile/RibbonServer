@@ -168,6 +168,46 @@ public class RibbonProtocol {
         });
         
         /**
+         * RIBBON_NCTL_GET_ID: commandlet
+         * Find out session ID.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_GET_ID", CONNECTION_TYPES.ANY) {
+            @Override
+            public String exec(String args) {
+                if (CURR_SESSION.CURR_ENTRY != null) {
+                    return "RIBBON_ERROR:Вхід не виконано!\nRIBBON_GCTL_FORCE_LOGIN:";
+                } else {
+                    return CURR_SESSION.CURR_ENTRY.SESSION_HASH_ID;
+                }
+            }
+        });
+        
+        /**
+         * RIBBON_NCTL_RESUME: commandlet
+         * Resume session by given hash id.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_RESUME", CONNECTION_TYPES.ANY) {
+            @Override
+            public String exec(String args) {
+                SessionManager.SessionEntry exicted = SessionManager.getUserBySessionEntry(args);
+                if (exicted == null) {
+                    return "RIBBON_GCTL_FORCE_LOGIN:";
+                } else {
+                    String returned = AccessHandler.PROC_RESUME_USER(exicted);
+                    if (returned == null) {
+                        SessionManager.reniewEntry(exicted);
+                          CURR_SESSION.USER_NAME = exicted.SESSION_USER_NAME;
+                          CURR_SESSION.CURR_ENTRY = exicted;
+                          CURR_SESSION.setSessionName();
+                        return "OK:";
+                    } else {
+                        return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
+                    }
+                }
+            }
+        });
+        
+        /**
          * RIBBON_NCTL_CLOSE: commandlet
          * Exit command to close connection.
          */

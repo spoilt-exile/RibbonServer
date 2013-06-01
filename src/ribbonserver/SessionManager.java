@@ -37,7 +37,7 @@ public final class SessionManager {
     /**
      * List with stored session entries.
      */
-    private static java.util.ArrayList<SessionManager.SessionEntry> sessionCookie = new java.util.ArrayList<>();
+    public static java.util.ArrayList<SessionManager.SessionEntry> sessionCookie = new java.util.ArrayList<>();
     
     /**
      * Session entry class for quick session resume.
@@ -365,5 +365,16 @@ public final class SessionManager {
         } else {
             return null;
         }
+    }
+    
+    /**
+     * Renew session entry index file or remove it from index.
+     * @param givenEntry entry to check;
+     */
+    public static void reniewEntry(SessionManager.SessionEntry givenEntry) {
+        if (givenEntry.IS_OBSELETE) {
+            SessionManager.sessionCookie.remove(givenEntry);
+        }
+        IndexReader.updateSessionIndex();
     }
 }

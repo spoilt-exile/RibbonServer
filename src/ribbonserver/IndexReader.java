@@ -199,9 +199,9 @@ public abstract class IndexReader {
     public synchronized static void appendToSessionIndex(String csvReport) {
         synchronized (SESSION_LOCK) {
             try {
-                try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index", true)) {
-                    messageWriter.write(csvReport + "\n");
-                    messageWriter.close();
+                try (java.io.FileWriter sesWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index", true)) {
+                    sesWriter.write(csvReport + "\n");
+                    sesWriter.close();
                 }
             } catch (java.io.IOException ex) {
                 RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса сесій!");
@@ -214,14 +214,14 @@ public abstract class IndexReader {
             @Override
             public void run() {
                 synchronized (SESSION_LOCK) {
-                    java.util.ListIterator<MessageClasses.MessageEntry> storeIter = Messenger.messageIndex.listIterator();
+                    java.util.ListIterator<SessionManager.SessionEntry> sesIter = SessionManager.sessionCookie.listIterator();
                     String newIndexFileContent = "";
-                    while (storeIter.hasNext()) {
-                        newIndexFileContent += storeIter.next().toCsv() + "\n";
+                    while (sesIter.hasNext()) {
+                        newIndexFileContent += sesIter.next().toCsv() + "\n";
                     }
                     try {
-                        try (java.io.FileWriter messageWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index")) {
-                            messageWriter.write(newIndexFileContent);
+                        try (java.io.FileWriter sesWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index")) {
+                            sesWriter.write(newIndexFileContent);
                         }
                     } catch (java.io.IOException ex) {
                         RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса сесій!");
