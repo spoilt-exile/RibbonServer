@@ -42,7 +42,7 @@ public final class SessionManager {
     /**
      * Session entry class for quick session resume.
      */
-    private static class SessionEntry extends Generic.CsvElder {
+    public static class SessionEntry extends Generic.CsvElder {
         
         /**
          * Hash id of the session.
@@ -88,6 +88,15 @@ public final class SessionManager {
         }
         
         /**
+         * Init empty session entry with given user name.
+         */
+        public void initWithName(String givenName) {
+            this.SESSION_USER_NAME = givenName;
+            this.SESSION_HASH_ID = RibbonServer.getHash(this.SESSION_USER_NAME + RibbonServer.getCurrentDate());
+            this.COUNT = 0;
+        }
+        
+        /**
          * Use this entry.
          */
         public void useEntry() {
@@ -112,6 +121,11 @@ public final class SessionManager {
          * User name of this session
          */
         public String USER_NAME;
+        
+        /**
+         * User session entry.
+         */
+        public SessionEntry CURR_ENTRY;
         
         /**
          * Short session description
@@ -216,6 +230,13 @@ public final class SessionManager {
             }
         }
     }
+    
+    /**
+     * Init session manager.
+     */
+    public static void init() {
+        
+    }
 
     /**
      * Create new session and add it into session list;
@@ -303,11 +324,30 @@ public final class SessionManager {
     }
     
     /**
-     * Get login from persistent session store.
+     * Create new session entry and add it to list.
+     * @param givenUser user name for session;
+     * @return new created session entry;
+     */
+    public static SessionManager.SessionEntry createSessionEntry(String givenUser) {
+        SessionManager.SessionEntry existed = SessionManager.getUserBySessionEntry(givenUser);
+        SessionManager.SessionEntry returned = null;
+        if (existed != null) {
+            existed.initWithName(givenUser);
+            return existed;
+        } else {
+            returned = new SessionManager.SessionEntry();
+            returned.initWithName(givenUser);
+            SessionManager.sessionCookie.add(returned);
+            return returned;
+        }
+    }
+    
+    /**
+     * Get session entry from persistent session store.
      * @param givenHashId hash id of the session;
      * @return username of user or null;
      */
-    public static String loginBySessionEntry(String givenHashId) {
+    public static SessionManager.SessionEntry getUserBySessionEntry(String givenHashId) {
         SessionManager.SessionEntry findedSession = null;
         java.util.ListIterator<SessionManager.SessionEntry> cookIter = SessionManager.sessionCookie.listIterator();
         while (cookIter.hasNext()) {
@@ -318,11 +358,7 @@ public final class SessionManager {
             }
         }
         if (findedSession != null) {
-            findedSession.useEntry();
-            if (findedSession.IS_OBSELETE) {
-                SessionManager.sessionCookie.remove(findedSession);
-            }
-            return findedSession.SESSION_USER_NAME;
+            return findedSession;
         } else {
             return null;
         }

@@ -460,4 +460,29 @@ public class RibbonServer {
                 + (RibbonServer.DEBUG_POST_EXCEPTIONS ? "Режим дебагінгу активовано.\nНапрямок реєстрації помилок: " + RibbonServer.DEBUG_POST_DIR : "")
                 );
     }
+    
+    /**
+     * Get hash sum of given string.
+     * @param givenStr given string;
+     * @return md5 hash sum representation;
+     */
+    public static String getHash(String givenStr) {
+        StringBuffer hexString = new StringBuffer();
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            md.update(givenStr.getBytes());
+            byte[] hash = md.digest();
+            for (int i = 0; i < hash.length; i++) {
+                if ((0xff & hash[i]) < 0x10) {
+                    hexString.append("0"
+                            + Integer.toHexString((0xFF & hash[i])));
+                } else {
+                    hexString.append(Integer.toHexString(0xFF & hash[i]));
+                }
+            }
+        } catch (Exception ex) {
+            RibbonServer.logAppend(LOG_ID, 1, "Неможливо добути хеш-суму!");
+        }
+        return hexString.toString();
+    }
 }

@@ -158,8 +158,9 @@ public class RibbonProtocol {
                       }
                   }
                   CURR_SESSION.USER_NAME = parsedArgs[0];
+                  CURR_SESSION.CURR_ENTRY = SessionManager.createSessionEntry(parsedArgs[0]);
                   CURR_SESSION.setSessionName();
-                  return "OK:";
+                  return "OK:" + CURR_SESSION.CURR_ENTRY.SESSION_HASH_ID;
               } else {
                   return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
               }

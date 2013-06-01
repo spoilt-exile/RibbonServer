@@ -151,7 +151,7 @@ public final class AccessHandler {
     }
     
     /**
-     * Login user or return error 
+     * Login user or return error.
      * @param givenName name of user which is trying to login
      * @param givenHash md5 hash of user's password
      * @return null or error message
@@ -179,6 +179,34 @@ public final class AccessHandler {
             }
         } else {
             return "Користувача " + givenName + " не знайдено!";
+        }
+    }
+    
+    /**
+     * Resume user or return error.
+     * @param givenEntry session entry of user which trying to resume;
+     * @return null or error message;
+     * @since RibbonServer a2
+     */
+    public static String PROC_RESUME_USER(SessionManager.SessionEntry givenEntry) {
+        UserClasses.UserEntry findedUser = null;
+        java.util.ListIterator<UserClasses.UserEntry> usersIter = userStore.listIterator();
+        while (usersIter.hasNext()) {
+            UserClasses.UserEntry currUser = usersIter.next();
+            if (currUser.USER_NAME.equals(givenEntry.SESSION_USER_NAME)) {
+                findedUser = currUser;
+                break;
+            }
+        }
+        if (findedUser != null) {
+            if (!findedUser.IS_ENABLED) {
+                return "Користувач " + givenEntry.SESSION_USER_NAME + " заблоковано!";
+            } else {
+                givenEntry.useEntry();
+                return null;
+            }
+        } else {
+            return "Користувача " + givenEntry.SESSION_USER_NAME + " не знайдено!";
         }
     }
     
