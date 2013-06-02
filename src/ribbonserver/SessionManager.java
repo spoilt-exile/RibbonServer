@@ -351,7 +351,15 @@ public final class SessionManager {
      * @since RibbonServer a2
      */
     public static SessionManager.SessionEntry createSessionEntry(String givenUser) {
-        SessionManager.SessionEntry existed = SessionManager.getUserBySessionEntry(givenUser);
+        SessionManager.SessionEntry existed = null;
+        java.util.ListIterator<SessionManager.SessionEntry> cookIter = SessionManager.sessionCookie.listIterator();
+        while (cookIter.hasNext()) {
+            SessionManager.SessionEntry currEntry = cookIter.next();
+            if (currEntry.SESSION_USER_NAME.equals(givenUser)) {
+                existed = currEntry;
+                break;
+            }
+        }
         SessionManager.SessionEntry returned = null;
         if (existed != null) {
             existed.initWithName(givenUser);
