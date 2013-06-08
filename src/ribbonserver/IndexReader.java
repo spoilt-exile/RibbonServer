@@ -182,7 +182,11 @@ public abstract class IndexReader {
         try {
             java.io.BufferedReader baseIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + "session.index"));
             while (baseIndexReader.ready()) {
-                returnedIndex.add(new SessionManager.SessionEntry(baseIndexReader.readLine()));
+                String readedCsv = baseIndexReader.readLine();
+                if (readedCsv.isEmpty()) {
+                    return returnedIndex;
+                }
+                returnedIndex.add(new SessionManager.SessionEntry(readedCsv));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу сесій не знайдено. Створюю новий.");
