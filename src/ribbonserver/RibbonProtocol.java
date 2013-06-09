@@ -526,6 +526,17 @@ public class RibbonProtocol {
             }
         });
         
+        /**
+         * RIBBON_GET_USERS: commandlet
+         * Get all system users without ADM group members.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_GET_USERS", CONNECTION_TYPES.CLIENT) {
+            @Override
+            public String exec(String args) {
+                return AccessHandler.PROC_GET_USERS_UNI(false);
+            }
+        });
+        
         /** SERVER CONTROL PROTOCOL STACK [LEVEL_2 SUPPORT] **/
         
     }

@@ -217,6 +217,27 @@ public final class AccessHandler {
     }
     
     /**
+     * Return all users in short csv form to client or control application.
+     * @param includAdm include ADM members in final result;
+     * @return list with all users;
+     * @since RibbonServer a2
+     */
+    public static String PROC_GET_USERS_UNI(Boolean includAdm) {
+        StringBuffer userBuf = new StringBuffer();
+        java.util.ListIterator<UserClasses.UserEntry> userIter = userStore.listIterator();
+        while (userIter.hasNext()) {
+            UserClasses.UserEntry currEntry = userIter.next();
+            userBuf.append("{");
+            userBuf.append(currEntry.USER_NAME);
+            userBuf.append("},{");
+            userBuf.append(currEntry.COMM);
+            userBuf.append("}\n");
+        }
+        userBuf.append("END:");
+        return userBuf.toString();
+    }
+    
+    /**
      * Find out if there is group with given name
      * @param givenGroupName given name to search
      * @return true if group existed/false if not
