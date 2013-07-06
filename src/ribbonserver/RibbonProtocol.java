@@ -273,8 +273,11 @@ public class RibbonProtocol {
             public String exec(String args) {
                 if (!IS_REMOTE) {
                     return "RIBBON_ERROR:Видалений режим вимкнено!";
+                } else if (CURR_SESSION.USER_NAME == null) {
+                    return "RIBBON_ERROR:Вхід не виконано!";
+                } else if (!AccessHandler.isUserAdmin(CURR_SESSION.USER_NAME)) {
+                    return "RIBBON_ERROR:Ця сессія не може використовувати видалений режим!";
                 }
-                //TODO implement web group checking;
                 String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 2);
                 if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserAdmin(parsedArgs[0]))) {
                     return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.\nRIBBON_GCTL_FORCE_LOGIN:";
@@ -314,8 +317,46 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_SET_REMOTE_MODE", CONNECTION_TYPES.ANY) {
             @Override
             public String exec(String args) {
+                if (CURR_SESSION.USER_NAME == null) {
+                    return "RIBBON_ERROR:Вхід не виконано!";
+                } else if (!AccessHandler.isUserAdmin(CURR_SESSION.USER_NAME)) {
+                    return "RIBBON_ERROR:Ця сессія не може використовувати видалений режим!";
+                }
                 IS_REMOTE = "1".equals(args) ? true : false;
                 return "OK:" + (IS_REMOTE ? "1" : "0");
+            }
+        });
+        
+        /**
+         * RIBBON_NCTL_ACCESS_CONTEXT: commandlet
+         * Change access mode of next command.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_ACCESS_CONTEXT", CONNECTION_TYPES.ANY) {
+            @Override
+            public String exec(String args) {
+                if (CURR_SESSION.USER_NAME == null) {
+                    return "RIBBON_ERROR:Вхід не виконано!";
+                } else if (!AccessHandler.isUserAdmin(CURR_SESSION.USER_NAME)) {
+                    return "RIBBON_ERROR:Ця сессія не може використовувати видалений режим!";
+                }
+                UserClasses.UserEntry overUser = AccessHandler.getEntryByName(Generic.CsvFormat.commonParseLine(args, 1)[0]);
+                if (overUser == null) {
+                    return "RIBBON_ERROR:Користувача не знайдено!";
+                } else if (!overUser.IS_ENABLED) {
+                    return "RIBBON_ERROR:Користувача заблоковано!";
+                }
+                String oldUserName = CURR_SESSION.USER_NAME;
+                CURR_SESSION.USER_NAME = overUser.USER_NAME;
+                CURR_SESSION.outStream.println("PROCEED:");
+                String subResult = null;
+                try {
+                    subResult = process(CURR_SESSION.inStream.readLine());
+                } catch (java.io.IOException ex) {
+                    RibbonServer.logAppend(LOG_ID, 1, "неможливо прочитати дані з сокету!");
+                    SessionManager.closeSession(CURR_SESSION);
+                }
+                CURR_SESSION.USER_NAME = oldUserName;
+                return subResult;
             }
         });
         

@@ -253,4 +253,22 @@ public final class AccessHandler {
         return false;
     }
     
+    /**
+     * Find user entry by user name.
+     * @param givenName name to search;
+     * @return finded entry or null;
+     */
+    public static UserClasses.UserEntry getEntryByName(String givenName) {
+        UserClasses.UserEntry result = null;
+        java.util.ListIterator<UserClasses.UserEntry> userIter = AccessHandler.userStore.listIterator();
+        while (userIter.hasNext()) {
+            UserClasses.UserEntry curr = userIter.next();
+            if (curr.USER_NAME.equals(givenName)) {
+                result = curr;
+                break;
+            }
+        }
+        return result;
+    }
+    
 }
