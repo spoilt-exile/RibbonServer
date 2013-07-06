@@ -275,8 +275,6 @@ public class RibbonProtocol {
                     return "RIBBON_ERROR:Видалений режим вимкнено!";
                 } else if (CURR_SESSION.USER_NAME == null) {
                     return "RIBBON_ERROR:Вхід не виконано!";
-                } else if (!AccessHandler.isUserAdmin(CURR_SESSION.USER_NAME)) {
-                    return "RIBBON_ERROR:Ця сессія не може використовувати видалений режим!";
                 }
                 String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 2);
                 if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserAdmin(parsedArgs[0]))) {
@@ -336,8 +334,8 @@ public class RibbonProtocol {
             public String exec(String args) {
                 if (CURR_SESSION.USER_NAME == null) {
                     return "RIBBON_ERROR:Вхід не виконано!";
-                } else if (!AccessHandler.isUserAdmin(CURR_SESSION.USER_NAME)) {
-                    return "RIBBON_ERROR:Ця сессія не може використовувати видалений режим!";
+                } else if (!IS_REMOTE) {
+                    return "RIBBON_ERROR:Видалений режим вимкнено!";
                 }
                 UserClasses.UserEntry overUser = AccessHandler.getEntryByName(Generic.CsvFormat.commonParseLine(args, 1)[0]);
                 if (overUser == null) {
