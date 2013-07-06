@@ -41,6 +41,11 @@ public class RibbonProtocol {
     public CONNECTION_TYPES BROADCAST_TYPE;
     
     /**
+     * Remote session flag.
+     */
+    private Boolean IS_REMOTE = false;
+    
+    /**
      * Default constructor.
      * @param upperThread given session thread to link with;
      * @since RibbonServer a1
@@ -256,6 +261,61 @@ public class RibbonProtocol {
                         return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
                     }
                 }
+            }
+        });
+        
+        /**
+         * RIBBON_NCTL_REM_LOGIN: commandlet
+         * Remote login command.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_REM_LOGIN", CONNECTION_TYPES.ANY) {
+            @Override
+            public String exec(String args) {
+                if (!IS_REMOTE) {
+                    return "RIBBON_ERROR:Видалений режим вимкнено!";
+                }
+                //TODO implement web group checking;
+                String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 2);
+                if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserAdmin(parsedArgs[0]))) {
+                    return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.\nRIBBON_GCTL_FORCE_LOGIN:";
+                }
+                String returned = AccessHandler.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
+                if (returned == null) {
+                    if (CURR_TYPE == CONNECTION_TYPES.CLIENT) {
+                        RibbonServer.logAppend(LOG_ID, 3, "користувач " + parsedArgs[0] + " видалено увійшов до системи.");
+                    } else if (CURR_TYPE == CONNECTION_TYPES.CONTROL) {
+                        RibbonServer.logAppend(LOG_ID, 3, "адміністратор " + parsedArgs[0] + " видалено увійшов до системи.");
+                    }
+                    return "OK:";
+                } else {
+                    return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
+                }
+            }
+        });
+        
+        /**
+         * RIBBON_NCTL_GET_USERNAME: commandlet
+         * Get current session username.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_GET_USERNAME", CONNECTION_TYPES.ANY) {
+            public String exec(String args) {
+                if (CURR_SESSION.USER_NAME != null) {
+                    return "OK:" + CURR_SESSION.USER_NAME;
+                } else {
+                    return "RIBBON_ERROR:Вхід до системи не виконано!";
+                }
+            }
+        });
+        
+        /**
+         * RIBBON_NCTL_SET_REMOTE_MODE: commandlet
+         * Set remote flag of this session.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_SET_REMOTE_MODE", CONNECTION_TYPES.ANY) {
+            @Override
+            public String exec(String args) {
+                IS_REMOTE = "1".equals(args) ? true : false;
+                return "OK:" + (IS_REMOTE ? "1" : "0");
             }
         });
         
