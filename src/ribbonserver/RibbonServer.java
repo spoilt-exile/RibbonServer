@@ -388,7 +388,12 @@ public class RibbonServer {
         logAppend(LOG_ID, 3, "зчитування індексу сесій системи");
         SessionManager.init();
         CURR_STATE = RibbonServer.SYS_STATES.READY;
-        Procedures.postInitMessage();
+        if (OPT_CREATE_REPORTS) {
+            Directories.dumpTree();
+        }
+        if (OPT_POST_INIT) {
+            Procedures.postInitMessage();
+        }
         if (IO_ENABLED) {
             ImportQuene.importRun();
         }

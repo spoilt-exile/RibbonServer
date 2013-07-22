@@ -62,7 +62,6 @@ public final class Directories {
             }
         }
         rootDir.deployDir(RibbonServer.BASE_PATH);
-        dumpTree();
     }
     
     /**
@@ -78,7 +77,7 @@ public final class Directories {
      * Dump current tree as text report
      * @since RibbonServer a1
      */
-    private static void dumpTree() {
+    public static void dumpTree() {
         try {
             java.io.FileWriter treeWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/tree");
             treeWriter.write(Directories.rootDir.treeReport(0));
