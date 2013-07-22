@@ -68,8 +68,6 @@ public final class SessionManager {
          */
         public Boolean IS_OBSELETE = false;
         
-        private final Integer COUNT_MAX = 10;
-        
         /**
          * Empty constructor.
          */
@@ -105,7 +103,7 @@ public final class SessionManager {
          */
         public void useEntry() {
             ++this.COUNT;
-            if (this.COUNT == this.COUNT_MAX) {
+            if (this.COUNT == RibbonServer.ACCESS_SESSION_MAX_COUNT) {
                 this.IS_OBSELETE = true;
             }
         }

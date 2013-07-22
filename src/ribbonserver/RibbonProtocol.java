@@ -215,9 +215,13 @@ public class RibbonProtocol {
                       }
                   }
                   CURR_SESSION.USER_NAME = parsedArgs[0];
-                  CURR_SESSION.CURR_ENTRY = SessionManager.createSessionEntry(parsedArgs[0]);
-                  CURR_SESSION.setSessionName();
-                  return "OK:" + CURR_SESSION.CURR_ENTRY.SESSION_HASH_ID;
+                  if (RibbonServer.ACCESS_ALLOW_SESSIONS) {
+                      CURR_SESSION.CURR_ENTRY = SessionManager.createSessionEntry(parsedArgs[0]);
+                      CURR_SESSION.setSessionName();
+                      return "OK:" + CURR_SESSION.CURR_ENTRY.SESSION_HASH_ID;
+                  } else {
+                      return "OK:";
+                  }
               } else {
                   return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
               }
@@ -231,7 +235,9 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_GET_ID", CONNECTION_TYPES.ANY) {
             @Override
             public String exec(String args) {
-                if (CURR_SESSION.CURR_ENTRY != null) {
+                if (!RibbonServer.ACCESS_ALLOW_SESSIONS) {
+                    return "RIBBON_ERROR:Сесії вимкнено!\nRIBBON_GCTL_FORCE_LOGIN:";
+                } else if (CURR_SESSION.CURR_ENTRY == null) {
                     return "RIBBON_ERROR:Вхід не виконано!\nRIBBON_GCTL_FORCE_LOGIN:";
                 } else {
                     return CURR_SESSION.CURR_ENTRY.SESSION_HASH_ID;
@@ -246,6 +252,9 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_RESUME", CONNECTION_TYPES.ANY) {
             @Override
             public String exec(String args) {
+                if (!RibbonServer.ACCESS_ALLOW_SESSIONS) {
+                    return "RIBBON_ERROR:Сесії вимкнено!\nRIBBON_GCTL_FORCE_LOGIN:";
+                }
                 SessionManager.SessionEntry exicted = SessionManager.getUserBySessionEntry(args);
                 if (exicted == null) {
                     return "RIBBON_GCTL_FORCE_LOGIN:";
