@@ -175,6 +175,12 @@ public class RibbonServer {
     public static String ACCESS_ALL_MASK;
     
     /**
+     * Constant default ALL group permission (for validation).
+     * @since RibbonServer a2
+     */
+    public static final String VAL_ACCESS_ALL_MASK = "100";
+    
+    /**
      * Allow to login user to more than one session.
      * @since RibbonServer a2
      */
@@ -397,6 +403,8 @@ public class RibbonServer {
         if (IO_ENABLED) {
             ImportQuene.importRun();
         }
+        logAppend(LOG_ID, 3, "проводиться перевірка конфігурації");
+        validateSystemVariables();
         logAppend(LOG_ID, 2, "налаштування мережі");
         try {
             java.net.ServerSocket RibbonServSocket = new java.net.ServerSocket(NETWORK_PORT);
@@ -597,6 +605,60 @@ public class RibbonServer {
                 )
                 + (RibbonServer.DEBUG_POST_EXCEPTIONS ? "Режим дебагінгу активовано.\nНапрямок реєстрації помилок: " + RibbonServer.DEBUG_POST_DIR : "")
                 );
+    }
+    
+    /**
+     * Check correctness of some system configurations.<br>
+     * <b>WARNING!</b> May stop system with error.
+     * @since RibbonServer a2
+     */
+    private static void validateSystemVariables() {
+        //Turn off cache if cache size is lower or equal to 0;
+        if (CACHE_ENABLED && CACHE_SIZE <= 0) {
+            logAppend(LOG_ID, 1, "Невірне налаштування кешу (" + CACHE_SIZE + ")");
+            CACHE_ENABLED = false;
+        }
+        
+        //Set constant access ALL group mask if corrupted;
+        Boolean MASK_VALID = true;
+        for (char curr: ACCESS_ALL_MASK.toCharArray()) {
+            if (curr == '0' || curr == '1') {
+                continue;
+            } else {
+                MASK_VALID = false;
+                break;
+            }
+        }
+        if (ACCESS_ALL_MASK.length() > 3 && !MASK_VALID) {
+            logAppend(LOG_ID, 1, "Невірне налаштування маски доступу ALL (" + ACCESS_ALL_MASK + ")");
+            ACCESS_ALL_MASK = VAL_ACCESS_ALL_MASK;
+        }
+        
+        //EXIT if group doesn't exist
+        if (ACCESS_ALLOW_REMOTE && !AccessHandler.isGroupExisted(ACCESS_REMOTE_GROUP)) {
+            logAppend(LOG_ID, 0, "помилка видаленого режиму: групи " + ACCESS_REMOTE_GROUP + " не існує");
+            logAppend(LOG_ID, 3, "Перевірьте параметр access_remote_group у файлі конфігурації");
+            System.exit(3);
+        }
+        
+        //I/O section check
+        if (IO_ENABLED) {
+            
+            //EXIT if emergency dir set incorrect
+            if (Directories.getDirPath(IO_IMPORT_EM_DIR) == null) {
+                logAppend(LOG_ID, 0, "помилка налаштування імпорту: напрямку " + IO_IMPORT_EM_DIR + " не існує");
+                logAppend(LOG_ID, 3, "Перевірьте параметр io_import_em_dir у файлі конфігурації");
+                System.exit(3);
+            }
+            
+        }
+        
+        //EXIT if debug directory doesn't exist
+        if (DEBUG_POST_EXCEPTIONS && Directories.getDirPath(DEBUG_POST_DIR) == null) {
+            logAppend(LOG_ID, 0, "помилка дебагінгу: напрямку " + DEBUG_POST_DIR + " не існує");
+            logAppend(LOG_ID, 3, "Перевірьте параметр debug_post_dir у файлі конфігурації");
+            System.exit(3);
+        }
     }
     
     /**

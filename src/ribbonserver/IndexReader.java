@@ -62,10 +62,12 @@ public abstract class IndexReader {
                     dirIndexWriter.write("СИСТЕМА,{Головний напрямок новин про розробку системи},[ALL],[ALL:110],[]\n");
                     dirIndexWriter.write("СИСТЕМА.Розробка,{Новини про розробку},[UA,RU],[ALL:100],[]\n");
                     dirIndexWriter.write("СИСТЕМА.Тест,{Тестовий напрямок},[UA,RU],[ALL:110],[]\n");
+                    dirIndexWriter.write("СИСТЕМА.Загублене,{Напрямок для загублених повідомлень},[ALL],[GALL:100],[]\n");
                 }
                 Dirs.add(new DirClasses.DirSchema("СИСТЕМА", "Головний напрямок новин про розробку системи"));
                 Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Розробка", "Новини про розробку"));
                 Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Тест", "Тестовий напрямок"));
+                Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Загублене", "Напрямок для загублених повідомлень"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу напрямків!");
                 System.exit(4);

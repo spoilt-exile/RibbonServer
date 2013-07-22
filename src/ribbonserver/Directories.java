@@ -134,12 +134,11 @@ public final class Directories {
      * @since RibbonServer a1
      */
     public static String getDirPath(String givenDir) {
-        String returned = rootDir.returnEndDir("", givenDir).DIR_PATH;
+        DirClasses.DirEntry returned = rootDir.returnEndDir("", givenDir);
         if (returned == null) {
-            RibbonServer.logAppend(LOG_ID, 1, "не удалось получить доступ к данным директории: " + givenDir);
             return null;
         }
-        return returned;
+        return returned.DIR_PATH;
     }
     
     /**
