@@ -130,12 +130,13 @@ public final class AccessHandler {
     }
     
     /**
-     * Find out is user is administrator
+     * Find out is user is member of specified group.
      * @param givenName name to search
+     * @param givenGroup name of group
      * @return result of checking
      * @since RibbonServer a2
      */
-    public static Boolean isUserAdmin(String givenName) {
+    public static Boolean isUserIsMemberOf(String givenName, String givenGroup) {
         java.util.ListIterator<UserClasses.UserEntry> userIter = AccessHandler.userStore.listIterator();
         UserClasses.UserEntry findedUser = null;
         while (userIter.hasNext()) {
