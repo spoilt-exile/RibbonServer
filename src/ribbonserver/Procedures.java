@@ -51,7 +51,7 @@ public class Procedures {
                 givenMessage.ORIG_AUTHOR = Messenger.getMessageEntryByIndex(givenMessage.ORIG_INDEX).AUTHOR;
             }
             Messenger.addMessageToIndex(givenMessage);
-            if (IOControl.dispathcer.checkExport(givenMessage.DIRS)) {
+            if (RibbonServer.IO_ENABLED && IOControl.dispathcer.checkExport(givenMessage.DIRS)) {
                 IOControl.dispathcer.initExport(givenMessage);
             }
             writeMessage(givenMessage.DIRS, givenMessage.INDEX, givenMessage.CONTENT);

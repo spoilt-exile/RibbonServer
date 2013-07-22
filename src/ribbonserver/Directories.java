@@ -57,7 +57,9 @@ public final class Directories {
             DirClasses.DirSchema currDir = readIter.next();
             RibbonServer.logAppend(LOG_ID, 3, "додано напрямок (" + currDir.FULL_DIR_NAME + ": " + currDir.COMM + ")");
             createDirs(currDir);
-            IOControl.dispathcer.subscribeDir(currDir.DIR_EXPORTS, currDir.FULL_DIR_NAME);
+            if (RibbonServer.IO_ENABLED) {
+                IOControl.dispathcer.subscribeDir(currDir.DIR_EXPORTS, currDir.FULL_DIR_NAME);
+            }
         }
         rootDir.deployDir(RibbonServer.BASE_PATH);
         dumpTree();

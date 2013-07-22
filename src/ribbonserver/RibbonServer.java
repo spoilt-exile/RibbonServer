@@ -321,6 +321,9 @@ public class RibbonServer {
 
         @Override
         public void enableDirtyState(String moduleType, String moduleScheme, String modulePrint) {
+            if (RibbonServer.IO_IGNORE_DIRTY) {
+                return;
+            }
             String moduleString = moduleType + ":" + modulePrint;
             if (RibbonServer.DIRTY_LIST.contains(moduleString)) {
                 return;
@@ -338,6 +341,9 @@ public class RibbonServer {
 
         @Override
         public void disableDirtyState(String moduleType, String moduleScheme, String modulePrint) {
+            if (RibbonServer.IO_IGNORE_DIRTY) {
+                return;
+            }
             String moduleString = moduleType + ":" + modulePrint;
             synchronized (RibbonServer.DIRTY_LOCK) {
                 if (!RibbonServer.DIRTY_LIST.remove(moduleString)) {
@@ -367,10 +373,12 @@ public class RibbonServer {
         logAppend(LOG_ID, 2, "Версія системи: " + RIBBON_VER);
         CURR_STATE = RibbonServer.SYS_STATES.INIT;
         setSystemVariables();
-        logAppend(LOG_ID, 2, "налаштування бібліотек імпорту до системи");
-        Utils.IOControl.initWrapper(new IOWrapper());
-        ImportQuene = new Import.Quene(CurrentDirectory + "/imports/", BASE_PATH + "/import/");
-        ExportDispatcher = new Export.Dispatcher(CurrentDirectory + "/exports/", BASE_PATH + "/export/");
+        if (IO_ENABLED) {
+            logAppend(LOG_ID, 2, "налаштування бібліотек імпорту до системи");
+            Utils.IOControl.initWrapper(new IOWrapper());
+            ImportQuene = new Import.Quene(CurrentDirectory + "/imports/", BASE_PATH + "/import/");
+            ExportDispatcher = new Export.Dispatcher(CurrentDirectory + "/exports/", BASE_PATH + "/export/");
+        }
         logAppend(LOG_ID, 3, "початок налаштування контролю доступу");
         AccessHandler.init();
         logAppend(LOG_ID, 3, "початок налаштування напрявків");
@@ -381,7 +389,9 @@ public class RibbonServer {
         SessionManager.init();
         CURR_STATE = RibbonServer.SYS_STATES.READY;
         Procedures.postInitMessage();
-        ImportQuene.importRun();
+        if (IO_ENABLED) {
+            ImportQuene.importRun();
+        }
         logAppend(LOG_ID, 2, "налаштування мережі");
         try {
             java.net.ServerSocket RibbonServSocket = new java.net.ServerSocket(NETWORK_PORT);
@@ -573,7 +583,7 @@ public class RibbonServer {
                 + (RibbonServer.IO_ENABLED ? 
                     (
                     "Операції іморту/експорту увікнені.\n" +
-                    (RibbonServer.IO_IGNORE_DIRTY ? "[УВАГА!] Режим ігнорування помилок увікнено!" : "") + 
+                    (RibbonServer.IO_IGNORE_DIRTY ? "[УВАГА!] Режим ігнорування помилок увікнено!\n" : "") + 
                     "Аварійний напрямок:" + RibbonServer.IO_IMPORT_EM_DIR + "\n" +
                     "Розмір черги експорту:" + loc_IO_EXPORT_QUENE_SIZE + "\n" + 
                     "Розмір черги помилок експорту:" + loc_IO_EXPORT_ERRQUENE_SIZE + "\n"
