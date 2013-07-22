@@ -181,6 +181,62 @@ public class RibbonServer {
     public static Boolean ACCESS_ALLOW_MULTIPLIE_LOGIN;
     
     /**
+     * Allow to login by previous session hash.
+     * @since RibbonServer a2
+     */
+    public static Boolean ACCESS_ALLOW_SESSIONS;
+    
+    /**
+     * Max count of session hsah reusing.
+     * @since RibbonServer a2
+     */
+    public static Integer ACCESS_SESSION_MAX_COUNT;
+    
+    /**
+     * Allow to use remote connection mode.
+     * @since RibbonServer a2
+     */
+    public static Boolean ACCESS_ALLOW_REMOTE;
+    
+    /**
+     * Group of user which is allowed to create remote connections.
+     * @since RibbonServer a2
+     */
+    public static String ACCESS_REMOTE_GROUP;
+    
+    /**
+     * Post init message flag.
+     * @since RibbonServer a2
+     */
+    public static Boolean OPT_POST_INIT;
+    
+    /**
+     * Create text reports during startup.
+     * @since RibbonServer a2
+     */
+    public static Boolean OPT_CREATE_REPORTS;
+    
+    /**
+     * Enable/disable import and export operations.
+     * @since RibbonServer a2
+     */
+    public static Boolean IO_ENABLED;
+    
+    /**
+     * Ignore all attempts to set dirty status on the server.<br>
+     * <b>WARNING!</b> This settings is dangerous for production installations!<br>
+     * <b>ONLY FOR TEST PURPOSES!<b>
+     * @since RibbonServer a2
+     */
+    public static Boolean IO_IGNORE_DIRTY;
+    
+    /**
+     * Import emergency directory (in case of bad validation).
+     * @since RibbonServer a2
+     */
+    public static String IO_IMPORT_EM_DIR;
+    
+    /**
      * Post system exception to specified directory.
      * @since RibbonServer a2
      */
@@ -464,6 +520,31 @@ public class RibbonServer {
         //Setting access variables
         ACCESS_ALL_MASK = mainConfig.getProperty("access_all_mask");
         ACCESS_ALLOW_MULTIPLIE_LOGIN = mainConfig.getProperty("access_allow_multiplie_login").equals("0") ? false : true;
+        ACCESS_ALLOW_SESSIONS = mainConfig.getProperty("access_enable_sessions").equals("0") ? false : true;
+        ACCESS_SESSION_MAX_COUNT = Integer.valueOf(mainConfig.getProperty("access_session_count_max"));
+        ACCESS_ALLOW_REMOTE = mainConfig.getProperty("access_allow_remote").equals("0") ? false : true;
+        try {
+            ACCESS_REMOTE_GROUP = new String(mainConfig.getProperty("access_remote_group").getBytes("ISO-8859-1"), "UTF-8");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            RibbonServer.logAppend(LOG_ID, 1, "неможливо визначити напрямок реєстрації помилок!");
+            System.exit(3);
+        }
+        
+        //Setting optional variables
+        OPT_POST_INIT = mainConfig.getProperty("opt_post_init").equals("0") ? false : true;
+        OPT_CREATE_REPORTS = mainConfig.getProperty("opt_create_reports").equals("0") ? false : true;
+        
+        //Setting IO control varibales
+        IO_ENABLED = mainConfig.getProperty("io_enabled").equals("0") ? false : true;
+        IO_IGNORE_DIRTY = mainConfig.getProperty("io_ignore_dirty").equals("0") ? false : true;
+        try {
+            IO_IMPORT_EM_DIR = new String(mainConfig.getProperty("io_import_em_dir").getBytes("ISO-8859-1"), "UTF-8");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            RibbonServer.logAppend(LOG_ID, 1, "неможливо визначити напрямок реєстрації помилок!");
+            System.exit(3);
+        }
+        Integer loc_IO_EXPORT_QUENE_SIZE = ACCESS_SESSION_MAX_COUNT = Integer.valueOf(mainConfig.getProperty("io_export_quene_size"));
+        Integer loc_IO_EXPORT_ERRQUENE_SIZE = ACCESS_SESSION_MAX_COUNT = Integer.valueOf(mainConfig.getProperty("io_export_errquene_size"));
         
         //Setting debug variables
         DEBUG_POST_EXCEPTIONS = mainConfig.getProperty("debug_post_exceptions").equals("0") ? false : true;
@@ -471,9 +552,7 @@ public class RibbonServer {
             DEBUG_POST_DIR = new String(mainConfig.getProperty("debug_post_dir").getBytes("ISO-8859-1"), "UTF-8");
         } catch (java.io.UnsupportedEncodingException ex) {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо визначити напрямок реєстрації помилок!");
-            if (DEBUG_POST_EXCEPTIONS == true) {
-                System.exit(3);
-            }
+            System.exit(3);
         }
         
         logAppend(LOG_ID, 3, 
@@ -487,6 +566,20 @@ public class RibbonServer {
                 + RibbonServer.NETWORK_MAX_CONNECTIONS) + "\n" : "Мережевий доступ заблоковано.\n")
                 + (RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN ? "Дозволена неодноразова авторізація.\n" : "Неодноразова авторізація заблокована.\n")
                 + "Маска для системної категорії доступу ALL:" + RibbonServer.ACCESS_ALL_MASK + "\n"
+                + (RibbonServer.ACCESS_ALLOW_SESSIONS ? "Сесії дозволені.\nКількість споживань сесії:" + RibbonServer.ACCESS_SESSION_MAX_COUNT + "\n" : "")
+                + (RibbonServer.ACCESS_ALLOW_REMOTE ? "Видалений режим дозволено.\nГрупа для видаленого режиму:" + RibbonServer.ACCESS_REMOTE_GROUP + "\n" : "")
+                + (RibbonServer.OPT_POST_INIT ? "Автоматичний випуск тестового повідомлення увімкнено.\n" : "")
+                + (RibbonServer.OPT_CREATE_REPORTS ? "Створення рапортів увімкнено.\n" : "")
+                + (RibbonServer.IO_ENABLED ? 
+                    (
+                    "Операції іморту/експорту увікнені.\n" +
+                    (RibbonServer.IO_IGNORE_DIRTY ? "[УВАГА!] Режим ігнорування помилок увікнено!" : "") + 
+                    "Аварійний напрямок:" + RibbonServer.IO_IMPORT_EM_DIR + "\n" +
+                    "Розмір черги експорту:" + loc_IO_EXPORT_QUENE_SIZE + "\n" + 
+                    "Розмір черги помилок експорту:" + loc_IO_EXPORT_ERRQUENE_SIZE + "\n"
+                    ):
+                    ""
+                )
                 + (RibbonServer.DEBUG_POST_EXCEPTIONS ? "Режим дебагінгу активовано.\nНапрямок реєстрації помилок: " + RibbonServer.DEBUG_POST_DIR : "")
                 );
     }
