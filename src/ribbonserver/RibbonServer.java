@@ -613,11 +613,6 @@ public class RibbonServer {
      * @since RibbonServer a2
      */
     private static void validateSystemVariables() {
-        //Turn off cache if cache size is lower or equal to 0;
-        if (CACHE_ENABLED && CACHE_SIZE <= 0) {
-            logAppend(LOG_ID, 1, "Невірне налаштування кешу (" + CACHE_SIZE + ")");
-            CACHE_ENABLED = false;
-        }
         
         //Set constant access ALL group mask if corrupted;
         Boolean MASK_VALID = true;
@@ -632,6 +627,12 @@ public class RibbonServer {
         if (ACCESS_ALL_MASK.length() > 3 && !MASK_VALID) {
             logAppend(LOG_ID, 1, "Невірне налаштування маски доступу ALL (" + ACCESS_ALL_MASK + ")");
             ACCESS_ALL_MASK = VAL_ACCESS_ALL_MASK;
+        }
+        
+        //Turn off sessions if session use max count is lower or equal to 0;
+        if (ACCESS_ALLOW_SESSIONS && ACCESS_SESSION_MAX_COUNT <= 0) {
+            logAppend(LOG_ID, 1, "Невірне налаштування кешу (" + ACCESS_SESSION_MAX_COUNT + ")");
+            ACCESS_ALLOW_SESSIONS = false;
         }
         
         //EXIT if group doesn't exist
