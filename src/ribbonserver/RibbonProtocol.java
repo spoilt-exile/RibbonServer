@@ -171,6 +171,9 @@ public class RibbonProtocol {
                 if (CURR_TYPE == CONNECTION_TYPES.NULL) {
                     if (parsedArgs[1].equals(STR_VERSION)) {
                         try {
+                            if (parsedArgs[0].equals("ANY") || parsedArgs[0].equals("NULL")) {
+                                throw new IllegalArgumentException();
+                            }
                             CURR_TYPE = CONNECTION_TYPES.valueOf(parsedArgs[0]);
                             if (!parsedArgs[2].equals(System.getProperty("file.encoding"))) {
                                 RibbonServer.logAppend(LOG_ID, 2, "мережева сесія вимогає іншої кодової сторінки:" + parsedArgs[2]);
