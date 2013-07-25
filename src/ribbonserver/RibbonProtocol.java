@@ -678,7 +678,7 @@ public class RibbonProtocol {
         while (commIter.hasNext()) {
             CommandLet currComm = commIter.next();
             if (currComm.COMMAND_NAME.equals(command)) {
-                if (currComm.COMM_TYPE == this.CURR_TYPE || currComm.COMM_TYPE == CONNECTION_TYPES.ANY || this.CURR_TYPE == CONNECTION_TYPES.CONTROL) {
+                if (currComm.COMM_TYPE == this.CURR_TYPE || (currComm.COMM_TYPE == CONNECTION_TYPES.ANY && this.CURR_TYPE != CONNECTION_TYPES.NULL) || this.CURR_TYPE == CONNECTION_TYPES.CONTROL) {
                     if (this.CURR_SESSION.USER_NAME == null && (currComm.COMM_TYPE == CONNECTION_TYPES.CLIENT || currComm.COMM_TYPE == CONNECTION_TYPES.CONTROL)) {
                         return "RIBBON_ERROR:Вхід не виконано!\nRIBBON_GCTL_FORCE_LOGIN:";
                     } else {
