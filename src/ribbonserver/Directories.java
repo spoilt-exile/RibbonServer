@@ -46,6 +46,92 @@ public final class Directories {
     private static final Object dirLock = new Object();
     
     /**
+     * Pseudo directory class.
+     * @author Stanislav Nepochatov
+     * @since RibbonServer a2
+     */
+    public static class PseudoDirEntry extends Generic.CsvElder {
+
+        /**
+         * Name of the pseudo directory.
+         */
+        public String PSEUDO_DIR_NAME;
+        
+        /**
+         * Commentary for this pseudo directory.
+         */
+        private String COMM;
+        
+        /**
+         * Array of inernal directories;
+         */
+        private java.util.ArrayList<DirClasses.DirEntry> INTERNAL_DIRS;
+        
+        /**
+         * Default constructor.
+         */
+        public PseudoDirEntry() {
+            this.baseCount = 2;
+            this.groupCount = 1;
+            this.currentFormat = Generic.CsvElder.csvFormatType.ComplexCsv;
+        }
+        
+        /**
+         * Parametric constructor.
+         * @param givenCsv csv representation of pseudo durectory;
+         */
+        public PseudoDirEntry(String givenCsv) {
+            java.util.ArrayList<String[]> parsed = Generic.CsvFormat.fromCsv(this, givenCsv);
+            PSEUDO_DIR_NAME = parsed.get(0)[0];
+            COMM = parsed.get(0)[1];
+            String[] parsedDirs = parsed.get(1);
+            for (String currParsedDir : parsedDirs) {
+                DirClasses.DirEntry addDir = Directories.rootDir.returnEndDir("", currParsedDir);
+                if (addDir != null) {
+                    INTERNAL_DIRS.add(addDir);
+                } else {
+                    RibbonServer.logAppend(LOG_ID, 1, "помилка у індексі псевдонапрямків (напрямок " + currParsedDir + " не існує)");
+                }
+            }
+        }
+        
+        /**
+         * Get internal directories as string array;
+         * @return 
+         */
+        public String[] getinternalDirectories() {
+            String[] returned = new String[this.INTERNAL_DIRS.size()];
+            for (int index = 0; index < returned.length; index++) {
+                returned[index] = this.INTERNAL_DIRS.get(index).FULL_DIR_NAME;
+            }
+            return returned;
+        }
+        
+        /**
+         * Check if user can use this pseudo dir.
+         * @param userName name of user to check access;
+         * @return true if user can use this pseudo dir;
+         */
+        public Boolean checkPseudoDir(String userName) {
+            if (AccessHandler.checkAccessForAll(userName, this.getinternalDirectories(), 1) == null) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        
+        @Override
+        public String toCsv() {
+            String returned = "{" + this.PSEUDO_DIR_NAME + "},{" + this.COMM + "},[";
+            for (DirClasses.DirEntry currDir : INTERNAL_DIRS) {
+                returned += currDir.FULL_DIR_NAME;
+            }
+            return returned + "]";
+        }
+    }
+    
+    /**
      * Init directory's component.
      * @since RibbonServer a2
      */
