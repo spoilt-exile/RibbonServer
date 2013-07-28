@@ -408,6 +408,24 @@ public class RibbonProtocol {
         });
         
         /**
+         * RIBBON_GET_PSEUDO: commandlet
+         * Return csv list of pseudo directories which user may use.
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_GET_PSEUDO", CONNECTION_TYPES.CLIENT) {
+            @Override
+            public String exec(String args) {
+                if (IS_REMOTE) {
+                    if (CURR_SESSION.USER_NAME == null) {
+                        return "RIBBON_ERROR:Вхід не виконано!";
+                    }
+                    return Directories.PROC_GET_PSEUDO(CURR_SESSION.USER_NAME);
+                } else {
+                    return "RIBBON_ERROR:Видалений режим вимкнено!";
+                }
+            }
+        });
+        
+        /**
          * RIBBON_GET_TAGS: commandlet
          * Return all tags to client in csv form.
          */

@@ -355,6 +355,7 @@ public abstract class IndexReader {
             //buf.setLength((int) (java.nio.file.Files.size(new java.io.File(RibbonServer.BASE_PATH + "/" + indexFile).toPath()) / 2));
             while (indxReader.ready()) {
                 buf.append(indxReader.readLine());
+                buf.append("\n");
             }
             indxReader.close();
         } catch (java.io.FileNotFoundException ex) {

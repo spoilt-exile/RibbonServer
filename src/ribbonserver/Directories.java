@@ -258,6 +258,7 @@ public final class Directories {
      * Return pseudo directory object.
      * @param pseudoName name of the pseudo dir;
      * @return pseudo dir reference or null;
+     * @since RibbonServer a2
      */
     public static PseudoDirEntry getPseudoDir(String pseudoName) {
         for (PseudoDirEntry curr: pseudoDirs) {
@@ -266,5 +267,23 @@ public final class Directories {
             }
         }
         return null;
+    }
+    
+    /**
+     * Return pseudo directories which specified user may use.
+     * @param userName name to check;
+     * @return formatted csv strings end END: command at the end;
+     * @since RibbonServer a2
+     */
+    public static String PROC_GET_PSEUDO(String userName) {
+        StringBuffer buf = new StringBuffer();
+        for (PseudoDirEntry curr: pseudoDirs) {
+            if (curr.checkPseudoDir(userName)) {
+                buf.append(curr.toCsv());
+                buf.append("\n");
+            }
+        }
+        buf.append("END:");
+        return buf.toString();
     }
 }
