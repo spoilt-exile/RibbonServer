@@ -297,4 +297,74 @@ public abstract class IndexReader {
         };
         delayExec.start();
     }
+    
+    /**
+     * Read pseudo directoris from index;
+     * @return array list with pseudo directories objects;
+     */
+    public static java.util.ArrayList<Directories.PseudoDirEntry> readPseudoDirectories() {
+        String[] readed = readIndex("pseudo.index");
+        if (readed == null) {
+            writeIndex("pseudo.index", null, false, "{Тест},{Випуск тестового повідомлення},[СИСТЕМА.Тест]\n");
+            readed = readIndex("pseudo.index");
+        }
+        java.util.ArrayList<Directories.PseudoDirEntry> psDirs = new java.util.ArrayList(readed.length);
+        for (String currLine : readed) {
+            psDirs.add(new Directories.PseudoDirEntry(currLine));
+        }
+        return psDirs;
+    }
+    
+    /**
+     * Write some csv to index file.
+     * @param indexFile name of file;
+     * @param indexLock lock to sync;
+     * @param appendFlag write and erase or just append;
+     */
+    public static void writeIndex(String indexFile, Object indexLock, Boolean appendFlag, String content) {
+        java.io.FileWriter indexWriter = null;
+        try {
+            indexWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + indexFile);
+            if (indexLock == null) {
+                indexWriter.write(content);
+            } else {
+                synchronized (indexLock) {
+                    indexWriter.write(content);
+                }
+            }
+        } catch (java.io.IOException ex) {
+            RibbonServer.logAppend(LOG_ID, 0, "помилка запису до файлу " + indexFile);
+            System.exit(4);
+        } finally {
+            try {
+                indexWriter.close();
+            } catch (java.io.IOException ex) {}
+        }
+    }
+    
+    /**
+     * Read inde file.
+     * @param indexFile name of index file;
+     * @return string array of index lines or null if index does'nt exist;
+     */
+    public static String[] readIndex(String indexFile) {
+        StringBuffer buf = new StringBuffer();
+        java.io.BufferedReader indxReader = null;
+        try {
+            indxReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + indexFile));
+            //buf.setLength((int) (java.nio.file.Files.size(new java.io.File(RibbonServer.BASE_PATH + "/" + indexFile).toPath()) / 2));
+            while (indxReader.ready()) {
+                buf.append(indxReader.readLine());
+            }
+            indxReader.close();
+        } catch (java.io.FileNotFoundException ex) {
+            return null;
+        } catch (java.io.IOException ex) {
+            RibbonServer.logAppend(LOG_ID, 0, "помилка читання файлу " + indexFile);
+            System.exit(4);
+        }
+        return buf.toString().split("\n");
+    }
+    
+    
 }

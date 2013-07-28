@@ -40,6 +40,12 @@ public final class Directories {
     private static DirClasses.DirEntry rootDir;
     
     /**
+     * List with pseudo directories.
+     * @since RibbonServer a2
+     */
+    public static java.util.ArrayList<PseudoDirEntry> pseudoDirs;
+    
+    /**
      * Directories global lock.
      * @since RibbonServer a2
      */
@@ -65,7 +71,7 @@ public final class Directories {
         /**
          * Array of inernal directories;
          */
-        private java.util.ArrayList<DirClasses.DirEntry> INTERNAL_DIRS;
+        private java.util.ArrayList<DirClasses.DirEntry> INTERNAL_DIRS = new java.util.ArrayList();
         
         /**
          * Default constructor.
@@ -81,6 +87,7 @@ public final class Directories {
          * @param givenCsv csv representation of pseudo durectory;
          */
         public PseudoDirEntry(String givenCsv) {
+            this();
             java.util.ArrayList<String[]> parsed = Generic.CsvFormat.fromCsv(this, givenCsv);
             PSEUDO_DIR_NAME = parsed.get(0)[0];
             COMM = parsed.get(0)[1];
@@ -148,6 +155,12 @@ public final class Directories {
             }
         }
         rootDir.deployDir(RibbonServer.BASE_PATH);
+        if (RibbonServer.ACCESS_ALLOW_REMOTE) {
+            pseudoDirs = IndexReader.readPseudoDirectories();
+            for (PseudoDirEntry curr: pseudoDirs) {
+                RibbonServer.logAppend(LOG_ID, 3, "додано псевдонапрямок " + curr.PSEUDO_DIR_NAME + " " + Generic.CsvFormat.renderGroup(curr.getinternalDirectories()));
+            }
+        }
     }
     
     /**
