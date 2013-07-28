@@ -355,7 +355,7 @@ public class RibbonProtocol {
             public String exec(String args) {
                 if (CURR_SESSION.USER_NAME == null) {
                     return "RIBBON_ERROR:Вхід не виконано!";
-                } else if (!RibbonServer.ACCESS_ALLOW_REMOTE && !IS_REMOTE) {
+                } else if (!IS_REMOTE) {
                     return "RIBBON_ERROR:Видалений режим вимкнено!";
                 }
                 UserClasses.UserEntry overUser = AccessHandler.getEntryByName(Generic.CsvFormat.commonParseLine(args, 1)[0]);
