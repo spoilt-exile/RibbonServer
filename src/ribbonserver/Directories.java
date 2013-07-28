@@ -43,7 +43,7 @@ public final class Directories {
      * List with pseudo directories.
      * @since RibbonServer a2
      */
-    public static java.util.ArrayList<PseudoDirEntry> pseudoDirs;
+    private static java.util.ArrayList<PseudoDirEntry> pseudoDirs;
     
     /**
      * Directories global lock.
@@ -252,5 +252,19 @@ public final class Directories {
             returned += rootDirs.next().PROC_GET_DIR();
         }
         return returned + "END:";
+    }
+    
+    /**
+     * Return pseudo directory object.
+     * @param pseudoName name of the pseudo dir;
+     * @return pseudo dir reference or null;
+     */
+    public static PseudoDirEntry getPseudoDir(String pseudoName) {
+        for (PseudoDirEntry curr: pseudoDirs) {
+            if (curr.PSEUDO_DIR_NAME.equals(pseudoName)) {
+                return curr;
+            }
+        }
+        return null;
     }
 }

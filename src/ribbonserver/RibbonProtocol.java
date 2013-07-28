@@ -335,6 +335,11 @@ public class RibbonProtocol {
                     return "RIBBON_ERROR:Ця сессія не може використовувати видалений режим!";
                 }
                 IS_REMOTE = "1".equals(args) ? true : false;
+                if (IS_REMOTE) {
+                    RibbonServer.logAppend(LOG_ID, 3, "увімкнено видалений режим (" + CURR_SESSION.SESSION_TIP + ")");
+                } else {
+                    RibbonServer.logAppend(LOG_ID, 3, "вимкнено видалений режим (" + CURR_SESSION.SESSION_TIP + ")");
+                }
                 return "OK:" + (IS_REMOTE ? "1" : "0");
             }
         });
@@ -342,6 +347,8 @@ public class RibbonProtocol {
         /**
          * RIBBON_NCTL_ACCESS_CONTEXT: commandlet
          * Change access mode of next command.
+         * WARNING! this commandlet grab socket control!
+         * WARNING! this commandlet calls to process() method directly!
          */
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_ACCESS_CONTEXT", CONNECTION_TYPES.ANY) {
             @Override
@@ -456,6 +463,31 @@ public class RibbonProtocol {
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
                 }
                 return answer;
+            }
+        });
+        
+        /**
+         * RIBBON_POST_MESSAGE_BY_PSEUDO: commandlet
+         * Post message from remote interface to the system by using pseudo directory.
+         * WARNING! this commandlet grab socket control!
+         * WARNING! this commandlet calls to RIBBON_POST_MESSAGE commandlet
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_POST_MESSAGE_BY_PSEUDO", CONNECTION_TYPES.CLIENT) {
+            @Override
+            public String exec(String args) {
+                if (IS_REMOTE) {
+                    java.util.ArrayList<String[]> parsed = Generic.CsvFormat.complexParseLine(args, 4, 1);
+                    Directories.PseudoDirEntry currPostPseudo = Directories.getPseudoDir(parsed.get(0)[0]);
+                    if (currPostPseudo == null) {
+                        return "RIBBON_ERROR:Псевдонапрямок " + parsed.get(0)[0] + " не існує.";
+                    }
+                    String[] postDirs = currPostPseudo.getinternalDirectories();
+                    String commandToPost = "RIBBON_POST_MESSAGE:-1," + args.replace("{" + currPostPseudo.PSEUDO_DIR_NAME + "}", Generic.CsvFormat.renderGroup(postDirs));
+                    RibbonServer.logAppend(LOG_ID, 3, "додано повідомлення через псевдонапрямок '" + currPostPseudo.PSEUDO_DIR_NAME + "'");
+                    return process(commandToPost);
+                } else {
+                    return "RIBBON_ERROR:Видалений режим вимкнено!";
+                }
             }
         });
         
