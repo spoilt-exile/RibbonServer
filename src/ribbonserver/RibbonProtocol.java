@@ -500,7 +500,7 @@ public class RibbonProtocol {
                         return "RIBBON_ERROR:Псевдонапрямок " + parsed.get(0)[0] + " не існує.";
                     }
                     String[] postDirs = currPostPseudo.getinternalDirectories();
-                    String commandToPost = "RIBBON_POST_MESSAGE:-1," + args.replace("{" + currPostPseudo.PSEUDO_DIR_NAME + "}", Generic.CsvFormat.renderGroup(postDirs));
+                    String commandToPost = "RIBBON_POST_MESSAGE:-1," + Generic.CsvFormat.renderGroup(postDirs) + args.substring(currPostPseudo.PSEUDO_DIR_NAME.length() + 2);
                     RibbonServer.logAppend(LOG_ID, 3, "додано повідомлення через псевдонапрямок '" + currPostPseudo.PSEUDO_DIR_NAME + "'");
                     return process(commandToPost);
                 } else {
