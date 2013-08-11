@@ -602,6 +602,30 @@ public class RibbonProtocol {
         });
         
         /**
+         * RIBBON_MODIFY_MESSAGE_BY_PSEUDO: commandlet
+         * Modify existing message from remote interface to the system by using pseudo directory.
+         * WARNING! this commandlet grab socket control!
+         * WARNING! this commandlet calls to RIBBON_MODIFY_MESSAGE commandlet
+         */
+        this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_MODIFY_MESSAGE_BY_PSEUDO", CONNECTION_TYPES.CLIENT) {
+            @Override
+            public String exec(String args) {
+                if (IS_REMOTE) {
+                    java.util.ArrayList<String[]> parsed = Generic.CsvFormat.complexParseLine(args, 5, 1);
+                    Directories.PseudoDirEntry currPostPseudo = Directories.getPseudoDir(parsed.get(0)[1]);
+                    if (currPostPseudo == null) {
+                        return "RIBBON_ERROR:Псевдонапрямок " + parsed.get(0)[1] + " не існує.";
+                    }
+                    String[] postDirs = currPostPseudo.getinternalDirectories();
+                    String commandToPost = "RIBBON_MODIFY_MESSAGE:" + parsed.get(0)[0] + "," + Generic.CsvFormat.renderGroup(postDirs) + args.substring(currPostPseudo.PSEUDO_DIR_NAME.length() + 13);
+                    return process(commandToPost);
+                } else {
+                    return "RIBBON_ERROR:Видалений режим вимкнено!";
+                }
+            }
+        });
+        
+        /**
          * RIBBON_DELETE_MESSAGE: commandlet
          * Delete message from all directories.
          */
