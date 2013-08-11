@@ -313,7 +313,8 @@ public class RibbonProtocol {
         this.RIBBON_COMMANDS.add(new CommandLet("RIBBON_NCTL_GET_USERNAME", CONNECTION_TYPES.ANY) {
             public String exec(String args) {
                 if (CURR_SESSION.USER_NAME != null) {
-                    return "OK:" + CURR_SESSION.USER_NAME;
+                    UserClasses.UserEntry curr = AccessHandler.getEntryByName(CURR_SESSION.USER_NAME);
+                    return "OK:{" + curr.USER_NAME + "},{" + curr.COMM + "}," + Generic.CsvFormat.renderGroup(curr.GROUPS);
                 } else {
                     return "RIBBON_ERROR:Вхід до системи не виконано!";
                 }
