@@ -367,7 +367,7 @@ public class RibbonProtocol {
                 }
                 String oldUserName = CURR_SESSION.USER_NAME;
                 CURR_SESSION.USER_NAME = overUser.USER_NAME;
-                CURR_SESSION.outStream.println("PROCEED:");
+                CURR_SESSION.printLnToPeer("PROCEED:");
                 String subResult = null;
                 try {
                     subResult = process(CURR_SESSION.inStream.readLine());

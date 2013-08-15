@@ -154,13 +154,13 @@ public final class SessionManager {
         /**
          * Output writer to client.
          */
-        public java.io.PrintWriter outStream;
+        private java.io.PrintWriter outStream;
         
         /**
          * Lock object for <code>outStream</code>.
          * @since RibbonServer a2
          */
-        public final Object outputLock = new Object();
+        private final Object outputLock = new Object();
         
         /**
          * Protocol handler, parser and executor.
@@ -192,7 +192,7 @@ public final class SessionManager {
             try {
                 while (this.isAlive == true) {
                     inputLine = inStream.readLine();
-                    synchronized (this.outputLock) {
+                    synchronized (outputLock) {
                         String answer = this.ProtocolHandler.process(inputLine);
                         if (answer.equals("COMMIT_CLOSE:")) {
                             isAlive = false;
@@ -240,6 +240,16 @@ public final class SessionManager {
                 RibbonServer.logAppend(LOG_ID, 1, "неможливо прочитати дані з сокету (" + SessionSocket.getInetAddress().getHostAddress() + ")");
             }
         }
+        
+        /**
+         * Send message to this session peer.
+         * @param message message to send;
+         */
+        public void printLnToPeer(String message) {
+            synchronized (outputLock) {
+                outStream.println(message);
+            }
+        }
     }
     
     /**
@@ -285,9 +295,7 @@ public final class SessionManager {
         while (sessionIter.hasNext()) {
             SessionThread currSession = sessionIter.next();
             if (currSession.ProtocolHandler.CURR_TYPE == type) {
-                synchronized (currSession.outputLock) {
-                    currSession.outStream.println(message);
-                }
+                currSession.printLnToPeer(message);
             }
         }
     }
