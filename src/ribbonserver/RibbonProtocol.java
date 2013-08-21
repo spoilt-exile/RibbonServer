@@ -179,7 +179,7 @@ public class RibbonProtocol {
                                 RibbonServer.logAppend(LOG_ID, 2, "мережева сесія вимогає іншої кодової сторінки:" + parsedArgs[2]);
                                 CURR_SESSION.setReaderEncoding(parsedArgs[2]);
                             }
-                            return "OK:\nRIBBON_GCTL_FORCE_LOGIN:";
+                            return "OK:";
                         } catch (IllegalArgumentException ex) {
                             return "RIBBON_ERROR:Невідомий тип з'єднання!";
                         }
