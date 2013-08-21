@@ -201,10 +201,10 @@ public class RibbonProtocol {
           public String exec(String args) {
               String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 2);
               if (!RibbonServer.ACCESS_ALLOW_MULTIPLIE_LOGIN && SessionManager.isAlreadyLogined(parsedArgs[0])) {
-                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!\nRIBBON_GCTL_FORCE_LOGIN:";
+                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " вже увійшов до системи!";
               }
               if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserIsMemberOf(parsedArgs[0], "ADM"))) {
-                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.\nRIBBON_GCTL_FORCE_LOGIN:";
+                  return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.";
               }
               String returned = AccessHandler.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
               if (returned == null) {
@@ -226,7 +226,7 @@ public class RibbonProtocol {
                       return "OK:";
                   }
               } else {
-                  return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
+                  return "RIBBON_ERROR:" + returned;
               }
           }
         });
@@ -239,9 +239,9 @@ public class RibbonProtocol {
             @Override
             public String exec(String args) {
                 if (!RibbonServer.ACCESS_ALLOW_SESSIONS) {
-                    return "RIBBON_ERROR:Сесії вимкнено!\nRIBBON_GCTL_FORCE_LOGIN:";
+                    return "RIBBON_ERROR:Сесії вимкнено!";
                 } else if (CURR_SESSION.CURR_ENTRY == null) {
-                    return "RIBBON_ERROR:Вхід не виконано!\nRIBBON_GCTL_FORCE_LOGIN:";
+                    return "RIBBON_ERROR:Вхід не виконано!";
                 } else {
                     return CURR_SESSION.CURR_ENTRY.SESSION_HASH_ID;
                 }
@@ -256,7 +256,7 @@ public class RibbonProtocol {
             @Override
             public String exec(String args) {
                 if (!RibbonServer.ACCESS_ALLOW_SESSIONS) {
-                    return "RIBBON_ERROR:Сесії вимкнено!\nRIBBON_GCTL_FORCE_LOGIN:";
+                    return "RIBBON_ERROR:Сесії вимкнено!";
                 }
                 SessionManager.SessionEntry exicted = SessionManager.getUserBySessionEntry(args);
                 if (exicted == null) {
@@ -270,7 +270,7 @@ public class RibbonProtocol {
                           CURR_SESSION.setSessionName();
                         return "OK:";
                     } else {
-                        return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
+                        return "RIBBON_ERROR:" + returned;
                     }
                 }
             }
@@ -290,7 +290,7 @@ public class RibbonProtocol {
                 }
                 String[] parsedArgs = Generic.CsvFormat.commonParseLine(args, 2);
                 if (CURR_TYPE == CONNECTION_TYPES.CONTROL && (!AccessHandler.isUserIsMemberOf(parsedArgs[0], "ADM"))) {
-                    return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.\nRIBBON_GCTL_FORCE_LOGIN:";
+                    return "RIBBON_ERROR:Користувач " + parsedArgs[0] + " не є адміністратором системи.";
                 }
                 String returned = AccessHandler.PROC_LOGIN_USER(parsedArgs[0], parsedArgs[1]);
                 if (returned == null) {
@@ -301,7 +301,7 @@ public class RibbonProtocol {
                     }
                     return "OK:";
                 } else {
-                    return "RIBBON_ERROR:" + returned + "\nRIBBON_GCTL_FORCE_LOGIN:";
+                    return "RIBBON_ERROR:" + returned;
                 }
             }
         });
