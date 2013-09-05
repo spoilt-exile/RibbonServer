@@ -82,19 +82,29 @@ public final class AccessHandler {
         Boolean findedAnswer = false;
         DirClasses.DirPermissionEntry fallbackPermission = null;
         DirClasses.DirPermissionEntry[] dirAccessArray = Directories.getDirAccess(givenDir);
-        for (Integer keyIndex = 0; keyIndex < keyArray.length; keyIndex++) {
-            for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
-                if (keyArray[keyIndex].equals("ADM")) {
-                    return true;    //ADM is root-like group, all permission will be ignored
+        if (dirAccessArray == null) {
+            for (Integer keyIndex = 0; keyIndex < keyArray.length; keyIndex++) {
+                for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
+                    if (keyArray[keyIndex].equals("ADM") && !keyIndex.equals(keyArray.length - 1)) {
+                        return true;    //ADM is root-like group, all permission will be ignored
+                    }
+                    if (dirAccessArray[dirIndex].KEY.equals("ALL")) {
+                        fallbackPermission = dirAccessArray[dirIndex];
+                        continue;
+                    }
+                    if (dirAccessArray[dirIndex].KEY.equals(keyArray[keyIndex])) {
+                        findedAnswer = dirAccessArray[dirIndex].checkByMode(givenMode);
+                        if (findedAnswer == true) {
+                            return findedAnswer;
+                        }
+                    }
                 }
-                if (dirAccessArray[dirIndex].KEY.equals("ALL")) {
-                    fallbackPermission = dirAccessArray[dirIndex];
-                    continue;
-                }
-                if (dirAccessArray[dirIndex].KEY.equals(keyArray[keyIndex])) {
-                    findedAnswer = dirAccessArray[dirIndex].checkByMode(givenMode);
-                    if (findedAnswer == true) {
-                        return findedAnswer;
+            }
+        } else {
+            for (Integer keyIndex = 0; keyIndex < keyArray.length; keyIndex++) {
+                if (keyArray[keyIndex].equals("ADM") && !keyIndex.equals(keyArray.length - 1)) {
+                    if (keyArray[keyIndex].equals("ADM")) {
+                        return true;    //ADM is root-like group, all permission will be ignored
                     }
                 }
             }
