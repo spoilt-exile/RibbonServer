@@ -82,7 +82,7 @@ public final class AccessHandler {
         Boolean findedAnswer = false;
         DirClasses.DirPermissionEntry fallbackPermission = null;
         DirClasses.DirPermissionEntry[] dirAccessArray = Directories.getDirAccess(givenDir);
-        if (dirAccessArray == null) {
+        if (dirAccessArray != null) {
             for (Integer keyIndex = 0; keyIndex < keyArray.length; keyIndex++) {
                 for (Integer dirIndex = 0; dirIndex < dirAccessArray.length; dirIndex++) {
                     if (keyArray[keyIndex].equals("ADM") && !keyIndex.equals(keyArray.length - 1)) {
@@ -110,7 +110,7 @@ public final class AccessHandler {
             }
         }
         if (fallbackPermission == null) {
-            fallbackPermission = new DirClasses.DirPermissionEntry("ALL:" + RibbonServer.ACCESS_ALL_MASK);
+            fallbackPermission = new DirClasses.DirPermissionEntry("GALL:" + RibbonServer.ACCESS_ALL_MASK);
         }
         if (findedAnswer == false) {
             findedAnswer = fallbackPermission.checkByMode(givenMode);
