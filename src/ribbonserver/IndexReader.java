@@ -56,18 +56,20 @@ public abstract class IndexReader {
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу напрявків не знайдено. Створюю новий.");
             java.io.File dirIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + RibbonServer.DIR_INDEX_PATH);
+            String[] defaultDirs = new String[] {
+              "СИСТЕМА,{Головний напрямок новин про розробку системи},[ALL],[ALL:100],[]",
+              "СИСТЕМА.Розробка,{Новини про розробку},[UA,RU],[ALL:100],[]",
+              "СИСТЕМА.Тест,{Тестовий напрямок},[UA,RU],[ALL:110],[]",
+              "СИСТЕМА.Загублене,{Напрямок для загублених повідомлень},[ALL],[GALL:100],[]",
+              "СИСТЕМА.Помилки,{Напрямок журналу помилок системи},[ALL],[GALL:000],[]"
+            };
             try {
                 dirIndexFile.createNewFile();
-                try (java.io.FileWriter dirIndexWriter = new java.io.FileWriter(dirIndexFile)) {
-                    dirIndexWriter.write("СИСТЕМА,{Головний напрямок новин про розробку системи},[ALL],[ALL:110],[]\n");
-                    dirIndexWriter.write("СИСТЕМА.Розробка,{Новини про розробку},[UA,RU],[ALL:100],[]\n");
-                    dirIndexWriter.write("СИСТЕМА.Тест,{Тестовий напрямок},[UA,RU],[ALL:110],[]\n");
-                    dirIndexWriter.write("СИСТЕМА.Загублене,{Напрямок для загублених повідомлень},[ALL],[GALL:100],[]\n");
+                java.io.FileWriter dirIndexWriter = new java.io.FileWriter(dirIndexFile);
+                for (String defString: defaultDirs) {
+                    dirIndexWriter.write(defString + "\n");
+                    Dirs.add(new DirClasses.DirSchema(defString));
                 }
-                Dirs.add(new DirClasses.DirSchema("СИСТЕМА", "Головний напрямок новин про розробку системи"));
-                Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Розробка", "Новини про розробку"));
-                Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Тест", "Тестовий напрямок"));
-                Dirs.add(new DirClasses.DirSchema("СИСТЕМА.Загублене", "Напрямок для загублених повідомлень"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу напрямків!");
                 System.exit(4);
