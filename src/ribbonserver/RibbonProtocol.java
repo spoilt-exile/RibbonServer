@@ -260,7 +260,7 @@ public class RibbonProtocol {
                 }
                 SessionManager.SessionEntry exicted = SessionManager.getUserBySessionEntry(args);
                 if (exicted == null) {
-                    return "RIBBON_GCTL_FORCE_LOGIN:";
+                    return "RIBBON_ERROR:Сесію не знайдено!:";
                 } else {
                     String returned = AccessHandler.PROC_RESUME_USER(exicted);
                     if (returned == null) {
@@ -755,7 +755,7 @@ public class RibbonProtocol {
             if (currComm.COMMAND_NAME.equals(command)) {
                 if (currComm.COMM_TYPE == this.CURR_TYPE || (currComm.COMM_TYPE == CONNECTION_TYPES.ANY && this.CURR_TYPE != CONNECTION_TYPES.NULL) || this.CURR_TYPE == CONNECTION_TYPES.CONTROL) {
                     if (this.CURR_SESSION.USER_NAME == null && (currComm.COMM_TYPE == CONNECTION_TYPES.CLIENT || currComm.COMM_TYPE == CONNECTION_TYPES.CONTROL)) {
-                        return "RIBBON_ERROR:Вхід не виконано!\nRIBBON_GCTL_FORCE_LOGIN:";
+                        return "RIBBON_ERROR:Вхід не виконано!";
                     } else {
                         exComm = currComm;
                     }

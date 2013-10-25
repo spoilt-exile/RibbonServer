@@ -209,12 +209,15 @@ public final class SessionManager {
                 this.outStream.close();
                 this.SessionSocket.close();
                 RibbonServer.logAppend(LOG_ID, 3, "мережеву сесію зачинено (" + SessionSocket.getInetAddress().getHostAddress() + ")");
+                this.isAlive = false;
                 SessionManager.closeSession(this);
             } catch (java.lang.NullPointerException ex) {
                 RibbonServer.logAppend(LOG_ID, 1, "з'єднання аварійно разірване!");
+                this.isAlive = false;
                 SessionManager.closeSession(this);
             } catch (java.io.IOException ex) {
                 RibbonServer.logAppend(LOG_ID, 1, "неможливо прочитати дані з сокету (" + SessionSocket.getInetAddress().getHostAddress() + ")");
+                this.isAlive = false;
                 SessionManager.closeSession(this);
             }
         }
