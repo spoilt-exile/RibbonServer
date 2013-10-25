@@ -121,8 +121,8 @@ public abstract class IndexReader {
             try {
                 usersIndexFile.createNewFile();
                 usersIndexWriter = new java.io.FileWriter(usersIndexFile);
-                usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1\n");
-                usersIndexWriter.write("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1\n");
+                usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],63a9f0ea7bb98050796b649e85481845,1\n");
+                usersIndexWriter.write("{test},{Test user, pass: test},[test],098f6bcd4621d373cade4e832627b4f6,1\n");
                 returnedUsers.add(new UserClasses.UserEntry("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1"));
                 returnedUsers.add(new UserClasses.UserEntry("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1"));
             } catch (java.io.IOException exq) {
