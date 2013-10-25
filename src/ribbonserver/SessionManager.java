@@ -341,8 +341,7 @@ public final class SessionManager {
      * @since RibbonServer a2
      */
     public static Boolean isAlreadyLogined(String givenName) {
-        for (Iterator<SessionThread> it = SessionManager.sessionsStore.iterator(); it.hasNext();) {
-            SessionThread iterSess = it.next();
+        for (SessionThread iterSess : SessionManager.sessionsStore) {
             if (iterSess.USER_NAME == null) {
                 continue;
             }
