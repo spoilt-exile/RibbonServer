@@ -153,7 +153,7 @@ public class Procedures {
             }
         }
         Messenger.deleteMessageEntryFromIndex(givenEntry);
-        RibbonServer.logAppend(LOG_ID, 3, "повідомлення за індексом " + givenEntry.INDEX + "вилучено з системи.");
+        RibbonServer.logAppend(LOG_ID, 3, "повідомлення за індексом " + givenEntry.INDEX + " вилучено з системи.");
     }
     
     /**
