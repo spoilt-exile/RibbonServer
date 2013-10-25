@@ -48,8 +48,9 @@ public abstract class IndexReader {
      */
     public static java.util.ArrayList<DirClasses.DirSchema> readDirectories() {
         java.util.ArrayList<DirClasses.DirSchema> Dirs = new java.util.ArrayList<>();
+        java.io.BufferedReader dirIndexReader = null;
         try {
-            java.io.BufferedReader dirIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.DIR_INDEX_PATH));
+            dirIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.DIR_INDEX_PATH));
             while (dirIndexReader.ready()) {
                 Dirs.add(new DirClasses.DirSchema(dirIndexReader.readLine()));
             }
@@ -63,9 +64,10 @@ public abstract class IndexReader {
               "СИСТЕМА.Загублене,{Напрямок для загублених повідомлень},[ALL],[GALL:100],[]",
               "СИСТЕМА.Помилки,{Напрямок журналу помилок системи},[ALL],[GALL:000],[]"
             };
+            java.io.FileWriter dirIndexWriter = null;
             try {
                 dirIndexFile.createNewFile();
-                java.io.FileWriter dirIndexWriter = new java.io.FileWriter(dirIndexFile);
+                dirIndexWriter = new java.io.FileWriter(dirIndexFile);
                 for (String defString: defaultDirs) {
                     dirIndexWriter.write(defString + "\n");
                     Dirs.add(new DirClasses.DirSchema(defString));
@@ -73,10 +75,28 @@ public abstract class IndexReader {
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу напрямків!");
                 System.exit(4);
+            } finally {
+                try{
+                    if (dirIndexWriter != null) {
+                        dirIndexWriter.close();
+                    }
+                } catch (java.io.IOException exq) {
+                    RibbonServer.logAppend(LOG_ID, 0, "неможливо закрити файл індексу напрямків!");
+                    System.exit(4);
+                }
             }
         } catch (java.io.IOException ex) {
             RibbonServer.logAppend(LOG_ID, 0, "помилка читання файлу індекса напрямків!");
             System.exit(4);
+        } finally {
+            try {
+                if (dirIndexReader != null) {
+                    dirIndexReader.close();
+                }
+            } catch (java.io.IOException ex) {
+                RibbonServer.logAppend(LOG_ID, 0, "помилка закриття файлу індекса напрямків!");
+                System.exit(4);
+            }
         }
         return Dirs;
     }
@@ -88,29 +108,48 @@ public abstract class IndexReader {
      */
     public static java.util.ArrayList<UserClasses.UserEntry> readUsers() {
         java.util.ArrayList<UserClasses.UserEntry> returnedUsers = new java.util.ArrayList<>();
+        java.io.BufferedReader userIndexReader = null;
         try {
-            java.io.BufferedReader userIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.USERS_INDEX_PATH));
+            userIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.USERS_INDEX_PATH));
             while (userIndexReader.ready()) {
                 returnedUsers.add(new UserClasses.UserEntry(userIndexReader.readLine()));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу користувачів не знайдено. Створюю новий.");
             java.io.File usersIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + RibbonServer.USERS_INDEX_PATH);
+            java.io.FileWriter usersIndexWriter = null;
             try {
                 usersIndexFile.createNewFile();
-                try (java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile)) {
-                    usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1\n");
-                    usersIndexWriter.write("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1\n");
-                }
+                usersIndexWriter = new java.io.FileWriter(usersIndexFile);
+                usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1\n");
+                usersIndexWriter.write("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1\n");
                 returnedUsers.add(new UserClasses.UserEntry("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1"));
                 returnedUsers.add(new UserClasses.UserEntry("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу користувачів!");
                 System.exit(5);
+            } finally {
+                if (usersIndexWriter != null) {
+                    try {
+                        usersIndexWriter.close();
+                    } catch (java.io.IOException exq) {
+                        RibbonServer.logAppend(LOG_ID, 0, "неможливо закрити новий файл індексу користувачів!");
+                        System.exit(5);
+                    }
+                }
             }
         } catch (java.io.IOException ex) {
             RibbonServer.logAppend(LOG_ID, 0, "помилка читання файлу індекса користувачів!");
             System.exit(4);
+        } finally {
+            try {
+                if (userIndexReader != null) {
+                    userIndexReader.close();
+                }
+            }  catch (java.io.IOException ex) {
+                RibbonServer.logAppend(LOG_ID, 0, "помилка закриття файлу індекса користувачів!");
+                System.exit(4);
+            }
         }
         return returnedUsers;
     }
@@ -122,28 +161,46 @@ public abstract class IndexReader {
      */
     public static java.util.ArrayList<UserClasses.GroupEntry> readGroups() {
         java.util.ArrayList<UserClasses.GroupEntry> returnedGroups = new java.util.ArrayList<>();
+        java.io.BufferedReader groupIndexReader = null;
         try {
-            java.io.BufferedReader groupIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH));
-            Integer currentLine = 0;
+            groupIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH));
             while (groupIndexReader.ready()) {
                 returnedGroups.add(new UserClasses.GroupEntry(groupIndexReader.readLine()));
             }
         } catch (java.io.FileNotFoundException ex) {
             RibbonServer.logAppend(LOG_ID, 2, "попередній файл індексу груп не знайдено. Створюю новий.");
             java.io.File usersIndexFile = new java.io.File(RibbonServer.BASE_PATH + "/" + RibbonServer.GROUPS_INDEX_PATH);
+            java.io.FileWriter groupIndexWriter = null;
             try {
                 usersIndexFile.createNewFile();
-                try (java.io.FileWriter usersIndexWriter = new java.io.FileWriter(usersIndexFile)) {
-                    usersIndexWriter.write("{test},{Test group}\n");
-                }
+                groupIndexWriter = new java.io.FileWriter(usersIndexFile);
+                groupIndexWriter.write("{test},{Test group}\n");
                 returnedGroups.add(new UserClasses.GroupEntry("{test},{Test group}"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу груп!");
                 System.exit(5);
+            } finally {
+                if (groupIndexWriter != null) {
+                    try {
+                        groupIndexWriter.close();
+                    } catch (java.io.IOException exq) {
+                        RibbonServer.logAppend(LOG_ID, 0, "неможливо закрити новий файл індексу груп!");
+                        System.exit(5);
+                    }
+                }
             }
         } catch (java.io.IOException ex) {
             RibbonServer.logAppend(LOG_ID, 0, "помилка читання файлу індекса груп!");
             System.exit(4);
+        } finally {
+            if (groupIndexReader != null) {
+                try {
+                    groupIndexReader.close();
+                } catch (java.io.IOException ex) {
+                    RibbonServer.logAppend(LOG_ID, 0, "помилка закриття файлу індекса груп!");
+                    System.exit(4);
+                }
+            }
         }
         return returnedGroups;
     }
@@ -155,8 +212,9 @@ public abstract class IndexReader {
      */
     public static java.util.ArrayList<MessageClasses.MessageEntry> readBaseIndex() {
         java.util.ArrayList<MessageClasses.MessageEntry> returnedIndex = new java.util.ArrayList<>();
+        java.io.BufferedReader baseIndexReader = null;
         try {
-            java.io.BufferedReader baseIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH));
+            baseIndexReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + RibbonServer.BASE_INDEX_PATH));
             while (baseIndexReader.ready()) {
                 returnedIndex.add(new MessageClasses.MessageEntry(baseIndexReader.readLine()));
             }
@@ -241,12 +299,20 @@ public abstract class IndexReader {
                         contentBuf.append(sesIter.next().toCsv());
                         contentBuf.append("\n");
                     }
+                    java.io.FileWriter sesWriter = null;
                     try {
-                        try (java.io.FileWriter sesWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index")) {
-                            sesWriter.write(contentBuf.toString());
-                        }
+                    sesWriter = new java.io.FileWriter(RibbonServer.BASE_PATH + "/" + "session.index");
+                    sesWriter.write(contentBuf.toString());
                     } catch (java.io.IOException ex) {
-                        RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл индекса сесій!");
+                        RibbonServer.logAppend(LOG_ID, 0, "Неможливо записита файл індекса сесій!");
+                    } finally {
+                        if (sesWriter != null) {
+                            try {
+                                sesWriter.close();
+                            } catch (java.io.IOException ex) {
+                                RibbonServer.logAppend(LOG_ID, 0, "Неможливо закрити файл індекса сесій!");
+                            }
+                        }
                     }
                 }
             }
@@ -354,7 +420,6 @@ public abstract class IndexReader {
         java.io.BufferedReader indxReader = null;
         try {
             indxReader = new java.io.BufferedReader(new java.io.FileReader(RibbonServer.BASE_PATH + "/" + indexFile));
-            //buf.setLength((int) (java.nio.file.Files.size(new java.io.File(RibbonServer.BASE_PATH + "/" + indexFile).toPath()) / 2));
             while (indxReader.ready()) {
                 buf.append(indxReader.readLine());
                 buf.append("\n");
