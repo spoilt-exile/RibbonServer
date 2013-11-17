@@ -168,7 +168,7 @@ public class Procedures {
             "UA",
             new String[] {"СИСТЕМА.Тест"},
             new String[] {"оголошення", "ІТУ"},
-            formatLine + "\nСистема \"Стрічка\" " + RibbonServer.RIBBON_VER + "\n" + formatLine + "\n"
+            formatLine + "\nСистема \"Стрічка\" " + RibbonServer.RIBBON_MAJOR_VER + "\n" + formatLine + "\n"
                     + "Це повідомлення автоматично генерується системою \"Стрічка\"\n"
                     + "при завантаженні. Зараз система готова для одержання повідомлень."
                     + "\n\n" + RibbonServer.getCurrentDate()));

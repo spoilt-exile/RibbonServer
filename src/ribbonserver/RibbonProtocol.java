@@ -71,7 +71,7 @@ public class RibbonProtocol {
      * String protocol revision version.
      * @since RibbonServer a1
      */
-    private String STR_VERSION = RibbonServer.RIBBON_VER;
+    private String STR_VERSION = RibbonServer.RIBBON_MAJOR_VER;
     
     /**
      * Connection type enumeration.

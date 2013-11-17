@@ -133,10 +133,22 @@ public class RibbonServer {
     public static Boolean BASE_ALLOW_ATTACHMENTS;
     
     /**
-     * Version of the server.
+     * Major server version id.
      * @since RibbonServer a1
      */
-    public static String RIBBON_VER = "a2";
+    public static final String RIBBON_MAJOR_VER = "a2";
+    
+    /**
+     * Minor server version postfix.
+     * @since RibbonServer a2
+     */
+    public static final String RIBBON_MINOR_VER = ".1";
+    
+    /**
+     * Devel server version postfix.
+     * @since RibbonServer a2
+     */
+    public static final String RIBBON_DEVEL_VER = "";
     
     /**
      * Port number for listening.
@@ -376,7 +388,7 @@ public class RibbonServer {
     public static void main(String[] args) {
         createLogFile();
         logAppend(LOG_ID, -1, "Начало роботи системы...");
-        logAppend(LOG_ID, 2, "Версія системи: " + RIBBON_VER);
+        logAppend(LOG_ID, 2, "Версія системи: " + RIBBON_MAJOR_VER + RIBBON_MINOR_VER + RIBBON_DEVEL_VER);
         CURR_STATE = RibbonServer.SYS_STATES.INIT;
         setSystemVariables();
         if (IO_ENABLED) {
