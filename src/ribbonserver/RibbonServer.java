@@ -379,6 +379,11 @@ public class RibbonServer {
             IndexReader.updateBaseIndex();
             SessionManager.broadcast("RIBBON_UCTL_UPDATE_INDEX:" + Messenger.getMessageEntryByIndex(givenIndex).toCsv(), RibbonProtocol.CONNECTION_TYPES.CLIENT);
         }
+
+        @Override
+        public void postException(String desc, Throwable ex) {
+            Procedures.postException(desc, ex);
+        }
     }
 
     /**

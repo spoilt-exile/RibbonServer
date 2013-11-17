@@ -173,4 +173,27 @@ public class Procedures {
                     + "при завантаженні. Зараз система готова для одержання повідомлень."
                     + "\n\n" + RibbonServer.getCurrentDate()));
     }
+    
+    /**
+     * Post exception as message to the debug directory.
+     * @param desc short description of exceptional situation;
+     * @param ex exception object;
+     * @since RibbonServer a2
+     */
+    public static void postException(String desc, Throwable ex) {
+        if (RibbonServer.DEBUG_POST_EXCEPTIONS) {
+            StringBuffer exMesgBuf = new StringBuffer();
+            exMesgBuf.append(desc);
+            exMesgBuf.append(ex.getClass().getName() + "\n");
+            StackTraceElement[] stackTrace = ex.getStackTrace();
+            for (StackTraceElement element : stackTrace) {
+                exMesgBuf.append(element.toString() + "\n");
+            }
+            MessageClasses.Message exMessage = new MessageClasses.Message(
+                    "Звіт про помилку", "root", "UA", new String[] {RibbonServer.DEBUG_POST_DIR}, 
+                    new String[] {"СТРІЧКА", "ПОМИЛКИ"}, exMesgBuf.toString());
+            Procedures.PROC_POST_MESSAGE(exMessage);
+            SessionManager.broadcast("RIBBON_UCTL_LOAD_INDEX:" + exMessage.toCsv(), RibbonProtocol.CONNECTION_TYPES.CLIENT);
+        }
+    }
 }

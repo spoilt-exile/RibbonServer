@@ -769,6 +769,9 @@ public class RibbonProtocol {
             try {
                 return exComm.exec(args);
             } catch (Exception ex) {
+                Procedures.postException("Помилка при роботі сесії " + this.CURR_SESSION.SESSION_TIP
+                        + "\nКоманда: " + command + ":" + args + "\n\n", ex);
+                /**
                 if (RibbonServer.DEBUG_POST_EXCEPTIONS) {
                     StringBuffer exMesgBuf = new StringBuffer();
                     exMesgBuf.append("Помилка при роботі сесії ").append(this.CURR_SESSION.SESSION_TIP).append("(").append(RibbonServer.getCurrentDate()).append(")\n\n");
@@ -786,7 +789,8 @@ public class RibbonProtocol {
                     BROADCAST_TYPE = CONNECTION_TYPES.CLIENT;
                 }
                 RibbonServer.logAppend(LOG_ID, 1, "помилка при виконанні команди " + exComm.COMMAND_NAME + "!");
-                return "RIBBON_ERROR: помилка команди:" + ex.toString();
+                **/
+                return "RIBBON_ERROR:Помилка команди:" + ex.toString();
             }
         } else {
             return "RIBBON_ERROR:Невідома команда!";
