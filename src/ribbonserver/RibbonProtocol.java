@@ -661,7 +661,7 @@ public class RibbonProtocol {
                     return "RIBBON_ERROR:Повідмолення не існує!";
                 }
                 if ((matchedEntry.AUTHOR.equals(CURR_SESSION.USER_NAME) || (AccessHandler.checkAccessForAll(CURR_SESSION.USER_NAME, matchedEntry.DIRS, 2) != null))) {
-                    MessageClasses.MessageProperty newProp = new MessageClasses.MessageProperty(parsedArgs[1], CURR_SESSION.USER_NAME, parsedArgs[2], RibbonServer.getCurrentDate());
+                    MessageClasses.MessageProperty newProp = new MessageClasses.MessageProperty(parsedArgs[1], CURR_SESSION.USER_NAME, parsedArgs[2]);
                     newProp.TYPE = parsedArgs[1];
                     newProp.TEXT_MESSAGE = parsedArgs[2];
                     newProp.DATE = RibbonServer.getCurrentDate();
