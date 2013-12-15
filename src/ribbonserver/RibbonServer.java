@@ -314,7 +314,14 @@ public class RibbonServer {
         }
 
         @Override
-        public void addMessage(MessageClasses.Message givenMessage) {
+        public void addMessage(String schemeName, String typeName, MessageClasses.Message givenMessage) {
+            for (int index = 0; index < givenMessage.DIRS.length; index++) {
+                if (Directories.getDirPath(givenMessage.DIRS[index]) == null) {
+                    this.log("ОБГОРТКА", 1, "схема " + schemeName + " (" + typeName + ") посилається на неіснуючий напрямок " + givenMessage.DIRS[index]);
+                    givenMessage.DIRS = new String[] {IO_IMPORT_EM_DIR};
+                    break;
+                }
+            }
             Procedures.PROC_POST_MESSAGE(givenMessage);
             SessionManager.broadcast("RIBBON_UCTL_LOAD_INDEX:" + givenMessage.toCsv(), RibbonProtocol.CONNECTION_TYPES.CLIENT);
         }
