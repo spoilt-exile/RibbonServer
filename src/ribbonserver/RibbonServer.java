@@ -542,7 +542,7 @@ public class RibbonServer {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо визначити шлях до бази!");
             System.exit(3);
         }
-        BASE_ALLOW_ATTACHMENTS = mainConfig.getProperty("base_allow_attachments").equals("0") ? false : true;
+        //BASE_ALLOW_ATTACHMENTS = mainConfig.getProperty("base_allow_attachments").equals("0") ? false : true;
         
         //Setting network variables
         NETWORK_PORT = Integer.valueOf(mainConfig.getProperty("networking_port"));
@@ -554,8 +554,8 @@ public class RibbonServer {
         NETWORK_MAX_CONNECTIONS = Integer.valueOf(mainConfig.getProperty("networking_max_connections"));
         
         //Setting cache variables
-        CACHE_ENABLED = mainConfig.getProperty("cache_enabled").equals("0") ? false : true;
-        CACHE_SIZE = Integer.valueOf(mainConfig.getProperty("cache_size"));
+        //CACHE_ENABLED = mainConfig.getProperty("cache_enabled").equals("0") ? false : true;
+        //CACHE_SIZE = Integer.valueOf(mainConfig.getProperty("cache_size"));
         
         //Setting access variables
         ACCESS_ALL_MASK = mainConfig.getProperty("access_all_mask");
@@ -583,8 +583,8 @@ public class RibbonServer {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо визначити напрямок реєстрації помилок!");
             System.exit(3);
         }
-        Integer loc_IO_EXPORT_QUENE_SIZE = ACCESS_SESSION_MAX_COUNT = Integer.valueOf(mainConfig.getProperty("io_export_quene_size"));
-        Integer loc_IO_EXPORT_ERRQUENE_SIZE = ACCESS_SESSION_MAX_COUNT = Integer.valueOf(mainConfig.getProperty("io_export_errquene_size"));
+        //Integer loc_IO_EXPORT_QUENE_SIZE = ACCESS_SESSION_MAX_COUNT = Integer.valueOf(mainConfig.getProperty("io_export_quene_size"));
+        //Integer loc_IO_EXPORT_ERRQUENE_SIZE = ACCESS_SESSION_MAX_COUNT = Integer.valueOf(mainConfig.getProperty("io_export_errquene_size"));
         
         //Setting debug variables
         DEBUG_POST_EXCEPTIONS = mainConfig.getProperty("debug_post_exceptions").equals("0") ? false : true;
@@ -598,8 +598,8 @@ public class RibbonServer {
         logAppend(LOG_ID, 3, 
                 "початкова конфігурація завершена.\n" + 
                 "Шлях до бази: " + BASE_PATH + "\n" +
-                (RibbonServer.BASE_ALLOW_ATTACHMENTS ? "Зберігання файлів увімкнено." : "") + "\n" +
-                (RibbonServer.CACHE_ENABLED ? "Кешування бази увімкнено.\nРозмір кешу: " + RibbonServer.CACHE_SIZE + "\n" : "") +
+                //(RibbonServer.BASE_ALLOW_ATTACHMENTS ? "Зберігання файлів увімкнено." : "") + "\n" +
+                //(RibbonServer.CACHE_ENABLED ? "Кешування бази увімкнено.\nРозмір кешу: " + RibbonServer.CACHE_SIZE + "\n" : "") +
                 (RibbonServer.NETWORK_ALLOW_REMOTE ? "Мережевий доступ увімкнено.\n"
                 + "Мережевий порт:" + RibbonServer.NETWORK_PORT + "\n"
                 + (RibbonServer.NETWORK_MAX_CONNECTIONS == -1 ? "Без ліміту з'єднань." : "Кількість з'єднань: " 
@@ -614,9 +614,9 @@ public class RibbonServer {
                     (
                     "Операції іморту/експорту увікнені.\n" +
                     (RibbonServer.IO_IGNORE_DIRTY ? "[УВАГА!] Режим ігнорування помилок увікнено!\n" : "") + 
-                    "Аварійний напрямок:" + RibbonServer.IO_IMPORT_EM_DIR + "\n" +
-                    "Розмір черги експорту:" + loc_IO_EXPORT_QUENE_SIZE + "\n" + 
-                    "Розмір черги помилок експорту:" + loc_IO_EXPORT_ERRQUENE_SIZE + "\n"
+                    "Аварійний напрямок:" + RibbonServer.IO_IMPORT_EM_DIR + "\n"
+                    //"Розмір черги експорту:" + loc_IO_EXPORT_QUENE_SIZE + "\n" +
+                    //"Розмір черги помилок експорту:" + loc_IO_EXPORT_ERRQUENE_SIZE + "\n"
                     ):
                     ""
                 )
