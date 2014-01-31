@@ -123,8 +123,8 @@ public abstract class IndexReader {
                 usersIndexWriter = new java.io.FileWriter(usersIndexFile);
                 usersIndexWriter.write("{root},{Root administrator, pass: root},[ADM],63a9f0ea7bb98050796b649e85481845,1\n");
                 usersIndexWriter.write("{test},{Test user, pass: test},[test],098f6bcd4621d373cade4e832627b4f6,1\n");
-                returnedUsers.add(new UserClasses.UserEntry("{root},{Root administrator, pass: root},[ADM],74cc1c60799e0a786ac7094b532f01b1,1"));
-                returnedUsers.add(new UserClasses.UserEntry("{test},{Test user, pass: test},[test],d8e8fca2dc0f896fd7cb4cb0031ba249,1"));
+                returnedUsers.add(new UserClasses.UserEntry("{root},{Root administrator, pass: root},[ADM],63a9f0ea7bb98050796b649e85481845,1"));
+                returnedUsers.add(new UserClasses.UserEntry("{test},{Test user, pass: test},[test],098f6bcd4621d373cade4e832627b4f6,1"));
             } catch (java.io.IOException exq) {
                 RibbonServer.logAppend(LOG_ID, 0, "неможливо створити новий файл індексу користувачів!");
                 System.exit(5);
@@ -376,7 +376,7 @@ public abstract class IndexReader {
             writeIndex("pseudo.index", null, false, "{Тест},{Випуск тестового повідомлення},[СИСТЕМА.Тест]\n");
             readed = readIndex("pseudo.index");
         }
-        java.util.ArrayList<Directories.PseudoDirEntry> psDirs = new java.util.ArrayList(readed.length);
+        java.util.ArrayList<Directories.PseudoDirEntry> psDirs = new java.util.ArrayList<Directories.PseudoDirEntry>(readed.length);
         for (String currLine : readed) {
             psDirs.add(new Directories.PseudoDirEntry(currLine));
         }

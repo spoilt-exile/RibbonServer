@@ -71,7 +71,7 @@ public final class Directories {
         /**
          * Array of inernal directories;
          */
-        private java.util.ArrayList<DirClasses.DirEntry> INTERNAL_DIRS = new java.util.ArrayList();
+        private java.util.ArrayList<DirClasses.DirEntry> INTERNAL_DIRS = new java.util.ArrayList<DirClasses.DirEntry>();
         
         /**
          * Default constructor.
