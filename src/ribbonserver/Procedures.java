@@ -37,7 +37,7 @@ public class Procedures {
      * @since RibbonServer a1
      */
     public static synchronized String PROC_POST_MESSAGE(MessageClasses.Message givenMessage) {
-        if (RibbonServer.CURR_STATE != RibbonServer.SYS_STATES.READY) {
+        if (RibbonServer.CURR_STATE == RibbonServer.SYS_STATES.MAINTAINING || RibbonServer.CURR_STATE == RibbonServer.SYS_STATES.INIT || RibbonServer.CURR_STATE == RibbonServer.SYS_STATES.CLOSING) {
             RibbonServer.logAppend(LOG_ID, 1, "неможливо випустити повідомлення, система не готова!");
             return "RIBBON_ERROR:Система не готова!";
         } else {
@@ -184,7 +184,9 @@ public class Procedures {
         if (RibbonServer.DEBUG_POST_EXCEPTIONS) {
             StringBuffer exMesgBuf = new StringBuffer();
             exMesgBuf.append(desc);
+            exMesgBuf.append("\n");
             exMesgBuf.append(ex.getClass().getName() + "\n");
+            exMesgBuf.append(ex.getMessage());
             StackTraceElement[] stackTrace = ex.getStackTrace();
             for (StackTraceElement element : stackTrace) {
                 exMesgBuf.append(element.toString() + "\n");
