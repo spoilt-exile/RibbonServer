@@ -110,7 +110,7 @@ public class RibbonServer {
      * Lock for system status concurent operations.
      * @since RibbonServer a2
      */
-    protected static Object DIRTY_LOCK = new Object();
+    protected static final Object DIRTY_LOCK = new Object();
     
     /**
      * Is system controled by administrator control console.
@@ -142,7 +142,7 @@ public class RibbonServer {
      * Minor server version postfix.
      * @since RibbonServer a2
      */
-    public static final String RIBBON_MINOR_VER = ".1";
+    public static final String RIBBON_MINOR_VER = ".2";
     
     /**
      * Devel server version postfix.
@@ -330,7 +330,7 @@ public class RibbonServer {
         public void registerPropertyName(String givenName) {
             Boolean result = MessageClasses.MessageProperty.Types.registerTypeIfNotExist(givenName);
             if (result) {
-                this.log(IOControl.IMPORT_LOGID, 2, "зареєстровано новий тип ознак '" + givenName + "'");
+                this.log(IOControl.LOG_ID, 2, "зареєстровано новий тип ознак '" + givenName + "'");
             }
         }
 
@@ -406,8 +406,11 @@ public class RibbonServer {
         if (IO_ENABLED) {
             logAppend(LOG_ID, 2, "налаштування бібліотек імпорту до системи");
             Utils.IOControl.initWrapper(new IOWrapper());
+            IOControl.registerPathes(BASE_PATH + "/import/", BASE_PATH + "/export/");
             ImportQuene = new Import.Quene(CurrentDirectory + "/imports/", BASE_PATH + "/import/");
             ExportDispatcher = new Export.Dispatcher(CurrentDirectory + "/exports/", BASE_PATH + "/export/");
+            IOControl.registerImport(ImportQuene);
+            IOControl.registerExport(ExportDispatcher);
         }
         logAppend(LOG_ID, 3, "початок налаштування контролю доступу");
         AccessHandler.init();
